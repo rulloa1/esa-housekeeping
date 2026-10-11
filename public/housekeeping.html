@@ -1,0 +1,902 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Housekeeping">
+<meta name="theme-color" content="#f6f8fb">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>IAH Airport Housekeeping Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400;500;700&display=swap">
+<style>
+/* Layout: iPad-first. Hero = property + shift progress + filters beside an interactive 3D stack of the three floors (east courtyard on the ground plane). Sticky glass toolbar. Floor plan (horizontal on iPad landscape, vertical hallway on portrait/phone) or prioritized work list. Suite editor = side sheet on iPad, bottom sheet on phone. */
+/* Bright "day" look is the default whatever the device theme; night mode is an opt-in switch saved per device. */
+:root {
+  --bg: #f6f8fb; --bg-glow: #d9ebfc; --bg-glow2: #fdeed6; --sky: #eaf4fe; --surface: #ffffff; --surface-2: #f1f5f9; --glass: rgba(255, 255, 255, .8);
+  --line: #e0e6ee; --fg: #0f1b2a; --muted: #5b6b7f; --accent: #2457a6; --accent-fg: #ffffff; --accent-soft: #e6effb;
+  --brass: #b7832a; --brass-soft: #fbf1de;
+  --slab: #ffffff; --slab-edge: #c9d5e2; --ground: #e4edf5; --lawn: #c6e7ba; --pool: #9fd6ee;
+  --st-dirty: #d0820c; --st-dirty-bg: #fff4e0;
+  --st-prog: #2a6fd1; --st-prog-bg: #e8f1fe;
+  --st-clean: #2e8a4a; --st-clean-bg: #e6f6ea;
+  --st-insp: #10857d; --st-insp-bg: #e0f5f3;
+  --st-ooo: #6b7480; --st-ooo-bg: #eef0f3;
+  --st-none: #b4bdc8; --st-none-bg: #fbfcfd;
+  --dnd: #c62f25; --dnd-bg: #fdeceb;
+  --f-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body: "Figtree", -apple-system, system-ui, "Segoe UI", sans-serif;
+  --lift: 0 1px 2px rgba(15,27,42,.04), 0 10px 30px -14px rgba(36,87,166,.22);
+  --sheet: 0 24px 70px rgba(15, 27, 42, .22);
+  --radius: 16px;
+  color-scheme: light;
+}
+:root[data-mode="night"] {
+  --bg: #0a1017; --bg-glow: #142338; --bg-glow2: #1a1626; --sky: #101b28; --surface: #131c27; --surface-2: #1a2532; --glass: rgba(19, 28, 39, .74);
+  --line: #263444; --fg: #e8eef5; --muted: #95a5b7; --accent: #8db8e6; --accent-fg: #0a1522; --accent-soft: #1a2e45;
+  --brass: #d9ad5f; --brass-soft: #3a2f1a;
+  --slab: #1d2936; --slab-edge: #0f1822; --ground: #101a25; --lawn: #1f3a26; --pool: #1f5670;
+  --st-dirty: #f0b04a; --st-dirty-bg: #382a12;
+  --st-prog: #7eaef0; --st-prog-bg: #182e4c;
+  --st-clean: #6cc283; --st-clean-bg: #15301f;
+  --st-insp: #5cc9c0; --st-insp-bg: #113330;
+  --st-ooo: #a3adb8; --st-ooo-bg: #29313a;
+  --st-none: #4f5d6c; --st-none-bg: #17212c;
+  --dnd: #ff8a80; --dnd-bg: #421b19;
+  --lift: 0 1px 0 rgba(255,255,255,.04) inset, 0 8px 24px -10px rgba(0,0,0,.6);
+  --sheet: 0 20px 60px rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { background: radial-gradient(1100px 620px at 90% -12%, var(--bg-glow), transparent 70%), radial-gradient(900px 520px at -10% 8%, var(--bg-glow2), transparent 65%), var(--bg); background-attachment: fixed; color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 1.45; }
+.wrap { max-width: 1280px; margin: 0 auto; padding-inline: max(16px, env(safe-area-inset-left, 0px)); padding-block: 20px 72px; display: grid; gap: 18px; }
+h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; letter-spacing: -.015em; }
+h1 { font-size: clamp(1.7rem, 3.6vw, 2.5rem); font-weight: 700; line-height: 1.02; }
+h2 { font-size: 1.2rem; font-weight: 700; }
+h3 { font-size: 1.02rem; font-weight: 700; }
+.eyebrow { font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.muted { color: var(--muted); }
+.small { font-size: .86rem; }
+button, select, input, textarea { font: inherit; color: inherit; }
+button, select, label, [data-suite] { touch-action: manipulation; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.glass { background: var(--glass); backdrop-filter: blur(16px) saturate(1.3); -webkit-backdrop-filter: blur(16px) saturate(1.3); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--lift); }
+
+/* Hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 18px; align-items: stretch; }
+.hero-left { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.addr { color: var(--muted); margin-top: 6px; }
+.shiftcard { padding: 14px 16px; display: grid; gap: 10px; }
+.shiftcard .row1 { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.shiftcard input { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-height: 44px; font-variant-numeric: tabular-nums; }
+.prog { height: 12px; border-radius: 999px; background: var(--surface-2); overflow: hidden; display: flex; box-shadow: inset 0 1px 2px rgba(0,0,0,.12); }
+.prog i { display: block; height: 100%; transition: width .4s ease; }
+.prog-label { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
+.prog-label strong { font-family: var(--f-display); font-size: 1.6rem; line-height: 1; }
+.summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 0; text-align: left; position: relative; min-height: 64px; box-shadow: var(--lift); transition: transform .12s ease; }
+.stat::before { content: ""; position: absolute; left: 12px; top: 12px; width: 8px; height: 8px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 18%, transparent); }
+.stat .n { font-family: var(--f-display); font-size: 1.55rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; padding-left: 18px; }
+.stat .l { font-size: .78rem; color: var(--muted); line-height: 1.2; }
+.stat:active { transform: scale(.97); }
+.stat[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+
+/* 3D building */
+.stage { background: linear-gradient(180deg, var(--sky), var(--surface) 75%); position: relative; overflow: hidden; display: grid; grid-template-rows: auto 1fr auto; min-height: 380px; }
+.stage-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 0; gap: 8px; position: relative; z-index: 2; }
+.scene { position: relative; perspective: 1500px; perspective-origin: 50% 30%; display: grid; place-items: center; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; min-height: 280px; }
+.scene:active { cursor: grabbing; }
+.bldg { position: relative; width: 600px; height: 128px; transform-style: preserve-3d; transform: translateY(14px) scale(var(--s, 1)) rotateX(var(--rx, 58deg)) rotateZ(var(--rz, -28deg)); transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+.scene.dragging .bldg { transition: none; }
+.ground { position: absolute; left: -50px; right: -150px; top: -60px; bottom: -60px; background: var(--ground); border-radius: 18px; transform: translateZ(-26px); box-shadow: 0 0 0 1px var(--line); }
+.court { position: absolute; right: -138px; top: -40px; bottom: -40px; width: 120px; background: var(--lawn); border-radius: 12px; transform: translateZ(-25px); transform-style: preserve-3d; }
+.court .pool { position: absolute; left: 14px; right: 14px; top: 16px; height: 70px; background: var(--pool); border-radius: 10px; box-shadow: inset 0 0 0 4px rgba(255,255,255,.5); }
+.court .gz { position: absolute; width: 26px; height: 26px; background: #fff; border-radius: 3px; transform: translateZ(14px); box-shadow: 0 0 0 1px var(--slab-edge); }
+.court .gz.a { left: 18px; bottom: 26px; } .court .gz.b { right: 18px; bottom: 26px; }
+.court span.lbl { position: absolute; left: 0; right: 0; bottom: 4px; text-align: center; font-size: 11px; font-weight: 700; color: var(--fg); opacity: .7; }
+.slab { position: absolute; inset: 0; transform-style: preserve-3d; transform: translateZ(calc(var(--i) * 62px)); transition: transform .45s cubic-bezier(.2,.8,.2,1), opacity .3s; border: 0; padding: 0; background: transparent; }
+.slab .top { position: absolute; inset: 0; background: var(--slab); border-radius: 6px; padding: 8px; display: grid; grid-template-rows: 1fr 14px 1fr; gap: 4px; box-shadow: 0 0 0 1px var(--slab-edge); }
+.slab .edge-f { position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: var(--slab-edge); transform-origin: bottom; transform: rotateX(-90deg); border-radius: 0 0 4px 4px; }
+.slab .edge-r { position: absolute; top: 0; bottom: 0; right: 0; width: 14px; background: color-mix(in srgb, var(--slab-edge) 80%, #000); transform-origin: right; transform: rotateY(90deg); }
+.slab .hall { background: color-mix(in srgb, var(--slab-edge) 45%, transparent); border-radius: 3px; }
+.slab .cells { display: grid; grid-template-columns: repeat(16, 1fr); gap: 4px; transform-style: preserve-3d; }
+.cell { border-radius: 3px; background: var(--st-none); opacity: .55; transform-style: preserve-3d; transition: transform .3s; }
+.cell.c-dirty { background: var(--st-dirty); opacity: 1; }
+.cell.c-in_progress { background: var(--st-prog); opacity: 1; }
+.cell.c-clean { background: var(--st-clean); opacity: 1; }
+.cell.c-inspected { background: var(--st-insp); opacity: 1; }
+.cell.c-ooo { background: var(--st-ooo); opacity: 1; }
+.cell.warn { background: var(--dnd); opacity: 1; transform: translateZ(10px); box-shadow: 0 0 14px var(--dnd); }
+.slab.sel { transform: translateZ(calc(var(--i) * 62px + 16px)); }
+.slab.sel .top { box-shadow: 0 0 0 2px var(--brass), 0 0 30px color-mix(in srgb, var(--brass) 40%, transparent); }
+.bldg.focus .slab:not(.sel) { opacity: .45; }
+.floor-chips { display: flex; gap: 8px; padding: 0 16px 14px; flex-wrap: wrap; position: relative; z-index: 2; }
+.fchip { flex: 1 1 0; min-width: 96px; min-height: 52px; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 6px 12px; text-align: left; display: grid; }
+.fchip b { font-family: var(--f-display); font-size: 1.05rem; }
+.fchip span { font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.fchip[aria-pressed="true"] { border-color: var(--brass); background: var(--brass-soft); }
+.hint { font-size: .78rem; color: var(--muted); }
+.iconbtn { min-width: 44px; min-height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-weight: 700; padding: 0 12px; }
+
+/* Banners */
+.banner { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; padding: 12px 16px; border-radius: 12px; background: var(--surface-2); border: 1px dashed var(--line); }
+.alerts { background: var(--dnd-bg); border: 1px solid var(--dnd); border-radius: var(--radius); padding: 14px 16px; display: grid; gap: 8px; }
+.alerts h2 { color: var(--dnd); font-size: 1.05rem; }
+.alerts ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
+.alerts li button { background: var(--surface); border: 1px solid var(--dnd); border-radius: 999px; padding: 0 16px; min-height: 44px; font-variant-numeric: tabular-nums; font-weight: 700; }
+.btn { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 0 16px; font-weight: 700; min-height: 44px; transition: transform .1s; }
+.btn:active { transform: scale(.97); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.btn.danger { color: var(--dnd); }
+.btn.ghost { background: transparent; }
+
+/* Toolbar */
+.toolbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; margin-inline: -8px; padding: 10px; border: 1px solid var(--line); border-radius: 16px; display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; box-shadow: var(--lift); }
+.seg-tabs { display: flex; gap: 3px; background: var(--surface-2); padding: 4px; border-radius: 12px; }
+.seg-tabs button { border: 0; background: transparent; padding: 0 14px; min-height: 40px; border-radius: 9px; font-weight: 700; white-space: nowrap; }
+.seg-tabs button[aria-pressed="true"] { background: var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,.14); }
+.toolbar .grow { flex: 1 1 auto; }
+.toolbar select, .toolbar input[type="search"] { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; min-height: 44px; font-size: 16px; }
+.toolbar input[type="search"] { width: 8.5em; font-variant-numeric: tabular-nums; }
+.filter-note { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+/* Floor plan */
+.floor { padding: 16px; display: grid; gap: 12px; }
+.floor-head { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline; }
+.plan { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0 12px; align-items: stretch; }
+.side-label { writing-mode: vertical-rl; transform: rotate(180deg); font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); text-align: center; }
+.rows { display: grid; gap: 8px; min-width: 0; }
+.row { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 6px; }
+.row-cap { font-size: .74rem; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+.hallway { background: linear-gradient(90deg, transparent, var(--surface-2) 8%, var(--surface-2) 92%, transparent); border-radius: 6px; min-height: 24px; display: flex; align-items: center; justify-content: center; font-size: .68rem; letter-spacing: .4em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.courtyard { width: 96px; border-radius: 12px; background: var(--lawn); padding: 8px; display: grid; gap: 6px; align-content: center; font-size: .72rem; text-align: center; }
+.courtyard .pool { background: var(--pool); border-radius: 8px; padding: 10px 4px; font-weight: 700; }
+.courtyard .gz { display: flex; gap: 4px; justify-content: center; }
+.courtyard .gz span { background: var(--surface); border-radius: 4px; padding: 2px 5px; }
+
+.suite { position: relative; border: 1px solid color-mix(in srgb, var(--sc, var(--st-none)) 35%, var(--line)); border-radius: 10px; background: linear-gradient(180deg, var(--surface) -40%, var(--sb, var(--st-none-bg)) 60%); padding: 7px 3px 6px; min-height: 84px; display: grid; gap: 3px; align-content: start; justify-items: center; text-align: center; box-shadow: 0 3px 0 color-mix(in srgb, var(--sc, var(--st-none)) 55%, transparent), 0 6px 14px -8px rgba(0,0,0,.35); transition: transform .1s ease, box-shadow .1s ease; }
+.suite::before { content: ""; position: absolute; left: 8px; right: 8px; top: 0; height: 4px; border-radius: 0 0 4px 4px; background: var(--sc, var(--st-none)); }
+.suite:active { transform: translateY(3px); box-shadow: 0 0 0 color-mix(in srgb, var(--sc, var(--st-none)) 55%, transparent), 0 2px 6px -4px rgba(0,0,0,.35); }
+.suite .num { font-family: var(--f-display); font-weight: 700; font-size: 1.08rem; font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 3px; }
+.suite .st { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--sc, var(--muted)); }
+.suite .meta { display: flex; gap: 3px; justify-content: center; flex-wrap: wrap; }
+.tag { font-size: .64rem; font-weight: 700; border-radius: 5px; padding: 0 5px; background: var(--surface); color: var(--muted); border: 1px solid var(--line); line-height: 1.55; white-space: nowrap; }
+.tag.alert { background: var(--dnd); color: var(--surface); border-color: var(--dnd); }
+.tag.svc { color: var(--fg); }
+.suite .who { font-size: .64rem; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mini { width: 76%; height: 4px; border-radius: 2px; background: var(--surface-2); overflow: hidden; }
+.mini i { display: block; height: 100%; background: var(--st-clean); }
+.suite.dim { opacity: .22; }
+.suite.hit { outline: 3px solid var(--brass); outline-offset: 2px; }
+.suite .flag { position: absolute; top: 6px; right: 6px; width: 9px; height: 9px; border-radius: 50%; background: var(--dnd); box-shadow: 0 0 0 3px color-mix(in srgb, var(--dnd) 25%, transparent); }
+.suite .note { position: absolute; top: 6px; left: 6px; width: 8px; height: 8px; border-radius: 2px; background: var(--muted); }
+.s-dirty { --sc: var(--st-dirty); --sb: var(--st-dirty-bg); }
+.s-in_progress { --sc: var(--st-prog); --sb: var(--st-prog-bg); }
+.s-clean { --sc: var(--st-clean); --sb: var(--st-clean-bg); }
+.s-inspected { --sc: var(--st-insp); --sb: var(--st-insp-bg); }
+.s-ooo { --sc: var(--st-ooo); --sb: var(--st-ooo-bg); }
+
+/* Portrait iPad and phone: hallway runs top to bottom */
+@media (max-width: 1000px) {
+  .hero { grid-template-columns: 1fr; }
+  .plan { grid-template-columns: 1fr; gap: 8px; }
+  .plan .westend, .plan .side-label { display: none; }
+  .rows { grid-template-columns: minmax(0, 1fr) 30px minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 6px 8px; }
+  .row-cap { grid-row: 1; }
+  .row-cap.n { grid-column: 1; } .row-cap.s { grid-column: 3; }
+  .row-cap span + span { display: none; }
+  .row { grid-template-columns: 1fr; grid-row: 2; gap: 6px; }
+  .row.n { grid-column: 1; } .row.s { grid-column: 3; }
+  .hallway { grid-column: 2; grid-row: 2; writing-mode: vertical-rl; background: linear-gradient(180deg, transparent, var(--surface-2) 3%, var(--surface-2) 97%, transparent); }
+  .courtyard { width: auto; grid-template-columns: auto 1fr auto; align-items: center; text-align: left; }
+  .suite { min-height: 56px; grid-template-columns: auto 1fr auto; grid-template-areas: "num meta who" "st meta who"; justify-items: start; align-items: center; text-align: left; padding: 6px 12px; column-gap: 10px; row-gap: 0; }
+  .suite::before { left: 0; right: auto; top: 8px; bottom: 8px; width: 4px; height: auto; border-radius: 0 4px 4px 0; }
+  .suite .num { grid-area: num; margin: 0; font-size: 1.15rem; }
+  .suite .st { grid-area: st; }
+  .suite .meta { grid-area: meta; justify-content: start; }
+  .suite .who { grid-area: who; }
+  .suite .mini { position: absolute; left: 12px; right: 12px; bottom: 4px; width: auto; height: 3px; }
+  .suite .flag { top: 50%; right: auto; left: -4px; transform: translateY(-50%); }
+  .summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .rows { grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr); gap: 6px 4px; }
+  .hallway { letter-spacing: .2em; font-size: .6rem; }
+  .suite { grid-template-columns: auto 1fr; grid-template-areas: "num who" "st st" "meta meta"; padding: 6px 8px 8px 10px; }
+  .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .toolbar input[type="search"] { width: 6.5em; }
+  .stage { min-height: 330px; }
+}
+
+/* Work list */
+.worklist { display: grid; gap: 16px; }
+.group { display: grid; gap: 8px; }
+.group h2 { display: flex; gap: 8px; align-items: baseline; font-size: 1.05rem; }
+.group h2 .count { font-family: var(--f-body); font-size: .86rem; color: var(--muted); font-weight: 500; }
+.item { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 10px 14px; align-items: center; padding: 12px 14px; position: relative; overflow: hidden; }
+.item::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--sc, var(--st-none)); }
+.item .num { font-family: var(--f-display); font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; background: none; border: 0; padding: 0 0 0 4px; text-align: left; min-height: 44px; }
+.item .info { display: grid; gap: 4px; min-width: 0; }
+.item .info .line1 { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.item .info .line2 { font-size: .84rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pill { font-size: .76rem; font-weight: 700; border-radius: 999px; padding: 2px 10px; color: var(--sc); background: var(--sb); }
+.item .acts { display: flex; gap: 8px; flex-wrap: wrap; justify-content: end; }
+@media (max-width: 640px) {
+  .item { grid-template-columns: 60px minmax(0, 1fr); }
+  .item .acts { grid-column: 1 / -1; }
+  .item .acts .btn { flex: 1; }
+}
+.unlogged { display: flex; flex-wrap: wrap; gap: 6px; }
+.unlogged button { min-width: 56px; min-height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .8rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+.policies { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-top: 10px; }
+.policy { padding: 14px 16px; display: grid; gap: 6px; align-content: start; }
+.policy p, .policy ul { margin: 0; color: var(--muted); font-size: .92rem; }
+.policy ul { padding-left: 18px; }
+details.ref > summary { cursor: pointer; font-family: var(--f-display); font-weight: 700; font-size: 1.15rem; min-height: 44px; display: flex; align-items: center; }
+.empty { padding: 22px; border: 1px dashed var(--line); border-radius: var(--radius); color: var(--muted); text-align: center; }
+
+/* Sheet */
+.scrim { position: fixed; inset: 0; background: rgba(6, 12, 20, .42); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); z-index: 10; }
+.drawer { position: fixed; top: 12px; right: 12px; bottom: 12px; width: min(480px, calc(100% - 24px)); background: var(--surface); z-index: 11; box-shadow: var(--sheet); border-radius: 22px; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; margin-top: env(safe-area-inset-top, 0px); margin-bottom: env(safe-area-inset-bottom, 0px); }
+.drawer header { padding: 16px 18px 12px; border-bottom: 1px solid var(--line); }
+.drawer .grab { display: none; width: 40px; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto 10px; }
+.drawer .hrow { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.drawer .nav { display: flex; gap: 6px; }
+.drawer .body { overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 16px 18px; display: grid; gap: 20px; align-content: start; }
+.drawer footer { padding: 12px 18px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); display: flex; gap: 8px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.dirty-dot { color: var(--brass); font-weight: 700; }
+@media (max-width: 700px) {
+  .drawer { top: auto; left: 0; right: 0; bottom: 0; width: 100%; height: 92dvh; max-height: calc(100% - 24px); border-radius: 22px 22px 0 0; margin: 0; }
+  .drawer .grab { display: block; }
+  .drawer footer .grow-btns { flex: 1; display: flex; gap: 8px; }
+  .drawer footer .grow-btns .btn { flex: 1; }
+}
+fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; min-width: 0; }
+legend { font-family: var(--f-display); font-weight: 700; font-size: 1rem; margin-bottom: 8px; padding: 0; width: 100%; }
+.seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.seg label { border: 1px solid var(--line); border-radius: 12px; padding: 0 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; min-height: 48px; font-weight: 500; }
+.seg input, .statusgrid input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
+.seg label:has(input:focus-visible), .statusgrid label:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+.statusgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 8px; }
+.statusgrid label { position: relative; border: 1px solid var(--line); border-radius: 12px; padding: 0 10px; min-height: 52px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: .92rem; }
+.statusgrid label::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--sc); flex: none; }
+.statusgrid label:has(input:checked) { background: var(--sb); border-color: var(--sc); box-shadow: 0 0 0 2px var(--sc) inset; }
+.field { display: grid; gap: 6px; font-size: .9rem; font-weight: 500; }
+.field input, .field textarea { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; min-height: 48px; font-size: 16px; }
+.check { display: flex; gap: 12px; align-items: center; min-height: 52px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.check input { width: 24px; height: 24px; accent-color: var(--st-clean); flex: none; }
+.toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; cursor: pointer; font-weight: 500; }
+.toggle input { appearance: none; -webkit-appearance: none; width: 52px; height: 32px; border-radius: 999px; background: var(--line); position: relative; transition: background .2s; flex: none; cursor: pointer; }
+.toggle input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .2s; }
+.toggle input:checked { background: var(--dnd); }
+.toggle input:checked::after { transform: translateX(20px); }
+.svcbox { background: linear-gradient(135deg, var(--accent-soft), var(--surface-2)); border-radius: 14px; padding: 12px 14px; display: grid; gap: 4px; }
+.svcbox ul { margin: 4px 0 0; padding-left: 18px; color: var(--muted); font-size: .88rem; }
+.welfare { background: var(--dnd-bg); border: 1px solid var(--dnd); border-radius: 14px; padding: 12px 14px; display: grid; gap: 6px; }
+.welfare strong { color: var(--dnd); }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 8px 8px 16px; border-radius: 14px; z-index: 20; font-weight: 700; display: flex; gap: 12px; align-items: center; max-width: calc(100% - 32px); box-shadow: var(--sheet); }
+.toast button { background: transparent; color: var(--bg); border: 1px solid currentColor; border-radius: 10px; padding: 0 14px; min-height: 40px; font-weight: 700; }
+@media (prefers-reduced-motion: no-preference) {
+  .drawer { animation: sheetIn .24s cubic-bezier(.2,.8,.2,1); }
+  @keyframes sheetIn { from { transform: translateX(30px); opacity: .5; } }
+  @media (max-width: 700px) { .drawer { animation-name: sheetUp; } @keyframes sheetUp { from { transform: translateY(40px); opacity: .5; } } }
+  .cell.warn { animation: pulse 1.8s ease-in-out infinite; }
+  @keyframes pulse { 50% { transform: translateZ(16px); } }
+}
+@media (prefers-reduced-motion: reduce) { .bldg, .slab, .suite, .stat, .btn, .prog i { transition: none; } }
+</style>
+
+<div class="wrap">
+  <section class="hero">
+    <div class="hero-left">
+      <div>
+        <div class="eyebrow">Extended Stay America Suites · Housekeeping</div>
+        <h1>Houston – IAH Airport</h1>
+        <div class="addr">1500 N Sam Houston Pkwy E, Houston, TX 77032 · 96 suites on 3 floors</div>
+      </div>
+      <div class="shiftcard panel">
+        <div class="row1"><span class="eyebrow">Shift progress</span><input type="date" id="shiftDate" aria-label="Shift date"></div>
+        <div class="prog-label" id="progLabel"></div>
+        <div class="prog" id="progBar" role="img"></div>
+      </div>
+      <section class="summary" id="summary" aria-label="Filter suites by status"></section>
+    </div>
+    <div class="stage panel" aria-label="3D view of the building">
+      <div class="stage-head">
+        <div><div class="eyebrow">Building view</div><div class="hint">Drag to turn · tap a floor</div></div>
+        <button class="iconbtn" id="resetView">Reset view</button>
+      </div>
+      <div class="scene" id="scene"><div class="bldg" id="bldg"></div></div>
+      <div class="floor-chips" id="floorChips"></div>
+    </div>
+  </section>
+
+  <div id="modeBanner" class="banner" hidden></div>
+
+  <section class="alerts" id="alerts" hidden aria-live="polite">
+    <h2>Welfare check required now</h2>
+    <div class="small">On Do Not Disturb 3 or more consecutive days. A supervisor must do a welfare and property inspection.</div>
+    <ul id="alertList"></ul>
+  </section>
+
+  <div class="toolbar glass" role="toolbar" aria-label="Board controls">
+    <div class="seg-tabs" id="viewTabs" aria-label="View"></div>
+    <div class="seg-tabs" id="floorTabs" aria-label="Floor"></div>
+    <span class="grow"></span>
+    <select id="attFilter" aria-label="Filter by attendant"></select>
+    <button class="iconbtn" id="modeBtn" aria-pressed="false">Night mode</button>
+    <input type="search" id="jump" placeholder="Suite #" inputmode="numeric" enterkeyhint="go" aria-label="Go to suite number" maxlength="3">
+  </div>
+  <div id="filterNote" class="filter-note" hidden></div>
+
+  <div id="board" style="display:grid;gap:16px"></div>
+
+  <div class="legend" aria-label="Legend">
+    <span><i class="sw" style="background:var(--st-dirty)"></i>Needs service</span>
+    <span><i class="sw" style="background:var(--st-prog)"></i>In progress</span>
+    <span><i class="sw" style="background:var(--st-clean)"></i>Clean</span>
+    <span><i class="sw" style="background:var(--st-insp)"></i>Inspected</span>
+    <span><i class="sw" style="background:var(--st-ooo)"></i>Out of order</span>
+    <span><i class="sw" style="background:var(--st-none)"></i>Not logged</span>
+    <span><i class="sw" style="background:var(--dnd);border-radius:50%"></i>Needs attention</span>
+    <span><b>W</b> weekly full · <b>R</b> mid-week refresh · <b>T</b> turnover</span>
+  </div>
+
+  <details class="ref">
+    <summary>Service policies</summary>
+    <div class="policies">
+      <div class="policy panel"><h3>Weekly Full Service</h3><p>Every 7 days: deep clean, bed linen change, full kitchenette scrub, vacuum and mop.</p></div>
+      <div class="policy panel"><h3>Mid-Week Refresh</h3><p>Towel exchange and trash haul.</p></div>
+      <div class="policy panel"><h3>Mandatory DND Policy</h3><p>Any suite on Do Not Disturb for 3 or more consecutive days requires an immediate supervisor welfare and property inspection.</p></div>
+      <div class="policy panel"><h3>Kitchenette Audit</h3><p>Every turnover checks:</p><ul><li>Refrigerator and freezer</li><li>Stovetop burners</li><li>Microwave</li><li>Sink drainage</li><li>4-piece cookware inventory</li></ul></div>
+    </div>
+  </details>
+</div>
+
+<div id="scrim" class="scrim" hidden></div>
+<aside id="drawer" class="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dTitle"></aside>
+<div id="toast" class="toast" hidden role="status"></div>
+
+<script>
+(() => {
+  const STATUSES = [
+    ["dirty", "Needs service", "Dirty"], ["in_progress", "In progress", "In prog"], ["clean", "Clean", "Clean"],
+    ["inspected", "Inspected", "Insp"], ["ooo", "Out of order", "OOO"]
+  ];
+  const STATUS_LABEL = Object.fromEntries(STATUSES.map(([k, l]) => [k, l]));
+  const STATUS_SHORT = Object.fromEntries(STATUSES.map(([k, , s]) => [k, s]));
+  const NEXT = { dirty: ["in_progress", "Start"], in_progress: ["clean", "Mark clean"], clean: ["inspected", "Inspect"] };
+  const OCC = [["occupied", "Stayover"], ["checkout", "Checkout"], ["vacant", "Vacant"]];
+  const AUDIT = [
+    ["fridge", "Refrigerator / freezer"], ["burners", "Stovetop burners"], ["microwave", "Microwave"],
+    ["drain", "Sink drainage"], ["cookware", "4-piece cookware inventory"]
+  ];
+  const TASKS = {
+    W: ["Deep clean", "Bed linen change", "Full kitchenette scrub", "Vacuum and mop"],
+    R: ["Towel exchange", "Trash haul"],
+    T: ["Full clean", "Kitchenette audit (all 5 checks)"]
+  };
+
+  const suites = [];
+  for (let f = 1; f <= 3; f++) for (let i = 1; i <= 32; i++) suites.push(String(f * 100 + i));
+  const sideOf = (s) => (Number(s.slice(-2)) % 2 ? "n" : "s");
+
+  const prefs = (() => { try { return JSON.parse(localStorage.getItem("iah-hk-prefs") || "{}"); } catch { return {}; } })();
+  const state = {
+    docs: {}, floor: prefs.floor || "1", view: prefs.view || (matchMedia("(max-width: 640px)").matches ? "list" : "plan"),
+    att: prefs.att || "", filter: null, mode: "loading", canWrite: true, open: null, draft: null, dirtyDraft: false,
+    confirmClear: false, hit: null
+  };
+  let db = null;
+  const savePrefs = () => { try { localStorage.setItem("iah-hk-prefs", JSON.stringify({ floor: state.floor, view: state.view, att: state.att })); } catch {} };
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const pad = (n) => String(n).padStart(2, "0");
+  const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+  const dayNum = (iso) => { const [y, m, d] = iso.split("-").map(Number); return Date.UTC(y, m - 1, d) / 864e5; };
+  const shift = () => $("shiftDate").value || todayISO();
+  const clone = (o) => JSON.parse(JSON.stringify(o || {}));
+  const initials = (n) => String(n || "").trim().split(/\s+/).map((w) => w[0]).join("").slice(0, 3).toUpperCase();
+  const stVar = (k) => (k === "in_progress" ? "prog" : k === "inspected" ? "insp" : k);
+
+  function dndDays(doc) {
+    if (!doc || !doc.dndSince) return 0;
+    return Math.max(1, dayNum(shift()) - dayNum(doc.dndSince) + 1);
+  }
+  function service(doc) {
+    if (!doc) return { code: "", label: "Not logged", detail: "No status recorded for this suite yet." };
+    if (doc.status === "ooo") return { code: "", label: "Out of order", detail: "Suite is out of service." };
+    if (doc.occ === "checkout") return { code: "T", label: "Turnover", detail: "Full clean plus the mandatory kitchenette audit." };
+    if (doc.occ === "vacant") return { code: "", label: "Vacant", detail: "No service scheduled." };
+    if (doc.dndSince) return { code: "", label: "Skipped for DND", detail: "Guest has Do Not Disturb out. No service today." };
+    const since = doc.lastFull ? dayNum(shift()) - dayNum(doc.lastFull) : null;
+    if (since === null || since >= 7) return { code: "W", label: "Weekly Full Service", detail: since === null ? "No full service on record." : `Last full service ${since} days ago.` };
+    return { code: "R", label: "Mid-Week Refresh", detail: `Weekly Full Service due in ${7 - since} day${7 - since === 1 ? "" : "s"}.` };
+  }
+  const auditCount = (doc) => AUDIT.filter(([k]) => doc?.audit?.[k]).length;
+  const auditDone = (doc) => auditCount(doc) === AUDIT.length;
+  const needsWelfare = (doc) => !!doc && dndDays(doc) >= 3 && doc.welfareDone !== doc.dndSince;
+  const auditOpen = (doc) => !!doc && doc.occ === "checkout" && doc.status !== "ooo" && !auditDone(doc);
+  const isDone = (doc) => doc?.status === "clean" || doc?.status === "inspected";
+  const inScope = (s) => !state.att || (state.docs[s]?.attendant || "") === state.att;
+
+  const FILTERS = {
+    dirty: { label: "Needs service", color: "var(--st-dirty)", test: (d) => d?.status === "dirty" },
+    in_progress: { label: "In progress", color: "var(--st-prog)", test: (d) => d?.status === "in_progress" },
+    ready: { label: "Clean or inspected", color: "var(--st-clean)", test: (d) => isDone(d) },
+    dnd: { label: "On DND", color: "var(--accent)", test: (d) => dndDays(d) > 0 },
+    welfare: { label: "Welfare checks due", color: "var(--dnd)", test: (d) => needsWelfare(d) },
+    audit: { label: "Turnover audits open", color: "var(--brass)", test: (d) => auditOpen(d) },
+  };
+  const matches = (s) => inScope(s) && (!state.filter || FILTERS[state.filter].test(state.docs[s]));
+  const floorStats = (f) => {
+    const work = suites.filter((s) => s[0] === String(f) && inScope(s) && service(state.docs[s]).code);
+    return { done: work.filter((s) => isDone(state.docs[s])).length, total: work.length };
+  };
+
+  // ---------- 3D building ----------
+  const view3d = { rx: 58, rz: -28 };
+  function renderBuilding() {
+    const sel = state.filter || state.floor === "all" ? null : state.floor;
+    const cell = (s) => {
+      const d = state.docs[s];
+      const warn = needsWelfare(d) || auditOpen(d);
+      return `<i class="cell ${d ? "c-" + d.status : ""} ${warn ? "warn" : ""}" style="${matches(s) ? "" : "opacity:.18"}"></i>`;
+    };
+    let html = `<div class="ground"></div><div class="court"><div class="pool"></div><div class="gz a"></div><div class="gz b"></div><span class="lbl">East courtyard</span></div>`;
+    for (let f = 1; f <= 3; f++) {
+      const odd = [], even = [];
+      for (let i = 1; i <= 32; i++) (i % 2 ? odd : even).push(String(f * 100 + i));
+      html += `<div class="slab ${sel === String(f) ? "sel" : ""}" style="--i:${f - 1}" data-floor="${f}">
+        <div class="edge-f"></div><div class="edge-r"></div>
+        <div class="top"><div class="cells">${odd.map(cell).join("")}</div><div class="hall"></div><div class="cells">${even.map(cell).join("")}</div></div>
+      </div>`;
+    }
+    const b = $("bldg");
+    b.innerHTML = html;
+    b.classList.toggle("focus", !!sel);
+    b.style.setProperty("--rx", view3d.rx + "deg");
+    b.style.setProperty("--rz", view3d.rz + "deg");
+    $("floorChips").innerHTML = [3, 2, 1].map((f) => {
+      const st = floorStats(f);
+      return `<button class="fchip" data-floor="${f}" aria-pressed="${sel === String(f)}"><b>Floor ${f}</b><span>${st.done} of ${st.total} done</span></button>`;
+    }).join("") + `<button class="fchip" data-floor="all" aria-pressed="${state.floor === "all" && !state.filter}"><b>All</b><span>96 suites</span></button>`;
+  }
+  function fitScene() {
+    const w = $("scene").clientWidth;
+    $("bldg").style.setProperty("--s", Math.min(1, Math.max(.42, (w - 20) / 820)).toFixed(3));
+  }
+  (() => {
+    const sc = $("scene"); let start = null, moved = false;
+    sc.addEventListener("pointerdown", (e) => { start = { x: e.clientX, y: e.clientY, rx: view3d.rx, rz: view3d.rz }; moved = false; });
+    sc.addEventListener("pointermove", (e) => {
+      if (!start) return;
+      const dx = e.clientX - start.x, dy = e.clientY - start.y;
+      if (!moved && Math.hypot(dx, dy) < 6) return;
+      if (!moved) { moved = true; sc.classList.add("dragging"); try { sc.setPointerCapture(e.pointerId); } catch {} }
+      view3d.rz = Math.max(-80, Math.min(40, start.rz + dx * .35));
+      view3d.rx = Math.max(25, Math.min(72, start.rx - dy * .25));
+      $("bldg").style.setProperty("--rx", view3d.rx + "deg");
+      $("bldg").style.setProperty("--rz", view3d.rz + "deg");
+    });
+    const end = (e) => {
+      if (start && !moved) {
+        const el = document.elementFromPoint(e.clientX, e.clientY)?.closest(".slab");
+        if (el) { state.floor = el.dataset.floor; state.filter = null; savePrefs(); render(); }
+      }
+      start = null; sc.classList.remove("dragging");
+    };
+    sc.addEventListener("pointerup", end);
+    sc.addEventListener("pointercancel", () => { start = null; sc.classList.remove("dragging"); });
+    $("resetView").addEventListener("click", () => { view3d.rx = 58; view3d.rz = -28; renderBuilding(); });
+    try { new ResizeObserver(fitScene).observe(sc); } catch { addEventListener("resize", fitScene); }
+  })();
+
+  // ---------- Render ----------
+  function renderProgress() {
+    const work = suites.filter((s) => inScope(s) && service(state.docs[s]).code);
+    const n = (st) => work.filter((s) => state.docs[s].status === st).length;
+    const done = n("clean") + n("inspected");
+    const parts = [["inspected", "--st-insp"], ["clean", "--st-clean"], ["in_progress", "--st-prog"]];
+    $("progBar").innerHTML = work.length ? parts.map(([k, c]) => `<i style="width:${(n(k) / work.length) * 100}%;background:var(${c})"></i>`).join("") : "";
+    $("progBar").setAttribute("aria-label", `${done} of ${work.length} scheduled services finished`);
+    $("progLabel").innerHTML = `<span><strong>${done}</strong> <span class="muted">of ${work.length} services done${state.att ? " · " + esc(state.att) : ""}</span></span><span class="muted small">${n("in_progress")} in progress · ${n("dirty")} to go</span>`;
+  }
+
+  function renderSummary() {
+    $("summary").innerHTML = Object.entries(FILTERS).map(([k, f]) => {
+      const c = suites.filter((s) => inScope(s) && f.test(state.docs[s])).length;
+      return `<button class="stat" data-filter="${k}" aria-pressed="${state.filter === k}" style="--c:${f.color}"><span class="n">${c}</span><span class="l">${f.label}</span></button>`;
+    }).join("");
+    const fn = $("filterNote");
+    fn.hidden = !state.filter;
+    if (state.filter) fn.innerHTML = `<span>Showing <strong>${FILTERS[state.filter].label.toLowerCase()}</strong> on all floors.</span><button class="btn" data-filter="${state.filter}">Show all suites</button>`;
+  }
+
+  function renderAlerts() {
+    const due = suites.filter((s) => needsWelfare(state.docs[s]));
+    $("alerts").hidden = due.length === 0;
+    $("alertList").innerHTML = due.map((s) => `<li><button data-suite="${s}">Suite ${s} · DND day ${dndDays(state.docs[s])}</button></li>`).join("");
+  }
+
+  function renderToolbar() {
+    $("viewTabs").innerHTML = [["plan", "Floor plan"], ["list", "Work list"]].map(([k, l]) => `<button data-view="${k}" aria-pressed="${state.view === k}">${l}</button>`).join("");
+    $("floorTabs").innerHTML = ["1", "2", "3", "all"].map((k) => `<button data-floor="${k}" aria-pressed="${state.floor === k && !state.filter}" aria-label="${k === "all" ? "All floors" : "Floor " + k}">${k === "all" ? "All" : "Fl " + k}</button>`).join("");
+    const names = [...new Set(Object.values(state.docs).map((d) => d.attendant).filter(Boolean))].sort();
+    if (state.att && !names.includes(state.att)) state.att = "";
+    $("attFilter").innerHTML = `<option value="">All attendants</option>` + names.map((n) => `<option ${n === state.att ? "selected" : ""}>${esc(n)}</option>`).join("");
+  }
+
+  function tile(s) {
+    const d = state.docs[s];
+    const svc = service(d);
+    const days = dndDays(d);
+    const cls = ["suite", d ? "s-" + d.status : "", matches(s) ? "" : "dim", state.hit === s ? "hit" : ""].join(" ");
+    const occTag = d?.occ === "checkout" ? "CO" : d?.occ === "vacant" ? "VAC" : "";
+    const label = `Suite ${s}: ${d ? STATUS_LABEL[d.status] : "Not logged"}${svc.code ? ", " + svc.label : ""}${days ? ", DND day " + days : ""}${d?.attendant ? ", " + d.attendant : ""}`;
+    return `<button class="${cls}" data-suite="${s}" aria-label="${esc(label)}">
+      ${needsWelfare(d) || auditOpen(d) ? '<span class="flag" aria-hidden="true"></span>' : ""}
+      ${d?.notes ? '<span class="note" aria-hidden="true"></span>' : ""}
+      <span class="num">${s}</span>
+      <span class="st">${d ? STATUS_SHORT[d.status] : "Not logged"}</span>
+      <span class="meta">${svc.code ? `<span class="tag svc">${svc.code}</span>` : ""}${occTag ? `<span class="tag">${occTag}</span>` : ""}${days ? `<span class="tag ${days >= 3 ? "alert" : ""}">DND ${days}</span>` : ""}</span>
+      ${d?.occ === "checkout" && d.status !== "ooo" ? `<span class="mini" aria-hidden="true"><i style="width:${auditCount(d) / AUDIT.length * 100}%"></i></span>` : ""}
+      ${d?.attendant ? `<span class="who">${esc(initials(d.attendant))}</span>` : ""}
+    </button>`;
+  }
+
+  function floorPlan(f) {
+    const odd = [], even = [];
+    for (let i = 1; i <= 32; i++) (i % 2 ? odd : even).push(String(f * 100 + i));
+    const st = floorStats(f);
+    return `<section class="floor panel" aria-label="Floor ${f}">
+      <div class="floor-head"><h2>Floor ${f}</h2><span class="muted small">${st.done} of ${st.total} services done · ${suites.filter((s) => s[0] === String(f) && state.docs[s]).length} of 32 logged</span></div>
+      <div class="plan">
+        <div class="westend side-label">West end</div>
+        <div class="rows">
+          <div class="row-cap n"><span>North · rear parking</span><span>Odd suites ${f}01–${f}31</span></div>
+          <div class="row n">${odd.map(tile).join("")}</div>
+          <div class="hallway">Central hallway</div>
+          <div class="row s">${even.map(tile).join("")}</div>
+          <div class="row-cap s"><span>South · front entrance</span><span>Even suites ${f}02–${f}32</span></div>
+        </div>
+        <div class="courtyard" aria-label="East courtyard">
+          <strong>East courtyard</strong>
+          <div class="pool">Pool &amp; spa</div>
+          <div class="gz"><span>BBQ</span><span>BBQ</span></div>
+        </div>
+      </div>
+    </section>`;
+  }
+
+  function listItem(s) {
+    const d = state.docs[s];
+    const svc = service(d);
+    const days = dndDays(d);
+    const nx = d && NEXT[d.status];
+    const bits = [`Floor ${s[0]} ${sideOf(s) === "n" ? "North" : "South"}`, svc.label];
+    if (d?.attendant) bits.push(d.attendant);
+    if (d?.notes) bits.push(d.notes);
+    let tags = `<span class="pill">${d ? STATUS_LABEL[d.status] : "Not logged"}</span>`;
+    if (svc.code) tags += `<span class="tag svc">${svc.code}</span>`;
+    if (days) tags += `<span class="tag ${days >= 3 ? "alert" : ""}">DND day ${days}</span>`;
+    if (auditOpen(d)) tags += `<span class="tag">Audit ${auditCount(d)}/5</span>`;
+    const canAdvance = nx && state.canWrite && !(nx[0] === "clean" && auditOpen(d)) && !days;
+    return `<div class="item panel ${d ? "s-" + d.status : ""}">
+      <button class="num" data-suite="${s}" aria-label="Open suite ${s}">${s}</button>
+      <div class="info"><div class="line1">${tags}</div><div class="line2">${esc(bits.join(" · "))}</div></div>
+      <div class="acts">
+        ${needsWelfare(d) ? `<button class="btn danger" data-suite="${s}">Log welfare check</button>` : ""}
+        ${nx && auditOpen(d) && nx[0] === "clean" ? `<button class="btn" data-suite="${s}">Finish audit</button>` : ""}
+        ${canAdvance ? `<button class="btn primary" data-quick="${s}">${nx[1]}</button>` : ""}
+        <button class="btn ghost" data-suite="${s}">Details</button>
+      </div>
+    </div>`;
+  }
+
+  function priority(s) {
+    const d = state.docs[s];
+    if (needsWelfare(d)) return 0;
+    if (!d) return 9;
+    if (d.status === "in_progress") return 1;
+    if (d.status === "dirty" && dndDays(d)) return 6;
+    if (d.status === "dirty") return { T: 2, W: 3, R: 4 }[service(d).code] ?? 5;
+    if (d.status === "clean") return 7;
+    return 8;
+  }
+
+  function workList(list) {
+    const groups = [
+      ["Needs attention now", (p) => p === 0],
+      ["In progress", (p) => p === 1],
+      ["To service", (p) => p >= 2 && p <= 5],
+      ["On Do Not Disturb", (p) => p === 6],
+      ["Ready for inspection", (p) => p === 7],
+      ["Done or out of order", (p) => p === 8],
+    ];
+    const ranked = list.filter((s) => state.docs[s]).sort((a, b) => priority(a) - priority(b) || a.localeCompare(b));
+    const unlogged = list.filter((s) => !state.docs[s]);
+    let html = groups.map(([title, fn]) => {
+      const items = ranked.filter((s) => fn(priority(s)));
+      return items.length ? `<section class="group"><h2>${title} <span class="count">${items.length}</span></h2>${items.map(listItem).join("")}</section>` : "";
+    }).join("");
+    if (unlogged.length && !state.filter && !state.att) html += `<section class="group"><h2>Not logged yet <span class="count">${unlogged.length}</span></h2><div class="unlogged">${unlogged.map((s) => `<button data-suite="${s}">${s}</button>`).join("")}</div></section>`;
+    return html || `<div class="empty">No suites match. <button class="btn" data-clearall>Show all suites</button></div>`;
+  }
+
+  function renderBoard() {
+    const fl = state.filter || state.floor === "all" ? [1, 2, 3] : [Number(state.floor)];
+    if (state.view === "plan") $("board").innerHTML = fl.map(floorPlan).join("");
+    else $("board").innerHTML = `<div class="worklist">${workList(suites.filter((s) => fl.includes(Number(s[0])) && matches(s)))}</div>`;
+  }
+
+  function renderBanner() {
+    const b = $("modeBanner");
+    const ex = suites.filter((s) => state.docs[s]?.example).length;
+    let html = "";
+    if (state.mode === "local") html = `<span>Shared saving isn't available here, so changes stay on this device.</span>`;
+    else if (state.mode === "loading") html = `<span>Loading suite statuses…</span>`;
+    else if (!state.canWrite) html = `<span>You can view this board but not change it. Ask the owner for Contributor access to update suites.</span>`;
+    else if (ex && state.confirmClear) html = `<span>Clear the sample status from ${ex} suites? Suites you've saved yourself stay.</span><span style="display:flex;gap:8px"><button class="btn" id="keepEx">Keep them</button><button class="btn danger" id="doClearEx">Clear ${ex} suites</button></span>`;
+    else if (ex) html = `<span><strong>Example data.</strong> ${ex} suites carry sample statuses. Suites you save replace them.</span><button class="btn danger" id="clearEx">Clear example statuses</button>`;
+    else if (!Object.keys(state.docs).length) html = `<span>No suites logged yet. Tap any suite to record its status, DND and kitchenette audit.</span>`;
+    b.innerHTML = html;
+    b.hidden = !html;
+  }
+
+  function render() {
+    renderToolbar(); renderBanner(); renderProgress(); renderSummary(); renderBuilding(); renderAlerts(); renderBoard();
+    if (state.open && !state.dirtyDraft) { state.draft = clone(state.docs[state.open] || state.draft); renderDrawer(); }
+  }
+
+  // ---------- Sheet ----------
+  function openSuite(s) {
+    state.open = s; state.dirtyDraft = false;
+    state.draft = state.docs[s] ? clone(state.docs[s]) : { status: "dirty", occ: "occupied", audit: {} };
+    document.documentElement.style.overflow = "hidden";
+    renderDrawer(true);
+  }
+  function closeDrawer() {
+    const s = state.open; state.open = null; $("drawer").hidden = true; $("scrim").hidden = true;
+    document.documentElement.style.overflow = "";
+    const t = document.querySelector(`#board [data-suite="${s}"]`); t && t.focus({ preventScroll: true });
+  }
+  function neighbor(dir) {
+    const order = state.view === "list" ? [...document.querySelectorAll("#board [data-suite]")].map((b) => b.dataset.suite).filter((v, i, a) => a.indexOf(v) === i) : suites.filter(matches);
+    const pool = order.length ? order : suites;
+    const i = pool.indexOf(state.open);
+    return pool[(i + dir + pool.length) % pool.length];
+  }
+
+  function renderDrawer(first) {
+    const s = state.open, d = state.draft, saved = state.docs[s];
+    const svc = service(d);
+    const days = dndDays(d);
+    const side = sideOf(s) === "n" ? "North side, faces rear parking" : "South side, faces front entrance";
+    const ro = !state.canWrite ? "disabled" : "";
+    const names = [...new Set(Object.values(state.docs).map((x) => x.attendant).filter(Boolean))].sort();
+    const scroll = $("drawer").querySelector(".body")?.scrollTop || 0;
+    $("drawer").innerHTML = `
+      <header>
+        <div class="grab" aria-hidden="true"></div>
+        <div class="hrow">
+          <div><div class="eyebrow">Floor ${s[0]} · ${side}</div><h2 id="dTitle" style="font-size:1.8rem">Suite ${s}</h2>
+          <div class="muted small">${saved?.updatedAt ? "Updated " + esc(new Date(saved.updatedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })) : saved ? "Example status" : "Not logged yet"}${state.dirtyDraft ? ' · <span class="dirty-dot">Unsaved changes</span>' : ""}</div></div>
+          <div class="nav">
+            <button class="iconbtn" id="dPrev" aria-label="Previous suite">‹</button>
+            <button class="iconbtn" id="dNext" aria-label="Next suite">›</button>
+            <button class="iconbtn" id="dClose" aria-label="Close">✕</button>
+          </div>
+        </div>
+      </header>
+      <div class="body">
+        <div class="svcbox"><span class="eyebrow">Today's service</span><strong style="font-size:1.1rem">${svc.label}</strong><span class="muted small">${svc.detail}</span>
+          ${svc.code ? `<ul>${TASKS[svc.code].map((t) => `<li>${t}</li>`).join("")}</ul>` : ""}</div>
+        <fieldset><legend>Room status</legend><div class="statusgrid">
+          ${STATUSES.map(([k, l]) => `<label style="--sc:var(--st-${stVar(k)});--sb:var(--st-${stVar(k)}-bg)"><input type="radio" name="status" value="${k}" ${d.status === k ? "checked" : ""} ${ro}>${l}</label>`).join("")}
+        </div>
+        ${auditOpen(d) && isDone(d) ? `<div class="small" style="color:var(--dnd)">Turnover audit is incomplete. Finish all 5 checks before releasing this suite.</div>` : ""}
+        </fieldset>
+        <fieldset><legend>Occupancy</legend><div class="seg">
+          ${OCC.map(([k, l]) => `<label><input type="radio" name="occ" value="${k}" ${d.occ === k ? "checked" : ""} ${ro}>${l}</label>`).join("")}
+        </div>
+        ${d.occ === "occupied" ? `<label class="field">Last Weekly Full Service<input type="date" id="dLastFull" value="${esc(d.lastFull || "")}" max="${shift()}" ${ro}></label>` : ""}
+        </fieldset>
+        <fieldset><legend>Do Not Disturb</legend>
+          <label class="toggle"><span>DND sign is out</span><input type="checkbox" role="switch" id="dDnd" ${d.dndSince ? "checked" : ""} ${ro}></label>
+          ${d.dndSince ? `<label class="field">First seen on<input type="date" id="dDndSince" value="${esc(d.dndSince)}" max="${shift()}" ${ro}></label>
+            <div class="small">Consecutive day <strong>${days}</strong> as of ${shift()}${days < 3 ? ". Welfare check required from day 3." : "."}</div>` : ""}
+          ${days >= 3 ? `<div class="welfare"><strong>Day ${days}: supervisor welfare and property inspection required now.</strong>
+            <label class="check" style="border:0"><input type="checkbox" id="dWelfare" ${d.welfareDone === d.dndSince ? "checked" : ""} ${ro}>Supervisor completed the welfare check</label></div>` : ""}
+        </fieldset>
+        <fieldset><legend style="display:flex;justify-content:space-between;align-items:baseline"><span>Kitchenette audit${d.occ === "checkout" ? " · required" : ""}</span><span class="small muted" style="font-family:var(--f-body);font-weight:500">${auditCount(d)} of ${AUDIT.length}</span></legend>
+          ${AUDIT.map(([k, l]) => `<label class="check"><input type="checkbox" data-audit="${k}" ${d.audit?.[k] ? "checked" : ""} ${ro}>${l}</label>`).join("")}
+          ${state.canWrite ? `<button type="button" class="btn" id="dAuditAll" style="justify-self:start;margin-top:4px">${auditDone(d) ? "Clear all checks" : "Check all 5"}</button>` : ""}
+        </fieldset>
+        <label class="field">Attendant<input id="dAtt" list="attList" value="${esc(d.attendant || "")}" placeholder="Who is assigned" autocomplete="off" ${ro}>
+          <datalist id="attList">${names.map((n) => `<option value="${esc(n)}">`).join("")}</datalist></label>
+        <label class="field">Notes<textarea id="dNotes" rows="3" placeholder="Missing items, maintenance needs, guest requests" ${ro}>${esc(d.notes || "")}</textarea></label>
+        ${saved && state.canWrite ? `<button class="btn ghost danger" id="dClear" style="justify-self:start">Clear this suite's record</button>` : ""}
+      </div>
+      <footer>
+        ${state.canWrite ? `<div class="grow-btns" style="display:flex;gap:8px;margin-left:auto"><button class="btn" id="dSaveNext">Save &amp; next</button><button class="btn primary" id="dSave">Save</button></div>` : `<button class="btn" id="dCancel" style="margin-left:auto">Close</button>`}
+      </footer>`;
+    $("drawer").hidden = false; $("scrim").hidden = false;
+    $("drawer").querySelector(".body").scrollTop = first ? 0 : scroll;
+    if (first) $("dClose").focus({ preventScroll: true });
+  }
+
+  function touch() { state.dirtyDraft = true; }
+  $("drawer").addEventListener("change", (e) => {
+    const t = e.target, d = state.draft;
+    if (t.name === "occ") d.occ = t.value;
+    else if (t.name === "status") d.status = t.value;
+    else if (t.id === "dLastFull") d.lastFull = t.value || null;
+    else if (t.id === "dDnd") { d.dndSince = t.checked ? shift() : null; if (!t.checked) d.welfareDone = null; }
+    else if (t.id === "dDndSince") d.dndSince = t.value || shift();
+    else if (t.id === "dWelfare") d.welfareDone = t.checked ? d.dndSince : null;
+    else if (t.dataset.audit) d.audit = { ...(d.audit || {}), [t.dataset.audit]: t.checked };
+    else return;
+    touch(); renderDrawer();
+  });
+  $("drawer").addEventListener("input", (e) => {
+    if (e.target.id === "dNotes") { state.draft.notes = e.target.value; state.dirtyDraft = true; }
+    if (e.target.id === "dAtt") { state.draft.attendant = e.target.value.trim(); state.dirtyDraft = true; }
+  });
+
+  async function saveDraft() {
+    const s = state.open;
+    const body = { ...state.draft, example: false, updatedAt: new Date().toISOString() };
+    if (!body.attendant) delete body.attendant;
+    const prev = state.docs[s] ? clone(state.docs[s]) : null;
+    if (isDone(body) && !isDone(prev) && service(prev || body).code === "W") body.lastFull = shift();
+    state.dirtyDraft = false;
+    const ok = await write(s, body);
+    if (ok) toast(`Suite ${s} saved`, () => write(s, prev));
+    return ok;
+  }
+
+  $("drawer").addEventListener("click", async (e) => {
+    const id = e.target.closest("button")?.id;
+    if (id === "dClose" || id === "dCancel") closeDrawer();
+    else if (id === "dPrev" || id === "dNext") { if (state.dirtyDraft && state.canWrite) await saveDraft(); openSuite(neighbor(id === "dNext" ? 1 : -1)); }
+    else if (id === "dSave") { if (await saveDraft()) closeDrawer(); }
+    else if (id === "dSaveNext") { if (await saveDraft()) openSuite(neighbor(1)); }
+    else if (id === "dAuditAll") { const all = !auditDone(state.draft); state.draft.audit = Object.fromEntries(AUDIT.map(([k]) => [k, all])); touch(); renderDrawer(); }
+    else if (id === "dClear") {
+      const s = state.open, prev = clone(state.docs[s]);
+      if (await write(s, null)) { closeDrawer(); toast(`Suite ${s} cleared`, () => write(s, prev)); }
+    }
+  });
+  $("scrim").addEventListener("click", closeDrawer);
+  document.addEventListener("keydown", (e) => {
+    if (!state.open) return;
+    if (e.key === "Escape") closeDrawer();
+    else if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) $(e.key === "ArrowRight" ? "dNext" : "dPrev").click();
+  });
+  // Swipe down on the sheet header closes it on phones
+  (() => {
+    let y0 = null;
+    $("drawer").addEventListener("touchstart", (e) => { y0 = e.target.closest("header") ? e.touches[0].clientY : null; }, { passive: true });
+    $("drawer").addEventListener("touchend", (e) => { if (y0 !== null && e.changedTouches[0].clientY - y0 > 80 && !state.dirtyDraft) closeDrawer(); y0 = null; }, { passive: true });
+  })();
+
+  async function quick(s) {
+    const d = state.docs[s]; const nx = d && NEXT[d.status];
+    if (!nx) return;
+    const prev = clone(d);
+    const body = { ...clone(d), status: nx[0], example: false, updatedAt: new Date().toISOString() };
+    if (nx[0] === "clean" && service(d).code === "W") body.lastFull = shift();
+    if (await write(s, body)) toast(`Suite ${s} · ${STATUS_LABEL[nx[0]]}`, () => write(s, prev));
+  }
+
+  // ---------- Global events ----------
+  document.addEventListener("click", async (e) => {
+    if (e.target.closest("#drawer") || e.target.closest("#toast") || e.target.closest("#scene")) return;
+    const q = e.target.closest("[data-quick]");
+    if (q) return quick(q.dataset.quick);
+    const sb = e.target.closest("[data-suite]");
+    if (sb) return openSuite(sb.dataset.suite);
+    const vb = e.target.closest("[data-view]");
+    if (vb) { state.view = vb.dataset.view; savePrefs(); return render(); }
+    const fb = e.target.closest("[data-floor]");
+    if (fb) { state.floor = fb.dataset.floor; state.filter = null; savePrefs(); return render(); }
+    const st = e.target.closest("[data-filter]");
+    if (st) { state.filter = state.filter === st.dataset.filter ? null : st.dataset.filter; return render(); }
+    if (e.target.closest("[data-clearall]")) { state.filter = null; state.att = ""; savePrefs(); return render(); }
+    if (e.target.id === "clearEx") { state.confirmClear = true; return renderBanner(); }
+    if (e.target.id === "keepEx") { state.confirmClear = false; return renderBanner(); }
+    if (e.target.id === "doClearEx") {
+      state.confirmClear = false;
+      const ex = suites.filter((s) => state.docs[s]?.example);
+      for (const s of ex) await write(s, null, true);
+      render(); toast(`Cleared ${ex.length} example suites`);
+    }
+  });
+  $("shiftDate").addEventListener("change", render);
+  $("attFilter").addEventListener("change", (e) => { state.att = e.target.value; savePrefs(); render(); });
+  $("jump").addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    const v = e.target.value.trim();
+    if (!suites.includes(v)) { toast(`There's no suite ${v || "with that number"}. Suites run 101–132, 201–232, 301–332.`); return; }
+    e.target.value = ""; e.target.blur();
+    state.hit = v; state.floor = v[0]; state.filter = null; render();
+    openSuite(v);
+    setTimeout(() => { state.hit = null; }, 2500);
+  });
+
+  let toastTimer;
+  function toast(msg, undo) {
+    const t = $("toast");
+    t.innerHTML = `<span>${esc(msg)}</span>${undo ? '<button id="undoBtn">Undo</button>' : ""}`;
+    t.hidden = false;
+    if (undo) $("undoBtn").onclick = async () => { t.hidden = true; await undo(); toast("Change undone"); };
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), undo ? 5000 : 2600);
+  }
+
+  // ---------- Storage ----------
+  const LS = "iah-hk-local";
+  function loadLocal() { try { return JSON.parse(localStorage.getItem(LS) || "{}"); } catch { return {}; } }
+  function saveLocal() { try { localStorage.setItem(LS, JSON.stringify(state.docs)); } catch {} }
+
+  async function write(s, body, quiet) {
+    if (state.mode === "db") {
+      try {
+        if (body) await db.collection("suites").doc(s).set(body);
+        else await db.collection("suites").doc(s).delete();
+        return true;
+      } catch (err) {
+        if (err && err.code === "invalid_argument") { state.canWrite = false; render(); toast("You don't have permission to change suites"); }
+        else if (!quiet) toast("Couldn't save. Check your connection and try again.");
+        return false;
+      }
+    }
+    if (body) state.docs[s] = body; else delete state.docs[s];
+    saveLocal(); if (!quiet) render();
+    return true;
+  }
+
+  function applyMode(night) {
+    document.documentElement.setAttribute("data-mode", night ? "night" : "day");
+    $("modeBtn").textContent = night ? "Day mode" : "Night mode";
+    $("modeBtn").setAttribute("aria-pressed", String(night));
+  }
+  let night = false;
+  try { night = localStorage.getItem("iah-hk-mode") === "night"; } catch {}
+  applyMode(night);
+  $("modeBtn").addEventListener("click", () => { night = !night; applyMode(night); try { localStorage.setItem("iah-hk-mode", night ? "night" : "day"); } catch {} });
+
+  $("shiftDate").value = todayISO();
+  render(); fitScene();
+
+  (async () => {
+    try { db = await (window.claude?.use ? window.claude.use("db") : null); } catch { db = null; }
+    if (!db) { state.mode = "local"; state.docs = loadLocal(); render(); return; }
+    state.mode = "db";
+    db.collection("suites").onSnapshot((snap) => {
+      const docs = {};
+      snap.docs.forEach((d) => { if (d.exists) docs[d.id] = d.data(); });
+      state.docs = docs; render();
+    }, () => { state.mode = "local"; state.docs = loadLocal(); render(); });
+  })();
+})();
+</script>
+
+</body>
+</html>
