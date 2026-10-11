@@ -155,7 +155,10 @@ button { cursor: pointer; }
 .floor { padding: 16px; display: grid; gap: 12px; }
 .floor-head { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline; }
 .plan { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto auto; gap: 0 10px; align-items: stretch; }
-.core { width: 70px; display: grid; gap: 6px; align-content: center; }
+.core { width: 62px; display: grid; gap: 6px; align-content: center; }
+.hallway { gap: 14px; }
+.hallway .lift { display: inline-flex; align-items: center; gap: 5px; letter-spacing: .06em; background: var(--surface); border: 1px dashed color-mix(in srgb, var(--muted) 45%, var(--line)); border-radius: 8px; padding: 2px 8px; color: var(--fg); }
+.hallway .lift svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .core .cx { display: grid; justify-items: center; gap: 3px; background: var(--surface-2); border: 1px dashed color-mix(in srgb, var(--muted) 45%, var(--line)); border-radius: 10px; padding: 9px 4px; font-size: .62rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
 .core .cx svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .side-label { writing-mode: vertical-rl; transform: rotate(180deg); font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); text-align: center; }
@@ -163,7 +166,8 @@ button { cursor: pointer; }
 .row { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 6px; }
 .row-cap { font-size: .74rem; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
 .hallway { background: linear-gradient(90deg, transparent, var(--surface-2) 8%, var(--surface-2) 92%, transparent); border-radius: 6px; min-height: 24px; display: flex; align-items: center; justify-content: center; font-size: .68rem; letter-spacing: .4em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
-.courtyard { width: 96px; border-radius: 12px; background: var(--lawn); padding: 8px; display: grid; gap: 6px; align-content: center; font-size: .72rem; text-align: center; }
+.courtyard { width: 118px; border-radius: 12px; background: color-mix(in srgb, var(--lawn) 45%, var(--surface)); border: 1px solid var(--line); padding: 8px; display: grid; gap: 6px; align-content: center; font-size: .72rem; text-align: center; }
+.courtyard .cmap { width: 100%; height: auto; display: block; }
 .courtyard .pool { background: var(--pool); border-radius: 8px; padding: 10px 4px; font-weight: 700; }
 .courtyard .gz { display: flex; gap: 4px; justify-content: center; }
 .courtyard .gz span { background: var(--surface); border-radius: 4px; padding: 2px 5px; }
@@ -182,6 +186,20 @@ button { cursor: pointer; }
 .mini i { display: block; height: 100%; background: var(--st-clean); }
 .suite.dim { opacity: .22; }
 .suite.hit { outline: 3px solid var(--brass); outline-offset: 2px; }
+.suite.live { animation: liveFlash 1.2s ease-out 3; }
+@keyframes liveFlash { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sc, var(--st-prog)) 70%, transparent); } 100% { box-shadow: 0 0 0 14px transparent; } }
+.livebar { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; padding: 10px 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); font-size: .84rem; }
+.livebar .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--st-clean); box-shadow: 0 0 0 0 color-mix(in srgb, var(--st-clean) 60%, transparent); animation: liveDot 2s infinite; flex: none; }
+.livebar.off .dot { background: var(--st-dirty); animation: none; }
+@keyframes liveDot { 70% { box-shadow: 0 0 0 8px transparent; } }
+.livebar .lbl { font-weight: 800; }
+.livebar .feed { display: flex; gap: 8px; flex-wrap: wrap; min-width: 0; flex: 1; }
+.livebar .ev { display: inline-flex; gap: 6px; align-items: center; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px 3px 4px; background: var(--surface-2); cursor: pointer; font: inherit; color: inherit; white-space: nowrap; }
+.livebar .ev b { font-variant-numeric: tabular-nums; }
+.livebar .ev i { font-style: normal; font-size: .7rem; font-weight: 800; border-radius: 999px; padding: 1px 7px; color: #fff; background: var(--sc, var(--muted)); }
+.livebar .ev small { color: var(--muted); }
+.livebar select { min-height: 36px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); color: inherit; font: inherit; font-weight: 700; padding: 0 8px; }
+.saved-live { color: var(--st-clean); font-weight: 700; }
 .suite .flag { position: absolute; top: 6px; right: 6px; width: 9px; height: 9px; border-radius: 50%; background: var(--dnd); box-shadow: 0 0 0 3px color-mix(in srgb, var(--dnd) 25%, transparent); }
 .suite .note { position: absolute; top: 6px; left: 6px; width: 8px; height: 8px; border-radius: 2px; background: var(--muted); }
 .s-dirty { --sc: var(--st-dirty); --sb: var(--st-dirty-bg); }
@@ -195,7 +213,9 @@ button { cursor: pointer; }
   .hero { grid-template-columns: 1fr; }
   .plan { grid-template-columns: 1fr; gap: 8px; }
   .plan .westend, .plan .side-label { display: none; }
-  .core { width: auto; grid-template-columns: 1fr 1fr; }
+  .core { width: auto; grid-template-columns: 1fr; }
+  .hallway .lift { writing-mode: horizontal-tb; padding: 6px 3px; font-size: 0; gap: 0; }
+  .hallway .lift svg { width: 18px; height: 18px; }
   .core .cx { grid-auto-flow: column; justify-content: center; align-items: center; gap: 8px; padding: 7px 8px; }
   .rows { grid-template-columns: minmax(0, 1fr) 30px minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 6px 8px; }
   .row-cap { grid-row: 1; }
@@ -204,7 +224,8 @@ button { cursor: pointer; }
   .row { grid-template-columns: 1fr; grid-row: 2; gap: 6px; }
   .row.n { grid-column: 1; } .row.s { grid-column: 3; }
   .hallway { grid-column: 2; grid-row: 2; writing-mode: vertical-rl; background: linear-gradient(180deg, transparent, var(--surface-2) 3%, var(--surface-2) 97%, transparent); }
-  .courtyard { width: auto; grid-template-columns: auto 1fr auto; align-items: center; text-align: left; }
+  .courtyard { width: auto; grid-template-columns: auto 1fr; align-items: center; justify-items: start; text-align: left; gap: 14px; }
+  .courtyard .cmap { width: auto; height: 150px; }
   .suite { min-height: 56px; grid-template-columns: auto 1fr auto; grid-template-areas: "num meta who" "st meta who"; justify-items: start; align-items: center; text-align: left; padding: 6px 12px; column-gap: 10px; row-gap: 0; }
   .suite::before { left: 0; right: auto; top: 8px; bottom: 8px; width: 4px; height: auto; border-radius: 0 4px 4px 0; }
   .suite .num { grid-area: num; margin: 0; font-size: 1.15rem; }
@@ -333,6 +354,12 @@ legend { font-family: var(--f-display); font-weight: 700; font-size: 1rem; margi
   </section>
 
   <div id="modeBanner" class="banner" hidden></div>
+  <div id="liveBar" class="livebar" hidden>
+    <span class="dot" aria-hidden="true"></span><span class="lbl" id="liveLbl">Live</span>
+    <div class="feed" id="liveFeed" aria-live="polite"></div>
+    <label class="small muted" style="display:flex;gap:6px;align-items:center">This iPad is
+      <select id="roleSel" aria-label="Who is using this device"><option value="frontdesk">Front desk</option><option value="housekeeping">Housekeeping</option></select></label>
+  </div>
 
   <section class="alerts" id="alerts" hidden aria-live="polite">
     <h2>Welfare check required now</h2>
@@ -412,7 +439,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
   const prefs = (() => { try { return JSON.parse(localStorage.getItem("iah-hk-prefs") || "{}"); } catch { return {}; } })();
   const state = {
     docs: {}, floor: prefs.floor || "1", view: prefs.view || (matchMedia("(max-width: 640px)").matches ? "list" : "plan"),
-    att: prefs.att || "", filter: null, mode: "loading", canWrite: true, open: null, draft: null, dirtyDraft: false,
+    att: prefs.att || "", filter: null, mode: "loading", role: (() => { try { return localStorage.getItem("iah-hk-role") || "frontdesk"; } catch { return "frontdesk"; } })(), activity: [], live: {}, online: true, canWrite: true, open: null, draft: null, dirtyDraft: false,
     confirmClear: false, hit: null
   };
   let db = null;
@@ -535,8 +562,8 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     // Site plan traced from Rory's two aerial photos. Pale concrete paving with red curbs. South (front) lot: a row
     // against the building, an aisle, a back-to-back double row on a planted median, an aisle and an outer row, then a
     // hedge, the retention pond and Northgreen Blvd. North (rear) lot: a row, an aisle and an outer row, brush beyond.
-    // A drive with stalls wraps the west end; the east courtyard spans 15 m south to 33 m north.
-    const E0 = LEN / 2 + 1, CU = 35, CX1 = E0 + CU, CZS = 15, CZN = -33, W0 = -LEN / 2 - 15;
+    // A drive with stalls wraps the west end; the east courtyard spans 11 m south to 25 m north.
+    const E0 = LEN / 2 + 1, CU = 23.5, CX1 = E0 + CU, CZS = 11, CZN = -25, W0 = -LEN / 2 - 15;
     flat(900, 900, M(0x6e8264, { envMapIntensity: .2 }), 0, 0, 0);
     // Photo map: the aerial, warped top-down and laid on the ground. modelOnly/mapOnly hold what each ground mode shows.
     const modelOnly = [], mapOnly = [];
@@ -661,8 +688,8 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       // Stairwell glazing strip down the middle of each bay
       for (let f = 1; f <= 3; f++) tag(f, box(1.4, 2.2, .1, M(0x6f8aa3, { roughness: .15, metalness: .5 }), x, (f - .5) * FLOOR_H + .1, side * (HALF_D + .42), { cast: false }));
     }
-    // Stairs and elevator at each end of the hallway: a white stair bay on the end wall with a glazed stair window
-    // per landing, the hallway exit door at ground level, and the elevator overrun and stair bulkhead on the roof
+    // Stairs at each end of the hallway: a white stair bay on the end wall with a glazed stair window per landing,
+    // the hallway exit door at ground level, and a stair bulkhead on the roof
     const stairGlass = M(0x6f8aa3, { roughness: .15, metalness: .5 });
     for (const sx of [-1, 1]) {
       const ex = sx * (LEN / 2 + 1);
@@ -672,11 +699,12 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       for (let f = 2; f <= 3; f++) tag(f, box(.1, 2.3, 2.2, stairGlass, ex + sx * .34, (f - 1) * FLOOR_H + .2, 0, { cast: false }));
       tag(1, box(.6, .25, 3, M(0xf4f2ec), ex + sx * .6, 2.65, 0));
       const cx = sx * (LEN / 2 - 2.6);
-      tag(4, box(3, 2.4, 3.2, M(0xe4ddd1), cx, H + 2.1, 2.4));          // elevator machine overrun
-      tag(4, box(3.3, .2, 3.5, M(0xf3f1ec), cx, H + 3.35, 2.4, { cast: false }));
-      tag(4, box(3, 1.6, 3.6, M(0xe4ddd1), cx, H + 1.7, -2.3));         // stair roof bulkhead
-      tag(4, box(.08, 1.2, 1, M(0x8d9298, { metalness: .5, roughness: .4 }), cx - sx * 1.55, H + 1.5, -2.3, { cast: false }));
+      tag(4, box(3, 1.6, 3.6, M(0xe4ddd1), cx, H + 1.7, 0));            // stair roof bulkhead
+      tag(4, box(.08, 1.2, 1, M(0x8d9298, { metalness: .5, roughness: .4 }), cx - sx * 1.55, H + 1.5, 0, { cast: false }));
     }
+    // Elevators: midway along the hallway, between the central bays, with the machine overrun on the roof
+    tag(4, box(5.2, 2.6, 3.4, M(0xe4ddd1), 3.2, H + 2.2, 0));
+    tag(4, box(5.5, .2, 3.7, M(0xf3f1ec), 3.2, H + 3.55, 0, { cast: false }));
     // Main entrance midway along the south face: glass vestibule, canopy on two columns, walk to the drive
     const vest = tag(1, box(5.2, 3, 2.4, M(0x9fc3dc, { roughness: .05, metalness: .3, transparent: true, opacity: .35 }), ENTRY_X, 1.5, HALF_D + 1.25, { cast: false }));
     vest.userData.noHit = true; vest.userData.glass = .35;
@@ -718,75 +746,77 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     const ringMat = new T.MeshStandardMaterial({ color: 0xc8963a, emissive: 0xd9a441, emissiveIntensity: 1.1, roughness: .4 });
     const rings = [0, 1].map(() => { const r = box(LEN + 3.6, .38, HALF_D * 2 + 2.2, ringMat, 0, 0, 0, { cast: false, recv: false }); r.visible = false; return r; });
 
-    // East courtyard, traced from the aerial photo: fenced pool deck against the building end (pool with a
-    // curved step, spa, slatted pergola and a white hip-roofed cabana), then a lawn with two white hip-roofed
-    // gazebos, a palm, red curbs to the drives and a black iron fence along the street.
+    // East courtyard, measured from Rory's aerials (metres, same frame as the photo map). A fenced pool deck sits
+    // against the building's east end: the pool runs north-south with a curved step at its south end, a small spa,
+    // a white hip-roofed cabana and a slatted pergola at the north end, white piers with black iron panels round it.
+    // East of the deck a walk runs north-south, then the lawn with two white hip-roofed gazebos (each with a paved
+    // pad on its west side), a palm, shrubs, red curbs to the drives and a black iron fence along the street.
+    const CY = { x0: LEN / 2 + 1, deckX1: 62.8, deckZ0: -24, deckZ1: 7.5, walkX1: 65, lawnX1: 76.5, z0: -25, z1: 11 };
+    // Flat ground pieces: drawn-model mode only (the photo map already shows them)
     mark = scene.children.length;
-    const X = (u) => E0 + u;
-    rect(X(0), CX1, CZS, CZN, M(0x67a84a), .04);
-    curb(X(0), CX1, CZS, CZS + .15); curb(X(0), CX1, CZN, CZN - .15);
-    rect(X(0), X(14), 11.3, -27, concrete, .06);
-    rect(X(14), X(15.8), CZS - .5, -27, concrete, .06);
-    const water = M(0x3fa9d0, { roughness: .06, metalness: .1, emissive: 0x0a4a63, emissiveIntensity: .3 });
+    rect(CY.x0, CY.lawnX1, CY.z1, CY.z0, M(0x67a84a), .04);
+    curb(CY.x0, CY.lawnX1, CY.z1, CY.z1 + .15); curb(CY.x0, CY.lawnX1, CY.z0, CY.z0 - .15);
+    rect(CY.x0, CY.deckX1, CY.deckZ1, CY.deckZ0, M(0xd9cdb6, { roughness: .95 }), .06);
+    rect(CY.deckX1, CY.walkX1, CY.z1, CY.z0, concrete, .06);
+    const water = M(0x3f8fc0, { roughness: .06, metalness: .1, emissive: 0x0a4a63, emissiveIntensity: .3 });
     const waterLight = M(0x6cc6e3, { roughness: .1, emissive: 0x0a4a63, emissiveIntensity: .25 });
     const coping = M(0xf1efe9);
-    box(9.9, .1, 12.5, coping, X(6.75), .08, -3.25, { cast: false });
-    rect(X(2.2), X(11.3), 2.6, -9.1, water, .14);
-    add(new T.CylinderGeometry(1.5, 1.5, .06, 24, 1, false, Math.PI / 2, Math.PI), waterLight, X(7.8), .16, 2.6, { cast: false });
-    for (let i = 0; i < 4; i++) box(.8, .3, 2, M(0xffffff), X(3 + i * 2.2), .22, 5.6);
-    box(3.2, .14, 3, coping, X(4.7), .1, -13, { cast: false });
-    rect(X(3.5), X(5.9), -11.8, -14.2, waterLight, .18);
-    // Pergola
+    box(8.2, .1, 22, coping, 57.8, .08, -4, { cast: false });
+    rect(54.2, 61.4, 6.4, -14.6, water, .14);
+    add(new T.CylinderGeometry(1.6, 1.6, .06, 24, 1, false, Math.PI, Math.PI), waterLight, 57.8, .16, 4.8, { cast: false });
+    box(2.6, .14, 2.6, coping, 57.2, .1, -17.4, { cast: false });
+    rect(56.2, 58.2, -16.4, -18.4, waterLight, .18);
+    for (const [x, z] of [[66, -12.5], [68, -1.5]]) rect(x - 1.2, x + 1.2, z + 2, z - 2, concrete, .07);
+    takeModel();
+
+    // Built pieces: shown in both modes
     const white = M(0xf6f5f1, { roughness: .6 });
-    for (const [u, z] of [[1.3, -14.8], [1.3, -18.7], [10.9, -14.8], [10.9, -18.7], [6.1, -14.8], [6.1, -18.7]]) box(.35, 2.8, .35, white, X(u), 1.4, z);
-    for (const z of [-14.8, -18.7]) box(9.9, .25, .25, white, X(6.1), 2.9, z);
-    for (let u = 1.3; u <= 10.9; u += .8) box(.12, .2, 4.6, white, X(u), 3.1, -16.75);
-    // Cabana
-    box(5.4, 2.7, 5.4, M(0xe9e2d6), X(3.7), 1.35, -20.2);
-    add(new T.ConeGeometry(4.7, 1.7, 4), white, X(3.7), 3.55, -20.2, { ry: Math.PI / 4 });
-    // Pool fence: white piers with caps and black iron panels
+    // Cabana (white hip roof) and the slatted pergola beside it
+    box(4.6, 2.7, 4.2, M(0xe9e2d6), 55.9, 1.35, -21.6);
+    add(new T.ConeGeometry(3.9, 1.6, 4), white, 55.9, 3.5, -21.6, { ry: Math.PI / 4 });
+    for (const [x, z] of [[58.4, -20.4], [58.4, -16.4], [62, -20.4], [62, -16.4]]) box(.3, 2.8, .3, white, x, 1.4, z);
+    for (const x of [58.4, 62]) box(.25, .25, 4.4, white, x, 2.9, -18.4);
+    for (let z = -20.6; z <= -16.2; z += .55) box(4, .18, .1, white, 60.2, 3.1, z);
+    // Pool fence: white piers with caps and black iron panels, round the deck's east and south sides and its north end
     const iron = M(0x24292e, { roughness: .5, metalness: .6 });
-    const pier = (x, z) => { box(.6, 1.7, .6, white, x, .85, z); box(.8, .18, .8, white, x, 1.78, z); };
+    const pier = (x, z) => { box(.55, 1.6, .55, white, x, .8, z); box(.75, .16, .75, white, x, 1.68, z); };
     const run = (x0, z0, x1, z1, step) => {
       const n = Math.max(1, Math.round(Math.hypot(x1 - x0, z1 - z0) / step));
       for (let i = 0; i <= n; i++) pier(x0 + (x1 - x0) * i / n, z0 + (z1 - z0) * i / n);
       const len = Math.hypot(x1 - x0, z1 - z0), along = Math.abs(x1 - x0) > Math.abs(z1 - z0);
-      for (const y of [.25, 1.25]) box(along ? len : .05, .05, along ? .05 : len, iron, (x0 + x1) / 2, y, (z0 + z1) / 2, { recv: false });
+      for (const y of [.25, 1.2]) box(along ? len : .05, .05, along ? .05 : len, iron, (x0 + x1) / 2, y, (z0 + z1) / 2, { recv: false });
       const k = Math.round(len / .45);
-      for (let i = 1; i < k; i++) box(.035, 1.1, .035, iron, x0 + (x1 - x0) * i / k, .75, z0 + (z1 - z0) * i / k, { cast: false, recv: false });
+      for (let i = 1; i < k; i++) box(.035, 1.05, .035, iron, x0 + (x1 - x0) * i / k, .72, z0 + (z1 - z0) * i / k, { cast: false, recv: false });
     };
-    run(X(14), 11.3, X(14), -27, 5);
-    run(X(0), 11.3, X(14), 11.3, 4.7);
-    run(X(0), -27, X(14), -27, 4.7);
-    // Street fence
-    for (let z = CZS; z >= CZN; z -= 2.4) box(.08, 1.6, .08, iron, X(33.6), .8, z);
-    box(.06, .06, CZS - CZN, iron, X(33.6), 1.5, (CZS + CZN) / 2, { recv: false });
-    box(.06, .06, CZS - CZN, iron, X(33.6), .3, (CZS + CZN) / 2, { recv: false });
-    // Gazebos with walkways
-    const gazebo = (u, z) => {
-      rect(X(u - 3.4), X(u + 3.4), z + 3.4, z - 3.4, concrete, .07);
-      for (const [du, dz] of [[-2.9, -2.9], [2.9, -2.9], [-2.9, 2.9], [2.9, 2.9]]) box(.3, 2.7, .3, white, X(u + du), 1.35, z + dz);
-      add(new T.ConeGeometry(5.1, 1.9, 4), white, X(u), 3.65, z, { ry: Math.PI / 4 });
-      box(2.4, .1, 1, M(0x8a6a4a), X(u), .85, z);
-      for (const dz of [-.9, .9]) box(2.4, .08, .35, M(0x8a6a4a), X(u), .5, z + dz);
-      box(.8, .9, .6, M(0x2a2e33, { metalness: .5, roughness: .4 }), X(u + 2), .45, z + 2);
+    run(CY.deckX1, CY.deckZ1, CY.deckX1, CY.deckZ0, 4);
+    run(CY.x0, CY.deckZ1, CY.deckX1, CY.deckZ1, 4.9);
+    run(CY.x0, CY.deckZ0, CY.deckX1, CY.deckZ0, 4.9);
+    // Street fence along the east edge of the lawn
+    for (let z = CY.z1; z >= CY.z0; z -= 2.4) box(.08, 1.6, .08, iron, CY.lawnX1, .8, z);
+    for (const y of [1.5, .3]) box(.06, .06, CY.z1 - CY.z0, iron, CY.lawnX1, y, (CY.z0 + CY.z1) / 2, { recv: false });
+    // Gazebos: white hip roofs on four posts, picnic table and grill
+    const gazebo = (x, z) => {
+      for (const [dx, dz] of [[-2.2, -2.2], [2.2, -2.2], [-2.2, 2.2], [2.2, 2.2]]) box(.28, 2.7, .28, white, x + dx, 1.35, z + dz);
+      add(new T.ConeGeometry(3.9, 1.7, 4), white, x, 3.55, z, { ry: Math.PI / 4 });
+      box(2.2, .1, .95, M(0x8a6a4a), x, .85, z);
+      for (const dz of [-.85, .85]) box(2.2, .08, .32, M(0x8a6a4a), x, .5, z + dz);
+      box(.75, .9, .55, M(0x2a2e33, { metalness: .5, roughness: .4 }), x + 1.6, .45, z + 1.6);
     };
-    gazebo(22.2, -1.7); gazebo(19.1, -14.8);
-    rect(X(15.8), X(18.8), -.6, -2.8, concrete, .07);
-    // Palm, shrubs, utility box
-    const palm = (u, z) => {
-      add(new T.CylinderGeometry(.18, .26, 7.5, 7), M(0x8b7356), X(u), 3.75, z);
+    gazebo(68.6, -12.5); gazebo(70.6, -1.5);
+    // Palm, shrubs and a utility box, where the photos show them
+    const palm = (x, z) => {
+      add(new T.CylinderGeometry(.18, .26, 7.5, 7), M(0x8b7356), x, 3.75, z);
       const frond = M(0x4d8a3a, { flatShading: true });
       for (let i = 0; i < 8; i++) {
-        const a = i * Math.PI / 4, m = add(new T.BoxGeometry(3.4, .06, .7), frond, X(u) + Math.cos(a) * 1.5, 7.4, z + Math.sin(a) * 1.5);
+        const a = i * Math.PI / 4, m = add(new T.BoxGeometry(3.4, .06, .7), frond, x + Math.cos(a) * 1.5, 7.4, z + Math.sin(a) * 1.5);
         m.rotation.set(0, -a, -.35);
       }
     };
-    palm(15.9, -28.6);
+    palm(74.5, -21.5);
     const shrub = M(0x4a7a36, { flatShading: true });
-    for (const [u, z] of [[8, 13.5], [12, 13.8], [29.5, -1], [28.5, 11], [25, -21], [3, 13.2], [31, -12]]) add(new T.IcosahedronGeometry(.75, 0), shrub, X(u), .6, z);
-    box(1.6, 1.1, 1.1, M(0x6f7f5e), X(27), .55, -29.5);
-    box(2.6, .15, 1.4, concrete, X(31), .12, -24, { cast: false });
+    for (const [x, z] of [[66.2, -9.5], [73.2, -11.2], [69, 8.2], [60.4, 9.6], [64.4, 10], [73.5, 3.2], [66.4, -23.2]]) add(new T.IcosahedronGeometry(.7, 0), shrub, x, .55, z);
+    box(1.4, 1, 1, M(0x6f7f5e), 75, .5, -16);
+    mark = scene.children.length;
 
     // Trees
     const leaf = [M(0x4f7d3a, { flatShading: true }), M(0x5e8c45, { flatShading: true }), M(0x467235, { flatShading: true })];
@@ -801,22 +831,6 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
 
     takeModel();
 
-    // Photo-map props: the courtyard's built pieces stood up in 3D where the aerial shows them
-    mark = scene.children.length;
-    const mapGazebo = (x, z) => {
-      for (const [dx, dz] of [[-2.7, -2.7], [2.7, -2.7], [-2.7, 2.7], [2.7, 2.7]]) box(.3, 2.7, .3, white, x + dx, 1.35, z + dz);
-      add(new T.ConeGeometry(4.8, 1.9, 4), white, x, 3.65, z, { ry: Math.PI / 4 });
-      box(2.4, .1, 1, M(0x8a6a4a), x, .85, z);
-    };
-    mapGazebo(67.8, -11.5); mapGazebo(69.9, -.7);
-    box(5, 2.7, 5, M(0xe9e2d6), 56.6, 1.35, -20.3);
-    add(new T.ConeGeometry(4.4, 1.7, 4), white, 56.6, 3.55, -20.3, { ry: Math.PI / 4 });
-    for (const [x, z] of [[55.2, -14], [55.2, -17.8], [63, -14], [63, -17.8]]) box(.35, 2.8, .35, white, x, 1.4, z);
-    for (const z of [-14, -17.8]) box(8.2, .25, .25, white, 59.1, 2.9, z);
-    for (let x = 55.2; x <= 63; x += .8) box(.12, .2, 4.4, white, x, 3.1, -15.9);
-    // Pool fence round the deck (piers and iron rails), following the photo
-    run(54, 5, 66, 5, 4); run(66, 5, 66, -13.5, 4.6); run(54, -13.5, 66, -13.5, 4);
-    mapOnly.push(...scene.children.slice(mark));
     let ground = "map";
     try { ground = localStorage.getItem("iah-hk-ground") || (D ? "map" : "model"); } catch {}
     function setGround(g) {
@@ -843,8 +857,8 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       sp.scale.set(15, 3.3, 1); sp.position.set(x, y, z); sp.renderOrder = 10; scene.add(sp);
     };
     label("Main entrance", ENTRY_X, 7.5, HALF_D + 7);
-    label("Pool & spa", 59.5, 6, -5);
-    label("East courtyard", 72, 7.5, -16);
+    label("Pool & spa", 57.8, 6, -4);
+    label("East courtyard", 70, 7.5, -18);
     label("Rear parking · North", -6, 5, -24);
     label("Front parking · South", -16, 4, 24);
     label("Retention pond", 30, 4, 44);
@@ -1017,6 +1031,8 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     pin.add(cone, head); pin.visible = false; scene.add(pin);
     let pinY = 0;
     const suitePos = (s) => { const f = Number(s[0]), dir = sideOf(s) === "n" ? -1 : 1; return { x: suiteX(s), y: (f - 1) * FLOOR_H + 1.85, z: dir * (HALF_D + 1.1), dir }; };
+    const pings = new Map();
+    function ping(s) { const w = windows.find((x) => x.userData.suite === s); if (w) { pings.set(w, performance.now() + 4000); wake(); } }
     function showPin(s) {
       if (!s) { pin.visible = false; wake(); return; }
       const p = suitePos(s); pinY = p.y + 1.1; pin.position.set(p.x, pinY, p.z); pin.visible = true; wake();
@@ -1051,8 +1067,12 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
         for (const w of attention) { w.material.emissive.copy(col["--dnd"]); w.material.color.copy(col["--dnd"]); w.material.emissiveIntensity = (isNight ? 1 : .5) + p * .9; }
       }
       if (pin.visible) { pin.position.y = pinY + Math.sin(now / 320) * .35; pin.rotation.y = now / 900; }
+      for (const [w, until] of pings) {
+        if (now > until) { pings.delete(w); w.scale.set(1, 1, 1); update(); continue; }
+        const k = .5 + .5 * Math.sin(now / 160); w.scale.set(1 + k * .25, 1 + k * .25, 1); w.material.emissiveIntensity = 1.2 + k * 1.2;
+      }
       renderer.render(scene, camera);
-      if ((attention.size || pin.visible || controls.autoRotate || now < idleAt || tween) && visible) requestAnimationFrame(frame); else running = false;
+      if ((attention.size || pings.size || pin.visible || controls.autoRotate || now < idleAt || tween) && visible) requestAnimationFrame(frame); else running = false;
     }
     const resize = () => {
       const w = host.clientWidth, h = host.clientHeight;
@@ -1069,7 +1089,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     resize();
     preset("front", true);
     setGround(ground);
-    return { update, setNight, preset, showPin, flyTo, spin, setGround, ground: () => ground };
+    return { update, setNight, preset, showPin, flyTo, spin, setGround, ground: () => ground, ping };
   })();
 
   function renderBuilding() {
@@ -1178,7 +1198,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     const d = state.docs[s];
     const svc = service(d);
     const days = dndDays(d);
-    const cls = ["suite", d ? "s-" + d.status : "", matches(s) ? "" : "dim", state.hit === s ? "hit" : ""].join(" ");
+    const cls = ["suite", d ? "s-" + d.status : "", matches(s) ? "" : "dim", state.hit === s ? "hit" : "", state.live[s] > Date.now() ? "live" : ""].join(" ");
     const occTag = d?.occ === "checkout" ? "CO" : d?.occ === "vacant" ? "VAC" : "";
     const label = `Suite ${s}: ${d ? STATUS_LABEL[d.status] : "Not logged"}${svc.code ? ", " + svc.label : ""}${days ? ", DND day " + days : ""}${d?.attendant ? ", " + d.attendant : ""}`;
     return `<button class="${cls}" data-suite="${s}" aria-label="${esc(label)}">
@@ -1192,10 +1212,36 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     </button>`;
   }
 
-  // Stairwell and elevator at each end of the central hallway
+  // Stairwells at each end of the central hallway; the elevators are midway along it
   const STAIR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h5v-5h5v-5h5V5h3"/><path d="M3 20V4"/></svg>';
   const LIFT_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 9.5l3-3 3 3M9 14.5l3 3 3-3"/></svg>';
-  const core = (end) => `<div class="core" aria-label="${end} end: stairs and elevator"><span class="cx">${STAIR_SVG}Stairs</span><span class="cx">${LIFT_SVG}Elevator</span></div>`;
+  const core = (end) => `<div class="core" aria-label="${end} end stairs"><span class="cx">${STAIR_SVG}Stairs</span></div>`;
+
+  // East courtyard mini-map, north up, measured from the aerials (1 unit = 1 m; the building's east end is the grey
+  // edge on the left). Pool deck with pool, spa, cabana and pergola; walk; lawn with two BBQ gazebos and a palm.
+  const COURT_SVG = `<svg class="cmap" viewBox="-1.6 -.6 25.6 37.2" role="img" aria-label="East courtyard: fenced pool deck against the building with the pool, spa, cabana and pergola; a walk; then the lawn with two BBQ gazebos and a palm, fenced along the street">
+    <rect x="-1.6" y="-.6" width="1.6" height="37.2" fill="var(--surface-2)" stroke="var(--line)" stroke-width=".2"/>
+    <rect x="0" y="0" width="23.5" height="36" rx="1.2" fill="var(--lawn)"/>
+    <rect x="9.8" y="0" width="2.2" height="36" fill="#e7e4dc"/>
+    <rect x="0" y="1" width="9.8" height="31.5" fill="#eadfca"/>
+    <rect x="1.2" y="10.4" width="7.2" height="21" rx=".7" fill="var(--pool)" stroke="#fff" stroke-width=".35"/>
+    <path d="M3.2 31.4 a1.6 1.6 0 0 1 3.2 0" fill="#bfe8f5" stroke="#fff" stroke-width=".25"/>
+    <rect x="3.2" y="6.6" width="2" height="2" rx=".3" fill="#8fd3ea" stroke="#fff" stroke-width=".3"/>
+    <g fill="#fff" stroke="#b9b2a5" stroke-width=".2"><rect x=".6" y="1.3" width="4.6" height="4.2"/><path d="M.6 1.3 L5.2 5.5 M5.2 1.3 L.6 5.5" fill="none"/></g>
+    <g stroke="#cfc8bb" stroke-width=".22"><rect x="5.4" y="4.6" width="3.6" height="4" fill="none"/>${Array.from({ length: 7 }, (_, i) => `<path d="M5.4 ${(5 + i * .5).toFixed(2)} H9"/>`).join("")}</g>
+    <path d="M9.8 1 V32.5 M0 32.5 H9.8 M0 1 H9.8" fill="none" stroke="#2a2f35" stroke-width=".3" stroke-dasharray=".9 .5"/>
+    <path d="M23.5 0 V36" stroke="#2a2f35" stroke-width=".3" stroke-dasharray="1.2 .6"/>
+    <g fill="#fff" stroke="#a9a397" stroke-width=".22">
+      <rect x="13.4" y="10.3" width="4.4" height="4.4"/><path d="M13.4 10.3 L17.8 14.7 M17.8 10.3 L13.4 14.7" fill="none"/>
+      <rect x="15.4" y="21.3" width="4.4" height="4.4"/><path d="M15.4 21.3 L19.8 25.7 M19.8 21.3 L15.4 25.7" fill="none"/>
+    </g>
+    <g fill="#3f7f2f"><circle cx="21.5" cy="3.5" r="1.3"/></g>
+    <g font-family="inherit" font-weight="700" fill="#0f1b2a" text-anchor="middle">
+      <text x="4.8" y="21.6" font-size="1.9" fill="#0b3b52" transform="rotate(-90 4.8 21)">POOL</text>
+      <text x="15.6" y="17.6" font-size="1.5">BBQ</text><text x="17.6" y="28.6" font-size="1.5">BBQ</text>
+      <text x="4.2" y="10" font-size="1.2" fill="#0b3b52">Spa</text>
+    </g>
+  </svg>`;
 
   function floorPlan(f) {
     const odd = [], even = [];
@@ -1209,15 +1255,14 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
         <div class="rows">
           <div class="row-cap n"><span>North · rear parking</span><span>Odd suites ${f}01–${f}31</span></div>
           <div class="row n">${odd.map(tile).join("")}</div>
-          <div class="hallway">Central hallway</div>
+          <div class="hallway"><span>Central</span><span class="lift" aria-label="Elevators, middle of the building">${LIFT_SVG}Elevators</span><span>hallway</span></div>
           <div class="row s">${even.map(tile).join("")}</div>
           <div class="row-cap s"><span>South · front entrance</span><span>Even suites ${f}02–${f}32</span></div>
         </div>
         ${core("East")}
-        <div class="courtyard" aria-label="East courtyard">
+        <div class="courtyard">
           <strong>East courtyard</strong>
-          <div class="pool">Pool &amp; spa</div>
-          <div class="gz"><span>BBQ</span><span>BBQ</span></div>
+          ${COURT_SVG}
         </div>
       </div>
     </section>`;
@@ -1284,7 +1329,28 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     else $("board").innerHTML = `<div class="worklist">${workList(suites.filter((s) => fl.includes(Number(s[0])) && matches(s)))}</div>`;
   }
 
+  const ago = (iso) => {
+    const m = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+    if (!(m >= 0)) return new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    if (m < 1) return "just now";
+    if (m < 60) return m + " min ago";
+    if (m < 60 * 12) return Math.floor(m / 60) + " h " + (m % 60) + " min ago";
+    return new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  };
+  function renderLive() {
+    const bar = $("liveBar");
+    bar.hidden = state.mode !== "db";
+    if (bar.hidden) return;
+    bar.classList.toggle("off", !state.online);
+    $("liveLbl").textContent = state.online ? "Live" : "Reconnecting…";
+    $("roleSel").value = state.role;
+    const recent = Object.entries(state.docs).filter(([, d]) => d.updatedAt && !d.example).sort((a, b) => b[1].updatedAt.localeCompare(a[1].updatedAt)).slice(0, 4);
+    $("liveFeed").innerHTML = recent.length ? recent.map(([s, d]) => `<button class="ev s-${d.status}" data-suite="${s}"><i>${esc(STATUS_SHORT[d.status] || d.status)}</i><b>${s}</b><small>${d.updatedBy === "housekeeping" ? "Housekeeping" : d.updatedBy === "frontdesk" ? "Front desk" : ""} · ${esc(ago(d.updatedAt))}</small></button>`).join("")
+      : `<span class="muted">Room updates from housekeeping appear here the moment they're made.</span>`;
+  }
+
   function renderBanner() {
+    renderLive();
     const b = $("modeBanner");
     const ex = suites.filter((s) => state.docs[s]?.example).length;
     let html = "";
@@ -1337,7 +1403,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
         <div class="grab" aria-hidden="true"></div>
         <div class="hrow">
           <div><div class="eyebrow">Floor ${s[0]} · ${side}</div><h2 id="dTitle" style="font-size:1.8rem">Suite ${s}</h2>
-          <div class="muted small">${saved?.updatedAt ? "Updated " + esc(new Date(saved.updatedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })) : saved ? "Example status" : "Not logged yet"}${state.dirtyDraft ? ' · <span class="dirty-dot">Unsaved changes</span>' : ""}</div></div>
+          <div class="muted small">${saved?.updatedAt ? "Updated " + esc(ago(saved.updatedAt)) + (saved.updatedBy ? " by " + (saved.updatedBy === "housekeeping" ? "Housekeeping" : "Front desk") : "") : saved ? "Example status" : "Not logged yet"}${state.dirtyDraft ? ' · <span class="dirty-dot">Unsaved changes</span>' : state.role === "housekeeping" && state.savedLive && Date.now() - state.savedLive < 4000 ? ' · <span class="saved-live">Saved · front desk can see it</span>' : ""}</div></div>
           <div class="nav">
             <button class="iconbtn" id="dPrev" aria-label="Previous suite">‹</button>
             <button class="iconbtn" id="dNext" aria-label="Next suite">›</button>
@@ -1375,7 +1441,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
         ${saved && state.canWrite ? `<button class="btn ghost danger" id="dClear" style="justify-self:start">Clear this suite's record</button>` : ""}
       </div>
       <footer>
-        ${state.canWrite ? `<div class="grow-btns" style="display:flex;gap:8px;margin-left:auto"><button class="btn" id="dSaveNext">Save &amp; next</button><button class="btn primary" id="dSave">Save</button></div>` : `<button class="btn" id="dCancel" style="margin-left:auto">Close</button>`}
+        ${!state.canWrite ? `<button class="btn" id="dCancel" style="margin-left:auto">Close</button>` : state.role === "housekeeping" ? `<span class="small muted">Changes save as you tap</span><div class="grow-btns" style="display:flex;gap:8px;margin-left:auto"><button class="btn" id="dSaveNext">Next suite</button><button class="btn primary" id="dSave">Done</button></div>` : `<div class="grow-btns" style="display:flex;gap:8px;margin-left:auto"><button class="btn" id="dSaveNext">Save &amp; next</button><button class="btn primary" id="dSave">Save</button></div>`}
       </footer>`;
     $("drawer").hidden = false; $("scrim").hidden = false;
     $("drawer").querySelector(".body").scrollTop = first ? 0 : scroll;
@@ -1392,23 +1458,32 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     else if (t.id === "dDndSince") d.dndSince = t.value || shift();
     else if (t.id === "dWelfare") d.welfareDone = t.checked ? d.dndSince : null;
     else if (t.dataset.audit) d.audit = { ...(d.audit || {}), [t.dataset.audit]: t.checked };
+    else if (t.id === "dNotes" || t.id === "dAtt") { if (state.role === "housekeeping") autoSave(); return; }
     else return;
     touch(); renderDrawer();
+    if (state.role === "housekeeping") autoSave();
   });
+  // In housekeeping mode each tap saves straight away, so the front desk sees the room change as it happens
+  let autoTimer = null;
+  function autoSave() {
+    if (!state.canWrite || !state.open) return;
+    clearTimeout(autoTimer);
+    autoTimer = setTimeout(async () => { if (state.open && state.dirtyDraft) { if (await saveDraft(true)) { state.savedLive = Date.now(); renderDrawer(); } } }, 350);
+  }
   $("drawer").addEventListener("input", (e) => {
     if (e.target.id === "dNotes") { state.draft.notes = e.target.value; state.dirtyDraft = true; }
     if (e.target.id === "dAtt") { state.draft.attendant = e.target.value.trim(); state.dirtyDraft = true; }
   });
 
-  async function saveDraft() {
+  async function saveDraft(quiet) {
     const s = state.open;
     const body = { ...state.draft, example: false, updatedAt: new Date().toISOString() };
     if (!body.attendant) delete body.attendant;
     const prev = state.docs[s] ? clone(state.docs[s]) : null;
     if (isDone(body) && !isDone(prev) && service(prev || body).code === "W") body.lastFull = shift();
     state.dirtyDraft = false;
-    const ok = await write(s, body);
-    if (ok) toast(`Suite ${s} saved`, () => write(s, prev));
+    const ok = await write(s, body, quiet);
+    if (ok && !quiet) toast(`Suite ${s} saved`, () => write(s, prev));
     return ok;
   }
 
@@ -1416,8 +1491,8 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     const id = e.target.closest("button")?.id;
     if (id === "dClose" || id === "dCancel") closeDrawer();
     else if (id === "dPrev" || id === "dNext") { if (state.dirtyDraft && state.canWrite) await saveDraft(); openSuite(neighbor(id === "dNext" ? 1 : -1)); }
-    else if (id === "dSave") { if (await saveDraft()) closeDrawer(); }
-    else if (id === "dSaveNext") { if (await saveDraft()) openSuite(neighbor(1)); }
+    else if (id === "dSave") { if (state.role === "housekeeping" && !state.dirtyDraft) closeDrawer(); else if (await saveDraft(state.role === "housekeeping")) closeDrawer(); }
+    else if (id === "dSaveNext") { if (state.role === "housekeeping" && !state.dirtyDraft) openSuite(neighbor(1)); else if (await saveDraft(state.role === "housekeeping")) openSuite(neighbor(1)); }
     else if (id === "dAuditAll") { const all = !auditDone(state.draft); state.draft.audit = Object.fromEntries(AUDIT.map(([k]) => [k, all])); touch(); renderDrawer(); }
     else if (id === "dClear") {
       const s = state.open, prev = clone(state.docs[s]);
@@ -1497,7 +1572,9 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
   function loadLocal() { try { return JSON.parse(localStorage.getItem(LS) || "{}"); } catch { return {}; } }
   function saveLocal() { try { localStorage.setItem(LS, JSON.stringify(state.docs)); } catch {} }
 
+  const myWrites = new Map();
   async function write(s, body, quiet) {
+    if (body) { body.updatedBy = state.role; body.updatedAt = body.updatedAt || new Date().toISOString(); myWrites.set(s, body.updatedAt); }
     if (state.mode === "db") {
       try {
         if (body) await db.collection("suites").doc(s).set(body);
@@ -1532,12 +1609,43 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     try { db = await (window.claude?.use ? window.claude.use("db") : null); } catch { db = null; }
     if (!db) { state.mode = "local"; state.docs = loadLocal(); render(); return; }
     state.mode = "db";
-    db.collection("suites").onSnapshot((snap) => {
-      const docs = {};
-      snap.docs.forEach((d) => { if (d.exists) docs[d.id] = d.data(); });
-      state.docs = docs; render();
-    }, () => { state.mode = "local"; state.docs = loadLocal(); render(); });
+    // Live listener: every change anyone saves arrives here within a moment. Changes made on another device
+    // flash their tile and 3D window and appear in the live bar; if the connection drops, we re-subscribe.
+    let first = true, retry = 0;
+    const listen = () => {
+      db.collection("suites").onSnapshot((snap) => {
+        retry = 0; state.online = true;
+        const docs = {};
+        snap.docs.forEach((d) => { if (d.exists) docs[d.id] = d.data(); });
+        const now = Date.now(), changed = [];
+        if (!first) for (const c of snap.docChanges()) {
+          const s = c.doc.id, d = c.type === "removed" ? null : c.doc.data(), mine = myWrites.get(s);
+          if (d && mine && mine === d.updatedAt) continue; // our own save coming back
+          state.live[s] = now + 3600; changed.push([s, d]);
+        }
+        first = false;
+        state.docs = docs; render();
+        for (const [s] of changed) if (gl && gl.ping) gl.ping(s);
+        if (changed.length === 1 && changed[0][1] && !state.open) {
+          const [s, d] = changed[0];
+          toast(`Suite ${s} is now ${STATUS_LABEL[d.status] || d.status}${d.updatedBy === "housekeeping" ? " (housekeeping)" : ""}`);
+        } else if (changed.length > 1 && !state.open) toast(`${changed.length} suites just updated`);
+      }, () => {
+        state.online = false; renderLive();
+        setTimeout(listen, Math.min(30000, 1500 * 2 ** retry++));
+      });
+    };
+    listen();
   })();
+  // Keep "2 min ago" labels fresh
+  setInterval(() => { if (state.mode === "db") renderLive(); }, 30000);
+  $("roleSel").addEventListener("change", (e) => {
+    state.role = e.target.value;
+    try { localStorage.setItem("iah-hk-role", state.role); } catch {}
+    toast(state.role === "housekeeping" ? "Housekeeping mode: each tap in a suite saves straight away" : "Front desk mode: changes save when you press Save");
+    if (state.open) renderDrawer();
+  });
+  $("liveFeed").addEventListener("click", (e) => { const b = e.target.closest("[data-suite]"); if (b) openSuite(b.dataset.suite); });
 })();
 </script>
 

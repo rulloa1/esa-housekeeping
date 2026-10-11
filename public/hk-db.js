@@ -1,6 +1,6 @@
 // Implements the subset of window.claude.use("db") the housekeeping board uses:
 //   db.collection(name).doc(id).set(body) / .delete()
-//   db.collection(name).onSnapshot(onNext, onError)
+//   db.collection(name).onSnapshot(onNext, onError), with snap.docs and snap.docChanges()
 // backed by /api/suites, polling every few seconds so every signed-in screen stays current.
 (() => {
   const POLL_MS = 3000;
@@ -9,10 +9,20 @@
   const listeners = new Set();
 
   const toLogin = () => { location.href = "/login"; };
+  const docSnap = (id, d) => ({ id, exists: d !== undefined, data: () => d });
 
-  function emit() {
-    const snap = { docs: Object.entries(docs).map(([id, d]) => ({ id, exists: true, data: () => d })) };
-    listeners.forEach((l) => l.next(snap));
+  function snapshot(changes) {
+    return { docs: Object.entries(docs).map(([id, d]) => docSnap(id, d)), docChanges: () => changes };
+  }
+
+  function diff(prev, next) {
+    const changes = [];
+    for (const [id, d] of Object.entries(next)) {
+      if (!(id in prev)) changes.push({ type: "added", doc: docSnap(id, d) });
+      else if (JSON.stringify(prev[id]) !== JSON.stringify(d)) changes.push({ type: "modified", doc: docSnap(id, d) });
+    }
+    for (const [id, d] of Object.entries(prev)) if (!(id in next)) changes.push({ type: "removed", doc: docSnap(id, d) });
+    return changes;
   }
 
   async function refresh() {
@@ -22,20 +32,31 @@
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
     if (json.unchanged) return;
+    const changes = diff(docs, json.docs);
+    const firstLoad = version === null;
     version = json.version;
     docs = json.docs;
-    emit();
+    // The first load always notifies, even when empty, so subscribers get their initial snapshot.
+    if (changes.length || firstLoad) listeners.forEach((l) => l.next(snapshot(changes)));
+  }
+
+  // A failed poll ends current subscriptions through their error callback (the board
+  // re-subscribes with backoff); polling itself keeps going.
+  function fail(err) {
+    const ls = [...listeners];
+    listeners.clear();
+    ls.forEach((l) => l.error && l.error(err));
   }
 
   let timer = null;
   function startPolling() {
     if (timer) return;
     const tick = async () => {
-      try { await refresh(); } catch { /* keep the last good data; retry next tick */ }
+      try { await refresh(); } catch (err) { fail(err); }
       timer = setTimeout(tick, document.hidden ? POLL_MS * 5 : POLL_MS);
     };
-    tick();
-    document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh().catch(() => {}); });
+    timer = setTimeout(tick, 0);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh().catch(fail); });
   }
 
   async function send(method, id, body) {
@@ -47,7 +68,7 @@
     });
     if (res.status === 401) { toLogin(); throw new Error("signed out"); }
     if (!res.ok) { const err = new Error(`HTTP ${res.status}`); if (res.status === 403) err.code = "invalid_argument"; throw err; }
-    await refresh();
+    refresh().catch(fail);
   }
 
   const db = {
@@ -59,7 +80,8 @@
       onSnapshot(next, error) {
         const l = { next, error };
         listeners.add(l);
-        if (version !== null) emit();
+        // A new subscriber gets the current data at once, with every doc reported as added.
+        if (version !== null) next(snapshot(Object.entries(docs).map(([id, d]) => ({ type: "added", doc: docSnap(id, d) }))));
         startPolling();
         return () => listeners.delete(l);
       },
