@@ -154,7 +154,10 @@ button { cursor: pointer; }
 /* Floor plan */
 .floor { padding: 16px; display: grid; gap: 12px; }
 .floor-head { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline; }
-.plan { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0 12px; align-items: stretch; }
+.plan { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto auto; gap: 0 10px; align-items: stretch; }
+.core { width: 70px; display: grid; gap: 6px; align-content: center; }
+.core .cx { display: grid; justify-items: center; gap: 3px; background: var(--surface-2); border: 1px dashed color-mix(in srgb, var(--muted) 45%, var(--line)); border-radius: 10px; padding: 9px 4px; font-size: .62rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.core .cx svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .side-label { writing-mode: vertical-rl; transform: rotate(180deg); font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); text-align: center; }
 .rows { display: grid; gap: 8px; min-width: 0; }
 .row { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 6px; }
@@ -192,6 +195,8 @@ button { cursor: pointer; }
   .hero { grid-template-columns: 1fr; }
   .plan { grid-template-columns: 1fr; gap: 8px; }
   .plan .westend, .plan .side-label { display: none; }
+  .core { width: auto; grid-template-columns: 1fr 1fr; }
+  .core .cx { grid-auto-flow: column; justify-content: center; align-items: center; gap: 8px; padding: 7px 8px; }
   .rows { grid-template-columns: minmax(0, 1fr) 30px minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 6px 8px; }
   .row-cap { grid-row: 1; }
   .row-cap.n { grid-column: 1; } .row-cap.s { grid-column: 3; }
@@ -656,8 +661,22 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       // Stairwell glazing strip down the middle of each bay
       for (let f = 1; f <= 3; f++) tag(f, box(1.4, 2.2, .1, M(0x6f8aa3, { roughness: .15, metalness: .5 }), x, (f - .5) * FLOOR_H + .1, side * (HALF_D + .42), { cast: false }));
     }
-    // Hallway end doors
-    for (const sx of [-1, 1]) tag(1, box(.15, 2.4, 2, M(0x1c2630, { roughness: .2, metalness: .5 }), sx * (LEN / 2 + 1.05), 1.2, 0, { cast: false }));
+    // Stairs and elevator at each end of the hallway: a white stair bay on the end wall with a glazed stair window
+    // per landing, the hallway exit door at ground level, and the elevator overrun and stair bulkhead on the roof
+    const stairGlass = M(0x6f8aa3, { roughness: .15, metalness: .5 });
+    for (const sx of [-1, 1]) {
+      const ex = sx * (LEN / 2 + 1);
+      for (let f = 1; f <= 3; f++) tag(f, box(.3, FLOOR_H, 4.4, bayMat, ex + sx * .15, (f - .5) * FLOOR_H, 0));
+      tag(4, box(.3, 1.1, 4.4, bayMat, ex + sx * .15, H + .55, 0));
+      tag(1, box(.12, 2.4, 2, M(0x1c2630, { roughness: .2, metalness: .5 }), ex + sx * .36, 1.2, 0, { cast: false }));
+      for (let f = 2; f <= 3; f++) tag(f, box(.1, 2.3, 2.2, stairGlass, ex + sx * .34, (f - 1) * FLOOR_H + .2, 0, { cast: false }));
+      tag(1, box(.6, .25, 3, M(0xf4f2ec), ex + sx * .6, 2.65, 0));
+      const cx = sx * (LEN / 2 - 2.6);
+      tag(4, box(3, 2.4, 3.2, M(0xe4ddd1), cx, H + 2.1, 2.4));          // elevator machine overrun
+      tag(4, box(3.3, .2, 3.5, M(0xf3f1ec), cx, H + 3.35, 2.4, { cast: false }));
+      tag(4, box(3, 1.6, 3.6, M(0xe4ddd1), cx, H + 1.7, -2.3));         // stair roof bulkhead
+      tag(4, box(.08, 1.2, 1, M(0x8d9298, { metalness: .5, roughness: .4 }), cx - sx * 1.55, H + 1.5, -2.3, { cast: false }));
+    }
     // Main entrance midway along the south face: glass vestibule, canopy on two columns, walk to the drive
     const vest = tag(1, box(5.2, 3, 2.4, M(0x9fc3dc, { roughness: .05, metalness: .3, transparent: true, opacity: .35 }), ENTRY_X, 1.5, HALF_D + 1.25, { cast: false }));
     vest.userData.noHit = true; vest.userData.glass = .35;
@@ -1173,6 +1192,11 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     </button>`;
   }
 
+  // Stairwell and elevator at each end of the central hallway
+  const STAIR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h5v-5h5v-5h5V5h3"/><path d="M3 20V4"/></svg>';
+  const LIFT_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 9.5l3-3 3 3M9 14.5l3 3 3-3"/></svg>';
+  const core = (end) => `<div class="core" aria-label="${end} end: stairs and elevator"><span class="cx">${STAIR_SVG}Stairs</span><span class="cx">${LIFT_SVG}Elevator</span></div>`;
+
   function floorPlan(f) {
     const odd = [], even = [];
     for (let i = 1; i <= 32; i++) (i % 2 ? odd : even).push(String(f * 100 + i));
@@ -1181,6 +1205,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       <div class="floor-head"><h2>Floor ${f}</h2><span class="muted small">${st.done} of ${st.total} services done · ${suites.filter((s) => s[0] === String(f) && state.docs[s]).length} of 32 logged</span></div>
       <div class="plan">
         <div class="westend side-label">West end</div>
+        ${core("West")}
         <div class="rows">
           <div class="row-cap n"><span>North · rear parking</span><span>Odd suites ${f}01–${f}31</span></div>
           <div class="row n">${odd.map(tile).join("")}</div>
@@ -1188,6 +1213,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
           <div class="row s">${even.map(tile).join("")}</div>
           <div class="row-cap s"><span>South · front entrance</span><span>Even suites ${f}02–${f}32</span></div>
         </div>
+        ${core("East")}
         <div class="courtyard" aria-label="East courtyard">
           <strong>East courtyard</strong>
           <div class="pool">Pool &amp; spa</div>
