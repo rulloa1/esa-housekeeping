@@ -18,6 +18,7 @@
   --st-insp: #10857d; --st-insp-bg: #e0f5f3;
   --st-ooo: #6b7480; --st-ooo-bg: #eef0f3;
   --st-none: #b4bdc8; --st-none-bg: #fbfcfd;
+  --unlogged-bg: #e3e7ec; --unlogged-line: #cdd3da; --unlogged-fg: #8b96a2;
   --dnd: #c62f25; --dnd-bg: #fdeceb;
   --f-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
   --f-body: "Figtree", -apple-system, system-ui, "Segoe UI", sans-serif;
@@ -37,6 +38,7 @@
   --st-insp: #5cc9c0; --st-insp-bg: #113330;
   --st-ooo: #a3adb8; --st-ooo-bg: #29313a;
   --st-none: #4f5d6c; --st-none-bg: #17212c;
+  --unlogged-bg: #1d2630; --unlogged-line: #2c3743; --unlogged-fg: #66727f;
   --dnd: #ff8a80; --dnd-bg: #421b19;
   --lift: 0 1px 0 rgba(255,255,255,.04) inset, 0 8px 24px -10px rgba(0,0,0,.6);
   --sheet: 0 20px 60px rgba(0, 0, 0, .6);
@@ -185,6 +187,10 @@ button { cursor: pointer; }
 .mini { width: 76%; height: 4px; border-radius: 2px; background: var(--surface-2); overflow: hidden; }
 .mini i { display: block; height: 100%; background: var(--st-clean); }
 .suite.dim { opacity: .22; }
+/* Not logged yet: greyed out, but still tappable to log */
+.suite.unlogged { background: var(--unlogged-bg); border-color: var(--unlogged-line); box-shadow: 0 2px 0 var(--unlogged-line); color: var(--unlogged-fg); }
+.suite.unlogged::before { background: var(--unlogged-line); }
+.suite.unlogged .num, .suite.unlogged .st { color: var(--unlogged-fg); }
 .suite.hit { outline: 3px solid var(--brass); outline-offset: 2px; }
 .suite.live { animation: liveFlash 1.2s ease-out 3; }
 @keyframes liveFlash { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sc, var(--st-prog)) 70%, transparent); } 100% { box-shadow: 0 0 0 14px transparent; } }
@@ -314,6 +320,10 @@ legend { font-family: var(--f-display); font-weight: 700; font-size: 1rem; margi
 .toggle input:checked::after { transform: translateX(20px); }
 .svcbox { background: linear-gradient(135deg, var(--accent-soft), var(--surface-2)); border-radius: 14px; padding: 12px 14px; display: grid; gap: 4px; }
 .svcbox ul { margin: 4px 0 0; padding-left: 18px; color: var(--muted); font-size: .88rem; }
+.svcbox .tasks { display: grid; gap: 2px; margin-top: 6px; }
+.svcbox .task { display: flex; gap: 12px; align-items: center; min-height: 46px; font-weight: 600; cursor: pointer; flex-wrap: wrap; }
+.svcbox .task input { width: 24px; height: 24px; accent-color: var(--st-prog); flex: none; }
+.svcbox .task .small { flex-basis: 100%; margin: -10px 0 4px 36px; font-weight: 500; }
 .welfare { background: var(--dnd-bg); border: 1px solid var(--dnd); border-radius: 14px; padding: 12px 14px; display: grid; gap: 6px; }
 .welfare strong { color: var(--dnd); }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 8px 8px 16px; border-radius: 14px; z-index: 20; font-weight: 700; display: flex; gap: 12px; align-items: center; max-width: calc(100% - 32px); box-shadow: var(--sheet); }
@@ -430,6 +440,15 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     W: ["Deep clean", "Bed linen change", "Full kitchenette scrub", "Vacuum and mop"],
     R: ["Towel exchange", "Trash haul"],
     T: ["Full clean", "Kitchenette audit (all 5 checks)"]
+  };
+  const AUDIT_TASK = "Kitchenette audit (all 5 checks)";
+  // Today's ticked service tasks: { tasks: { date: "YYYY-MM-DD", done: { "Bed linen change": true } } }; older days don't count
+  const tasksToday = (d) => (d?.tasks?.date === shift() ? d.tasks.done || {} : {});
+  const taskProgress = (d) => {
+    const code = service(d).code; if (!code) return null;
+    const list = TASKS[code], done = tasksToday(d);
+    const n = list.filter((k) => (k === AUDIT_TASK ? auditDone(d) : done[k])).length;
+    return { n, total: list.length };
   };
 
   const suites = [];
@@ -895,7 +914,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     const col = {};
     const readColors = () => { for (const k of ["--st-dirty", "--st-prog", "--st-clean", "--st-insp", "--st-ooo", "--dnd"]) col[k] = new T.Color(cssColor(k)); };
     const statusVar = { dirty: "--st-dirty", in_progress: "--st-prog", clean: "--st-clean", inspected: "--st-insp", ooo: "--st-ooo" };
-    const warm = new T.Color(0xffc978), glassDark = new T.Color(0x2b3b4c), whiteC = new T.Color(0xffffff);
+    const warm = new T.Color(0xffc978), glassDark = new T.Color(0x2b3b4c), whiteC = new T.Color(0xffffff), greyC = new T.Color(0x9aa2ab);
     const attention = new Set();
     let lastSel;
     const ghostC = new T.Color(0x86a2c0);
@@ -931,9 +950,10 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
           m.emissive.copy(c);
           m.emissiveIntensity = (isNight ? 1.1 : .55) * (dimmed ? .35 : 1);
         } else {
-          m.color.copy(glassDark);
-          m.emissive.copy(isNight ? warm : glassDark);
-          m.emissiveIntensity = isNight ? (dimmed ? .15 : .35) : 0;
+          // Not logged: flat grey glass, no glow
+          m.color.copy(greyC);
+          m.emissive.copy(greyC);
+          m.emissiveIntensity = isNight ? .05 : 0;
         }
       }
       for (const f of [1, 2, 3, 4]) {
@@ -1198,7 +1218,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     const d = state.docs[s];
     const svc = service(d);
     const days = dndDays(d);
-    const cls = ["suite", d ? "s-" + d.status : "", matches(s) ? "" : "dim", state.hit === s ? "hit" : "", state.live[s] > Date.now() ? "live" : ""].join(" ");
+    const cls = ["suite", d ? "s-" + d.status : "unlogged", matches(s) ? "" : "dim", state.hit === s ? "hit" : "", state.live[s] > Date.now() ? "live" : ""].join(" ");
     const occTag = d?.occ === "checkout" ? "CO" : d?.occ === "vacant" ? "VAC" : "";
     const label = `Suite ${s}: ${d ? STATUS_LABEL[d.status] : "Not logged"}${svc.code ? ", " + svc.label : ""}${days ? ", DND day " + days : ""}${d?.attendant ? ", " + d.attendant : ""}`;
     return `<button class="${cls}" data-suite="${s}" aria-label="${esc(label)}">
@@ -1207,7 +1227,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       <span class="num">${s}</span>
       <span class="st">${d ? STATUS_SHORT[d.status] : "Not logged"}</span>
       <span class="meta">${svc.code ? `<span class="tag svc">${svc.code}</span>` : ""}${occTag ? `<span class="tag">${occTag}</span>` : ""}${days ? `<span class="tag ${days >= 3 ? "alert" : ""}">DND ${days}</span>` : ""}</span>
-      ${d?.occ === "checkout" && d.status !== "ooo" ? `<span class="mini" aria-hidden="true"><i style="width:${auditCount(d) / AUDIT.length * 100}%"></i></span>` : ""}
+      ${d?.occ === "checkout" && d.status !== "ooo" ? `<span class="mini" aria-hidden="true"><i style="width:${auditCount(d) / AUDIT.length * 100}%"></i></span>` : (() => { const tp = d && d.status === "in_progress" && taskProgress(d); return tp && tp.n ? `<span class="mini" aria-hidden="true"><i style="width:${tp.n / tp.total * 100}%;background:var(--st-prog)"></i></span>` : ""; })()}
       ${d?.attendant ? `<span class="who">${esc(initials(d.attendant))}</span>` : ""}
     </button>`;
   }
@@ -1371,6 +1391,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
 
   // ---------- Sheet ----------
   function openSuite(s) {
+    if (state.open !== s) state.autoStarted = null;
     state.open = s; state.dirtyDraft = false;
     state.draft = state.docs[s] ? clone(state.docs[s]) : { status: "dirty", occ: "occupied", audit: {} };
     document.documentElement.style.overflow = "hidden";
@@ -1413,7 +1434,11 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       </header>
       <div class="body">
         <div class="svcbox"><span class="eyebrow">Today's service</span><strong style="font-size:1.1rem">${svc.label}</strong><span class="muted small">${svc.detail}</span>
-          ${svc.code ? `<ul>${TASKS[svc.code].map((t) => `<li>${t}</li>`).join("")}</ul>` : ""}</div>
+          ${svc.code ? `<div class="tasks">${TASKS[svc.code].map((k) => k === AUDIT_TASK
+            ? `<label class="task"><input type="checkbox" disabled ${auditDone(d) ? "checked" : ""}>${k}<span class="muted small">ticks itself when the audit below is complete</span></label>`
+            : `<label class="task"><input type="checkbox" data-task="${esc(k)}" ${tasksToday(d)[k] ? "checked" : ""} ${ro}>${k}</label>`).join("")}</div>
+          ${(() => { const tp = taskProgress(d); return tp && tp.n === tp.total && d.status === "in_progress" && !auditOpen(d) && state.canWrite ? `<button type="button" class="btn primary" id="dMarkClean" style="justify-self:start;margin-top:6px">All tasks done · Mark clean</button>` : ""; })()}` : ""}
+          ${state.autoStarted === s ? `<span class="small" style="color:var(--st-prog);font-weight:700">Set to In progress when the first task was ticked</span>` : ""}</div>
         <fieldset><legend>Room status</legend><div class="statusgrid">
           ${STATUSES.map(([k, l]) => `<label style="--sc:var(--st-${stVar(k)});--sb:var(--st-${stVar(k)}-bg)"><input type="radio" name="status" value="${k}" ${d.status === k ? "checked" : ""} ${ro}>${l}</label>`).join("")}
         </div>
@@ -1449,6 +1474,11 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
   }
 
   function touch() { state.dirtyDraft = true; }
+  // The first task ticked on a suite that still needs service marks it In progress, so the board and 3D view
+  // show it being cleaned without anyone pressing Start
+  function autoStart(d) {
+    if (d.status === "dirty" || !state.docs[state.open]) { d.status = "in_progress"; state.autoStarted = state.open; }
+  }
   $("drawer").addEventListener("change", (e) => {
     const t = e.target, d = state.draft;
     if (t.name === "occ") d.occ = t.value;
@@ -1457,7 +1487,8 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     else if (t.id === "dDnd") { d.dndSince = t.checked ? shift() : null; if (!t.checked) d.welfareDone = null; }
     else if (t.id === "dDndSince") d.dndSince = t.value || shift();
     else if (t.id === "dWelfare") d.welfareDone = t.checked ? d.dndSince : null;
-    else if (t.dataset.audit) d.audit = { ...(d.audit || {}), [t.dataset.audit]: t.checked };
+    else if (t.dataset.audit) { d.audit = { ...(d.audit || {}), [t.dataset.audit]: t.checked }; if (t.checked) autoStart(d); }
+    else if (t.dataset.task) { d.tasks = { date: shift(), done: { ...tasksToday(d), [t.dataset.task]: t.checked } }; if (t.checked) autoStart(d); }
     else if (t.id === "dNotes" || t.id === "dAtt") { if (state.role === "housekeeping") autoSave(); return; }
     else return;
     touch(); renderDrawer();
@@ -1493,7 +1524,8 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     else if (id === "dPrev" || id === "dNext") { if (state.dirtyDraft && state.canWrite) await saveDraft(); openSuite(neighbor(id === "dNext" ? 1 : -1)); }
     else if (id === "dSave") { if (state.role === "housekeeping" && !state.dirtyDraft) closeDrawer(); else if (await saveDraft(state.role === "housekeeping")) closeDrawer(); }
     else if (id === "dSaveNext") { if (state.role === "housekeeping" && !state.dirtyDraft) openSuite(neighbor(1)); else if (await saveDraft(state.role === "housekeeping")) openSuite(neighbor(1)); }
-    else if (id === "dAuditAll") { const all = !auditDone(state.draft); state.draft.audit = Object.fromEntries(AUDIT.map(([k]) => [k, all])); touch(); renderDrawer(); }
+    else if (id === "dAuditAll") { const all = !auditDone(state.draft); state.draft.audit = Object.fromEntries(AUDIT.map(([k]) => [k, all])); if (all) autoStart(state.draft); touch(); renderDrawer(); if (state.role === "housekeeping") autoSave(); }
+    else if (id === "dMarkClean") { state.draft.status = "clean"; touch(); renderDrawer(); if (state.role === "housekeeping") autoSave(); }
     else if (id === "dClear") {
       const s = state.open, prev = clone(state.docs[s]);
       if (await write(s, null)) { closeDrawer(); toast(`Suite ${s} cleared`, () => write(s, prev)); }
