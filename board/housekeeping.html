@@ -1,16 +1,5 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Housekeeping">
-<meta name="theme-color" content="#f6f8fb">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-</head>
-<body>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="theme-color" content="#f6f8fb"><title>IAH Housekeeping</title><style>html,body{margin:0;padding:0}</style></head><body>
 <title>IAH Airport Housekeeping Board</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -96,6 +85,12 @@ button { cursor: pointer; }
 .stage-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 0; gap: 8px; position: relative; z-index: 2; }
 .scene { position: relative; perspective: 1500px; perspective-origin: 50% 30%; display: grid; place-items: center; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; min-height: 280px; }
 .scene:active { cursor: grabbing; }
+.scene.gl-on { display: block; perspective: none; min-height: 320px; }
+.scene .gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; outline: none; }
+.cam { display: flex; gap: 3px; background: var(--surface-2); padding: 4px; border-radius: 12px; flex-wrap: wrap; }
+.cam button { border: 0; background: transparent; min-height: 36px; padding: 0 10px; border-radius: 9px; font-weight: 700; font-size: .85rem; }
+.cam button:active { background: var(--surface); }
+.stage-head { flex-wrap: wrap; }
 .bldg { position: relative; width: 600px; height: 128px; transform-style: preserve-3d; transform: translateY(14px) scale(var(--s, 1)) rotateX(var(--rx, 58deg)) rotateZ(var(--rz, -28deg)); transition: transform .5s cubic-bezier(.2,.8,.2,1); }
 .scene.dragging .bldg { transition: none; }
 .ground { position: absolute; left: -50px; right: -150px; top: -60px; bottom: -60px; background: var(--ground); border-radius: 18px; transform: translateZ(-26px); box-shadow: 0 0 0 1px var(--line); }
@@ -318,8 +313,8 @@ legend { font-family: var(--f-display); font-weight: 700; font-size: 1rem; margi
     </div>
     <div class="stage panel" aria-label="3D view of the building">
       <div class="stage-head">
-        <div><div class="eyebrow">Building view</div><div class="hint">Drag to turn · tap a floor</div></div>
-        <button class="iconbtn" id="resetView">Reset view</button>
+        <div><div class="eyebrow">Building view</div><div class="hint" id="sceneHint">Drag to orbit · pinch to zoom · tap a window to open a suite</div></div>
+        <div class="cam" id="camBtns" role="group" aria-label="Camera"><button data-cam="front">Front</button><button data-cam="rear">Rear</button><button data-cam="court">Courtyard</button><button data-cam="top">Top</button></div>
       </div>
       <div class="scene" id="scene"><div class="bldg" id="bldg"></div></div>
       <div class="floor-chips" id="floorChips"></div>
@@ -372,6 +367,8 @@ legend { font-family: var(--f-display); font-weight: 700; font-size: 1rem; margi
 <aside id="drawer" class="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dTitle"></aside>
 <div id="toast" class="toast" hidden role="status"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 (() => {
   const STATUSES = [
@@ -451,38 +448,451 @@ legend { font-family: var(--f-display); font-weight: 700; font-size: 1rem; margi
   };
 
   // ---------- 3D building ----------
-  const view3d = { rx: 58, rz: -28 };
+  // Real-time WebGL model (three.js). Units are metres: 16 suites x 4 m along each side, a 20 m deep
+  // double-loaded block, 3.2 m floors. West is -x, east is +x, north (rear parking) is -z, south (front) is +z.
+  const SUITE_W = 4, FLOOR_H = 3.2, HALF_D = 10, LEN = 16 * SUITE_W;
+  const suiteX = (s) => { const i = Number(s.slice(-2)); const pos = i % 2 ? (i + 1) / 2 : i / 2; return -LEN / 2 + (pos - .5) * SUITE_W; };
+  const cssColor = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#888888";
+
+  const gl = (() => {
+    try {
+      if (!window.THREE || !THREE.OrbitControls) return null;
+      const probe = document.createElement("canvas");
+      if (!(probe.getContext("webgl2") || probe.getContext("webgl"))) return null;
+    } catch { return null; }
+    const T = THREE;
+    const host = $("scene");
+    host.classList.add("gl-on");
+    const renderer = new T.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = T.PCFSoftShadowMap;
+    renderer.outputEncoding = T.sRGBEncoding;
+    renderer.toneMapping = T.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+    renderer.domElement.className = "gl";
+    renderer.domElement.setAttribute("aria-label", "3D model of the hotel. Drag to orbit, pinch to zoom, tap a window to open that suite.");
+    host.appendChild(renderer.domElement);
+
+    const scene = new T.Scene();
+    scene.fog = new T.Fog(0xeaf4fe, 220, 520);
+    const camera = new T.PerspectiveCamera(36, 1, 1, 1200);
+    const controls = new T.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true; controls.dampingFactor = .08; controls.enablePan = false;
+    controls.minDistance = 30; controls.maxDistance = 240;
+    controls.maxPolarAngle = Math.PI * .46; controls.rotateSpeed = .7;
+
+    const hemi = new T.HemisphereLight(0xe3f0ff, 0x8f9a7e, .85); scene.add(hemi);
+    const sun = new T.DirectionalLight(0xfff1d8, 1.5);
+    sun.position.set(70, 95, 80); sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    Object.assign(sun.shadow.camera, { left: -130, right: 130, top: 100, bottom: -100, near: 10, far: 340 });
+    sun.shadow.bias = -0.0004; sun.shadow.normalBias = .04;
+    scene.add(sun);
+
+    const M = (c, o = {}) => new T.MeshStandardMaterial({ color: c, roughness: .88, metalness: 0, ...o });
+    const add = (geo, mat, x, y, z, { cast = true, recv = true, ry = 0, rx = 0 } = {}) => {
+      const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.y = ry; m.rotation.x = rx;
+      m.castShadow = cast; m.receiveShadow = recv; scene.add(m); return m;
+    };
+    const box = (w, h, d, mat, x, y, z, o) => add(new T.BoxGeometry(w, h, d), mat, x, y, z, o);
+    const flat = (w, d, mat, x, y, z) => add(new T.PlaneGeometry(w, d), mat, x, y, z, { cast: false, rx: -Math.PI / 2 });
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+    // Site plan traced from Rory's two aerial photos. Pale concrete paving with red curbs. South (front) lot: a row
+    // against the building, an aisle, a back-to-back double row on a planted median, an aisle and an outer row, then a
+    // hedge, the retention pond and Northgreen Blvd. North (rear) lot: a row, an aisle and an outer row, brush beyond.
+    // A drive with stalls wraps the west end; the east courtyard spans 15 m south to 33 m north.
+    const E0 = LEN / 2 + 1, CU = 35, CX1 = E0 + CU, CZS = 15, CZN = -33, W0 = -LEN / 2 - 15;
+    flat(900, 900, M(0xbccfa6), 0, 0, 0);
+    const paving = M(0xc4c1b9, { roughness: .95 });
+    const concrete = M(0xdedad1, { roughness: .95 });
+    const road = M(0x8b9097, { roughness: .95 });
+    const stripe = M(0xfafaf6);
+    const curbMat = M(0xb4553b, { roughness: .8 });
+    const rect = (x0, x1, z0, z1, mat, y) => flat(Math.abs(x1 - x0), Math.abs(z1 - z0), mat, (x0 + x1) / 2, y, (z0 + z1) / 2);
+    const curb = (x0, x1, z0, z1) => box(Math.max(.25, Math.abs(x1 - x0)), .16, Math.max(.25, Math.abs(z1 - z0)), curbMat, (x0 + x1) / 2, .08, (z0 + z1) / 2, { cast: false });
+    // Brush field north of the rear lot
+    rect(-160, 160, -40, -150, M(0xa9b98a, { roughness: 1 }), .01);
+    // Paving: south lot, west drive, north lot, and the drive that jogs round the courtyard's north side
+    rect(W0, E0, HALF_D + 2.5, 49, paving, .02);
+    rect(E0, CX1 + 2, CZS + .3, 49, paving, .02);
+    rect(W0, -LEN / 2 - 1, -38, 49, paving, .021);
+    rect(W0, E0, -HALF_D - 2.5, -31, paving, .02);
+    rect(W0, E0, -31, -38, paving, .021);
+    rect(E0, CX1 + 2, CZN - .3, -40, paving, .02);
+    rect(E0 - 4, E0, -38, -40, paving, .021);
+    // Sidewalks against both faces and the west end
+    rect(-LEN / 2 - 1, E0, HALF_D, HALF_D + 2.5, concrete, .03);
+    rect(-LEN / 2 - 1, E0, -HALF_D, -HALF_D - 2.5, concrete, .03);
+    rect(-LEN / 2 - 3.5, -LEN / 2 - 1, -HALF_D - 2.5, HALF_D + 2.5, concrete, .03);
+    // Street along the east fence
+    rect(CX1 + 2, CX1 + 4.5, -110, 100, concrete, .03);
+    rect(CX1 + 4.5, CX1 + 16, -110, 112, road, .02);
+    for (let z = -108; z < 98; z += 6) box(.18, .02, 3, stripe, CX1 + 10.25, .04, z, { cast: false });
+    // Stall stripes (2.7 m wide, 5.5 m deep)
+    const stalls = (x0, x1, zc) => { for (let x = x0; x <= x1; x += 2.7) box(.14, .02, 5.5, stripe, x, .04, zc, { cast: false }); };
+    const stallsX = (z0, z1, xc) => { for (let z = z0; z <= z1; z += 2.7) box(5.5, .02, .14, stripe, xc, .04, z, { cast: false }); };
+    const ROWS_S = [15.25, 27.75, 33.25, 46.25], ROWS_N = [-15.25, -28.25];
+    stalls(-LEN / 2, E0 - 1, ROWS_S[0]);
+    for (const zc of ROWS_S.slice(1)) stalls(W0 + 8.5, CX1, zc);
+    stalls(-LEN / 2, E0 - 1, ROWS_N[0]);
+    stalls(W0 + 8.5, E0 - 1, ROWS_N[1]);
+    stallsX(-8, 40, W0 + 2.75);
+    // Planted median between the back-to-back rows
+    box(E0 - W0 - 20, .2, 1, M(0x7d9a5c), (W0 + 10 + E0 - 10) / 2, .1, 30.5, { cast: false });
+    for (let x = W0 + 14; x < E0 - 10; x += 14) add(new T.IcosahedronGeometry(1.1, 0), M(0x5e8c45, { flatShading: true }), x, 1.4, 30.5);
+    // Accessible stalls just west of the entrance
+    rect(-9.5, -3, HALF_D + 2.6, HALF_D + 7.9, M(0x2f6fb3, { roughness: .8 }), .035);
+    curb(W0, CX1 + 2, 49, 49.1); curb(W0, E0, -38, -38.1); curb(W0, W0 + .1, -38, 49);
+    const carColors = [0xf2f2f2, 0x2d3540, 0xa8b0ba, 0x8c1d1d, 0x1f4e8c, 0x3b3f45, 0xd9d4c7, 0x4a5d3a];
+    const car = (x, z, color, ry = 0) => {
+      const c = M(color ?? carColors[Math.floor(rnd() * carColors.length)], { roughness: .4, metalness: .35 });
+      box(1.9, .8, 4.4, c, x, .65, z, { ry });
+      const g = box(1.7, .6, 2.3, M(0x26313d, { roughness: .2, metalness: .4 }), x, 1.3, z, { ry });
+      g.position.x -= Math.sin(ry) * .2; g.position.z -= Math.cos(ry) * .2;
+    };
+    for (let x = -LEN / 2 + 1.35; x < E0 - 2; x += 2.7) if (rnd() < .45) car(x, ROWS_S[0]);
+    for (const zc of ROWS_S.slice(1)) for (let x = W0 + 9.85; x < CX1; x += 2.7) if (rnd() < .3) car(x, zc);
+    for (let x = -LEN / 2 + 1.35; x < E0 - 2; x += 2.7) if (rnd() < .5) car(x, ROWS_N[0]);
+    for (let x = W0 + 9.85; x < E0 - 2; x += 2.7) if (rnd() < .4) car(x, ROWS_N[1]);
+    for (let z = -6.65; z < 40; z += 2.7) if (rnd() < .35) car(W0 + 2.75, z, undefined, Math.PI / 2);
+    // Dumpster enclosure at the north-west corner
+    rect(W0 - 6, W0 - .5, -30, -37, concrete, .03);
+    box(5, 1.8, .25, M(0xcfc6b6), W0 - 3.25, .9, -36.8);
+    box(.25, 1.8, 6.6, M(0xcfc6b6), W0 - 5.9, .9, -33.5);
+    box(2, 1.3, 1.6, M(0x3b6e4a, { roughness: .6 }), W0 - 4, .65, -35.5);
+    // Hedge, retention pond with brush, and Northgreen Blvd
+    box(E0 - W0 + 30, 1.1, 1.2, M(0x4a7a36, { flatShading: true }), (W0 - 10 + CX1) / 2, .55, 50.4);
+    rect(W0 - 10, CX1 - 2, 51, 96, M(0x8f9a5a, { roughness: 1 }), .015);
+    rect(W0 + 4, CX1 - 14, 60, 88, M(0x55665a, { roughness: .25, metalness: .1 }), .025);
+    const brush = [M(0x6f7f45, { flatShading: true }), M(0x5f7040, { flatShading: true }), M(0x7d8b52, { flatShading: true })];
+    for (let i = 0; i < 140; i++) {
+      const x = W0 - 8 + rnd() * (CX1 - W0 + 4), z = 52 + rnd() * 43;
+      if (x > W0 + 6 && x < CX1 - 16 && z > 61 && z < 87) continue;
+      add(new T.IcosahedronGeometry(.8 + rnd() * 1.2, 0), brush[i % 3], x, .5, z, { cast: false });
+    }
+    box(E0 - W0 + 30, 1.1, 1.2, M(0x4a7a36, { flatShading: true }), (W0 - 10 + CX1) / 2, .55, 96.6);
+    rect(-200, CX1 + 4.5, 100, 112, road, .02);
+    for (let x = -196; x < CX1; x += 6) box(3, .02, .18, M(0xf2c94c), x, .04, 106, { cast: false });
+
+    // Main suite block
+    const stucco = M(0xeee8de), trim = M(0xd2c9ba), base = M(0xc9c0b2);
+    const H = 3 * FLOOR_H;
+    box(LEN + 2, H, HALF_D * 2, stucco, 0, H / 2, 0);
+    box(LEN + 2.3, .9, HALF_D * 2 + .3, base, 0, .45, 0);
+    for (const y of [FLOOR_H, 2 * FLOOR_H]) box(LEN + 2.5, .28, HALF_D * 2 + .5, trim, 0, y, 0);
+    box(LEN + 2.6, 1.1, HALF_D * 2 + .6, M(0xf3f1ec), 0, H + .55, 0);
+    // White membrane roof with rooftop units, as in the photos
+    box(LEN + 1.2, .1, HALF_D * 2 - .6, M(0xe7e7e3, { roughness: .9 }), 0, H + .9, 0, { cast: false });
+    const hvac = M(0xc9ccd0, { metalness: .35, roughness: .5 });
+    for (const [x, z, w, d] of [[E0 - 7, 3, 2.4, 1.8], [E0 - 7, 5.5, 2.4, 1.8], [E0 - 3.5, 7, 1.6, 1.4], [E0 - 6, -4, 1.4, 3.2], [-20, -3, 2.4, 1.8], [-8, 4, 2.4, 1.8], [6, -5, 2.4, 1.8], [18, 4, 2.4, 1.8], [-26, 3, 2.4, 1.8], [-16, 5, 1.6, 1.4], [-4, -4, 1.6, 1.4], [14, -3, 1.6, 1.4], [24, -5, 2.4, 1.8]]) box(w, 1.1, d, hvac, x, H + 1.45, z);
+    box(1.2, .9, 1.2, M(0xa8523b), E0 - 9, H + 1.35, 0);
+    // White barrel-arch roof accents over stair/entry bays (north at three spots, south at two)
+    const archMat = M(0xf7f7f4, { roughness: .45, metalness: .25 });
+    const archGeo = new T.CylinderGeometry(2.8, 2.8, 4.5, 20, 1, false, -Math.PI / 2, Math.PI);
+    for (const [x, side] of [[-12.4, -1], [1, -1], [12, -1], [-10.6, 1], [2.9, 1]]) {
+      add(archGeo, archMat, x, H + 1.1, side * (HALF_D - 1.7), { rx: -Math.PI / 2 });
+      box(5.8, H + 1.1, .35, M(0xf6f4ef), x, (H + 1.1) / 2, side * (HALF_D + .2));
+    }
+    // Hallway end doors
+    for (const sx of [-1, 1]) box(.15, 2.4, 2, M(0x1c2630, { roughness: .2, metalness: .5 }), sx * (LEN / 2 + 1.05), 1.2, 0, { cast: false });
+    // Main entrance midway along the south face: glass vestibule, canopy on two columns, walk to the drive
+    const vest = box(5.2, 3, 2.4, M(0x9fc3dc, { roughness: .05, metalness: .3, transparent: true, opacity: .35 }), 1.2, 1.5, HALF_D + 1.25, { cast: false });
+    vest.userData.noHit = true;
+    const canopy = box(8, .45, 5.4, M(0xf4f2ec), 1.2, 3.75, HALF_D + 2.7);
+    canopy.userData.noHit = true;
+    for (const cx of [-3.4, 3.4]) box(.45, 3.5, .45, trim, 1.2 + cx, 1.75, HALF_D + 5);
+    rect(-2, 4.4, HALF_D + 2.5, HALF_D + 8, concrete, .035);
+
+    // Windows: one per suite on its outside wall, tinted by the suite's status
+    const glassBase = { roughness: .15, metalness: .5 };
+    const frameMat = M(0xf7f6f2, { roughness: .6 });
+    const ptacMat = M(0xbfc3c7, { roughness: .5, metalness: .2 });
+    const windows = [];
+    const winGeo = new T.PlaneGeometry(2.3, 1.45), frameGeo = new T.BoxGeometry(2.7, 1.85, .22), ptacGeo = new T.BoxGeometry(1.1, .45, .25);
+    for (const s of suites) {
+      const f = Number(s[0]), north = sideOf(s) === "n", dir = north ? -1 : 1;
+      const x = suiteX(s), y = (f - 1) * FLOOR_H + 1.85, z = dir * (HALF_D + .01);
+      add(frameGeo, frameMat, x, y, z, { cast: false });
+      add(ptacGeo, ptacMat, x + .6, y - 1.25, z + dir * .1, { cast: false });
+      const mat = new T.MeshStandardMaterial({ color: 0x2b3b4c, ...glassBase });
+      const w = add(winGeo, mat, x, y, z + dir * .13, { cast: false, recv: false, ry: north ? Math.PI : 0 });
+      w.userData.suite = s;
+      windows.push(w);
+    }
+    // Floor highlight rings
+    const ringMat = new T.MeshStandardMaterial({ color: 0xc8963a, emissive: 0xc8963a, emissiveIntensity: .6, roughness: .4 });
+    const rings = [0, 1].map(() => { const r = box(LEN + 2.9, .22, HALF_D * 2 + .9, ringMat, 0, 0, 0, { cast: false, recv: false }); r.visible = false; return r; });
+
+    // East courtyard, traced from the aerial photo: fenced pool deck against the building end (pool with a
+    // curved step, spa, slatted pergola and a white hip-roofed cabana), then a lawn with two white hip-roofed
+    // gazebos, a palm, red curbs to the drives and a black iron fence along the street.
+    const X = (u) => E0 + u;
+    rect(X(0), CX1, CZS, CZN, M(0x67a84a), .04);
+    curb(X(0), CX1, CZS, CZS + .15); curb(X(0), CX1, CZN, CZN - .15);
+    rect(X(0), X(14), 11.3, -27, concrete, .06);
+    rect(X(14), X(15.8), CZS - .5, -27, concrete, .06);
+    const water = M(0x3fa9d0, { roughness: .06, metalness: .1, emissive: 0x0a4a63, emissiveIntensity: .3 });
+    const waterLight = M(0x6cc6e3, { roughness: .1, emissive: 0x0a4a63, emissiveIntensity: .25 });
+    const coping = M(0xf1efe9);
+    box(9.9, .1, 12.5, coping, X(6.75), .08, -3.25, { cast: false });
+    rect(X(2.2), X(11.3), 2.6, -9.1, water, .14);
+    add(new T.CylinderGeometry(1.5, 1.5, .06, 24, 1, false, Math.PI / 2, Math.PI), waterLight, X(7.8), .16, 2.6, { cast: false });
+    for (let i = 0; i < 4; i++) box(.8, .3, 2, M(0xffffff), X(3 + i * 2.2), .22, 5.6);
+    box(3.2, .14, 3, coping, X(4.7), .1, -13, { cast: false });
+    rect(X(3.5), X(5.9), -11.8, -14.2, waterLight, .18);
+    // Pergola
+    const white = M(0xf6f5f1, { roughness: .6 });
+    for (const [u, z] of [[1.3, -14.8], [1.3, -18.7], [10.9, -14.8], [10.9, -18.7], [6.1, -14.8], [6.1, -18.7]]) box(.35, 2.8, .35, white, X(u), 1.4, z);
+    for (const z of [-14.8, -18.7]) box(9.9, .25, .25, white, X(6.1), 2.9, z);
+    for (let u = 1.3; u <= 10.9; u += .8) box(.12, .2, 4.6, white, X(u), 3.1, -16.75);
+    // Cabana
+    box(5.4, 2.7, 5.4, M(0xe9e2d6), X(3.7), 1.35, -20.2);
+    add(new T.ConeGeometry(4.7, 1.7, 4), white, X(3.7), 3.55, -20.2, { ry: Math.PI / 4 });
+    // Pool fence: white piers with caps and black iron panels
+    const iron = M(0x24292e, { roughness: .5, metalness: .6 });
+    const pier = (x, z) => { box(.6, 1.7, .6, white, x, .85, z); box(.8, .18, .8, white, x, 1.78, z); };
+    const run = (x0, z0, x1, z1, step) => {
+      const n = Math.max(1, Math.round(Math.hypot(x1 - x0, z1 - z0) / step));
+      for (let i = 0; i <= n; i++) pier(x0 + (x1 - x0) * i / n, z0 + (z1 - z0) * i / n);
+      const len = Math.hypot(x1 - x0, z1 - z0), along = Math.abs(x1 - x0) > Math.abs(z1 - z0);
+      for (const y of [.25, 1.25]) box(along ? len : .05, .05, along ? .05 : len, iron, (x0 + x1) / 2, y, (z0 + z1) / 2, { recv: false });
+      const k = Math.round(len / .45);
+      for (let i = 1; i < k; i++) box(.035, 1.1, .035, iron, x0 + (x1 - x0) * i / k, .75, z0 + (z1 - z0) * i / k, { cast: false, recv: false });
+    };
+    run(X(14), 11.3, X(14), -27, 5);
+    run(X(0), 11.3, X(14), 11.3, 4.7);
+    run(X(0), -27, X(14), -27, 4.7);
+    // Street fence
+    for (let z = CZS; z >= CZN; z -= 2.4) box(.08, 1.6, .08, iron, X(33.6), .8, z);
+    box(.06, .06, CZS - CZN, iron, X(33.6), 1.5, (CZS + CZN) / 2, { recv: false });
+    box(.06, .06, CZS - CZN, iron, X(33.6), .3, (CZS + CZN) / 2, { recv: false });
+    // Gazebos with walkways
+    const gazebo = (u, z) => {
+      rect(X(u - 3.4), X(u + 3.4), z + 3.4, z - 3.4, concrete, .07);
+      for (const [du, dz] of [[-2.9, -2.9], [2.9, -2.9], [-2.9, 2.9], [2.9, 2.9]]) box(.3, 2.7, .3, white, X(u + du), 1.35, z + dz);
+      add(new T.ConeGeometry(5.1, 1.9, 4), white, X(u), 3.65, z, { ry: Math.PI / 4 });
+      box(2.4, .1, 1, M(0x8a6a4a), X(u), .85, z);
+      for (const dz of [-.9, .9]) box(2.4, .08, .35, M(0x8a6a4a), X(u), .5, z + dz);
+      box(.8, .9, .6, M(0x2a2e33, { metalness: .5, roughness: .4 }), X(u + 2), .45, z + 2);
+    };
+    gazebo(22.2, -1.7); gazebo(19.1, -14.8);
+    rect(X(15.8), X(18.8), -.6, -2.8, concrete, .07);
+    // Palm, shrubs, utility box
+    const palm = (u, z) => {
+      add(new T.CylinderGeometry(.18, .26, 7.5, 7), M(0x8b7356), X(u), 3.75, z);
+      const frond = M(0x4d8a3a, { flatShading: true });
+      for (let i = 0; i < 8; i++) {
+        const a = i * Math.PI / 4, m = add(new T.BoxGeometry(3.4, .06, .7), frond, X(u) + Math.cos(a) * 1.5, 7.4, z + Math.sin(a) * 1.5);
+        m.rotation.set(0, -a, -.35);
+      }
+    };
+    palm(15.9, -28.6);
+    const shrub = M(0x4a7a36, { flatShading: true });
+    for (const [u, z] of [[8, 13.5], [12, 13.8], [29.5, -1], [28.5, 11], [25, -21], [3, 13.2], [31, -12]]) add(new T.IcosahedronGeometry(.75, 0), shrub, X(u), .6, z);
+    box(1.6, 1.1, 1.1, M(0x6f7f5e), X(27), .55, -29.5);
+    box(2.6, .15, 1.4, concrete, X(31), .12, -24, { cast: false });
+
+    // Trees
+    const leaf = [M(0x4f7d3a, { flatShading: true }), M(0x5e8c45, { flatShading: true }), M(0x467235, { flatShading: true })];
+    const trunk = M(0x6b5440);
+    const tree = (x, z, s = 1) => {
+      add(new T.CylinderGeometry(.25 * s, .35 * s, 2.6 * s, 6), trunk, x, 1.3 * s, z);
+      add(new T.IcosahedronGeometry(2.4 * s, 0), leaf[Math.floor(rnd() * 3)], x, 3.6 * s, z);
+    };
+    for (let x = W0 - 6; x <= CX1; x += 16) tree(x + rnd() * 3, 98 + rnd() * 1, .9 + rnd() * .3);
+    for (let x = W0 - 20; x <= E0; x += 7) tree(x + rnd() * 4, -40 - rnd() * 30, .9 + rnd() * .5);
+    for (let x = E0 + 3; x <= CX1; x += 7) tree(x + rnd() * 2, -50 - rnd() * 6, 1 + rnd() * .5);
+
+    // Labels
+    const label = (text, x, y, z) => {
+      const c = document.createElement("canvas"); c.width = 512; c.height = 112;
+      const g = c.getContext("2d");
+      g.fillStyle = "rgba(255,255,255,.92)"; g.beginPath();
+      if (g.roundRect) g.roundRect(4, 4, 504, 104, 52); else g.rect(4, 4, 504, 104);
+      g.fill();
+      g.fillStyle = "#0f1b2a"; g.font = "700 46px Figtree, -apple-system, system-ui, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+      g.fillText(text, 256, 58);
+      const tex = new T.CanvasTexture(c); tex.encoding = T.sRGBEncoding; tex.anisotropy = 4;
+      const sp = new T.Sprite(new T.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
+      sp.scale.set(15, 3.3, 1); sp.position.set(x, y, z); sp.renderOrder = 10; scene.add(sp);
+    };
+    label("Main entrance", 1.2, 7, HALF_D + 6);
+    label("Pool & spa", X(7), 6, -8);
+    label("East courtyard", X(22), 7.5, -9);
+    label("Rear parking · North", -6, 5, -30);
+    label("Front parking · South", -14, 4, 30);
+    label("Retention pond", -10, 4, 74);
+    const floorTags = [1, 2, 3].map((f) => {
+      const c = document.createElement("canvas"); c.width = 128; c.height = 128;
+      const g = c.getContext("2d"); g.fillStyle = "#0f1b2a"; g.beginPath(); g.arc(64, 64, 58, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "#fff"; g.font = "800 64px Figtree, system-ui, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(String(f), 64, 68);
+      const tex = new T.CanvasTexture(c); tex.encoding = T.sRGBEncoding;
+      const sp = new T.Sprite(new T.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
+      sp.scale.set(2.6, 2.6, 1); sp.position.set(LEN / 2 + 4, (f - 1) * FLOOR_H + 1.8, HALF_D + 1.5); sp.renderOrder = 11; scene.add(sp);
+      return sp;
+    });
+
+    // Camera presets
+    const PRESETS = {
+      front: { pos: [40, 34, 100], tgt: [4, 3, 10] },
+      rear: { pos: [-28, 26, -80], tgt: [4, 4, -4] },
+      court: { pos: [92, 30, 32], tgt: [48, 2, -7] },
+      top: { pos: [10, 170, 18], tgt: [10, 0, 6] },
+    };
+    let tween = null;
+    const preset = (name, instant) => {
+      const p = PRESETS[name];
+      const tgt = new T.Vector3(...p.tgt);
+      const k = Math.min(2.4, Math.max(1, 1.5 / (camera.aspect || 1.5)));
+      const to = { pos: new T.Vector3(...p.pos).sub(tgt).multiplyScalar(k).add(tgt), tgt };
+      if (instant || matchMedia("(prefers-reduced-motion: reduce)").matches) { camera.position.copy(to.pos); controls.target.copy(to.tgt); controls.update(); wake(); return; }
+      tween = { from: { pos: camera.position.clone(), tgt: controls.target.clone() }, to, t0: performance.now() };
+      wake();
+    };
+
+    // Status colors
+    let isNight = false;
+    const col = {};
+    const readColors = () => { for (const k of ["--st-dirty", "--st-prog", "--st-clean", "--st-insp", "--st-ooo", "--dnd"]) col[k] = new T.Color(cssColor(k)); };
+    const statusVar = { dirty: "--st-dirty", in_progress: "--st-prog", clean: "--st-clean", inspected: "--st-insp", ooo: "--st-ooo" };
+    const warm = new T.Color(0xffc978), glassDark = new T.Color(0x2b3b4c), whiteC = new T.Color(0xffffff);
+    const attention = new Set();
+    function update() {
+      readColors();
+      attention.clear();
+      const sel = state.filter || state.floor === "all" ? null : Number(state.floor);
+      for (const w of windows) {
+        const s = w.userData.suite, d = state.docs[s], m = w.material;
+        const on = matches(s);
+        const dimmed = !on || (sel && Number(s[0]) !== sel);
+        if (d && on && (needsWelfare(d) || auditOpen(d))) attention.add(w);
+        if (d && on) {
+          const c = col[statusVar[d.status]];
+          m.color.copy(c).lerp(whiteC, .15);
+          m.emissive.copy(c);
+          m.emissiveIntensity = (isNight ? 1.1 : .55) * (dimmed ? .35 : 1);
+        } else {
+          m.color.copy(glassDark);
+          m.emissive.copy(isNight ? warm : glassDark);
+          m.emissiveIntensity = isNight ? (dimmed ? .15 : .35) : 0;
+        }
+      }
+      rings.forEach((r, i) => { r.visible = !!sel; if (sel) r.position.y = i ? sel * FLOOR_H : sel === 1 ? .95 : (sel - 1) * FLOOR_H; });
+      floorTags.forEach((t, i) => { t.material.opacity = !sel || sel === i + 1 ? 1 : .35; });
+      wake();
+    }
+    function setNight(n) {
+      isNight = n;
+      hemi.intensity = n ? .22 : .85;
+      hemi.color.set(n ? 0x7d95c8 : 0xe3f0ff);
+      sun.intensity = n ? .35 : 1.5;
+      sun.color.set(n ? 0x9db4ff : 0xfff1d8);
+      scene.fog.color.set(n ? 0x0f1824 : 0xeaf4fe);
+      renderer.toneMappingExposure = n ? 1.15 : 1.0;
+      update();
+    }
+
+    // Tap a window to open the suite; tap a wall to pick that floor
+    const ray = new T.Raycaster(), ndc = new T.Vector2();
+    let down = null;
+    renderer.domElement.addEventListener("pointerdown", (e) => { down = { x: e.clientX, y: e.clientY }; tween = null; wake(); });
+    renderer.domElement.addEventListener("pointerup", (e) => {
+      if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8) { down = null; return; }
+      down = null;
+      const r = renderer.domElement.getBoundingClientRect();
+      ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      const hit = ray.intersectObjects(scene.children, false).find((h) => h.object.type === "Mesh" && !h.object.userData.noHit);
+      if (!hit) return;
+      if (hit.object.userData.suite) return openSuite(hit.object.userData.suite);
+      const p = hit.point;
+      if (Math.abs(p.x) <= LEN / 2 + 1.3 && Math.abs(p.z) <= HALF_D + .4 && p.y > .2 && p.y < 3 * FLOOR_H) {
+        state.floor = String(Math.min(3, Math.floor(p.y / FLOOR_H) + 1)); state.filter = null; savePrefs(); render();
+      }
+    });
+    controls.addEventListener("change", wake);
+
+    // Render loop: runs while something moves, pulses attention windows, sleeps otherwise
+    let running = false, visible = true, idleAt = 0;
+    function wake() { idleAt = performance.now() + 1200; if (!running && visible) { running = true; requestAnimationFrame(frame); } }
+    function frame(now) {
+      if (tween) {
+        const k = Math.min(1, (now - tween.t0) / 900), e = 1 - Math.pow(1 - k, 3);
+        camera.position.lerpVectors(tween.from.pos, tween.to.pos, e);
+        controls.target.lerpVectors(tween.from.tgt, tween.to.tgt, e);
+        if (k >= 1) tween = null;
+        idleAt = now + 300;
+      }
+      controls.update();
+      if (attention.size) {
+        const p = .5 + .5 * Math.sin(now / 280);
+        for (const w of attention) { w.material.emissive.copy(col["--dnd"]); w.material.color.copy(col["--dnd"]); w.material.emissiveIntensity = (isNight ? 1 : .5) + p * .9; }
+      }
+      renderer.render(scene, camera);
+      if ((attention.size || now < idleAt || tween) && visible) requestAnimationFrame(frame); else running = false;
+    }
+    const resize = () => {
+      const w = host.clientWidth, h = host.clientHeight;
+      if (!w || !h) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.fov = w < 520 ? 44 : 36;
+      camera.updateProjectionMatrix();
+      wake();
+    };
+    try { new ResizeObserver(resize).observe(host); } catch { addEventListener("resize", resize); }
+    try { new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible) wake(); }).observe(host); } catch {}
+    document.addEventListener("visibilitychange", () => { visible = !document.hidden; if (visible) wake(); });
+    resize();
+    preset("front", true);
+    return { update, setNight, preset };
+  })();
+
   function renderBuilding() {
     const sel = state.filter || state.floor === "all" ? null : state.floor;
-    const cell = (s) => {
-      const d = state.docs[s];
-      const warn = needsWelfare(d) || auditOpen(d);
-      return `<i class="cell ${d ? "c-" + d.status : ""} ${warn ? "warn" : ""}" style="${matches(s) ? "" : "opacity:.18"}"></i>`;
-    };
-    let html = `<div class="ground"></div><div class="court"><div class="pool"></div><div class="gz a"></div><div class="gz b"></div><span class="lbl">East courtyard</span></div>`;
-    for (let f = 1; f <= 3; f++) {
-      const odd = [], even = [];
-      for (let i = 1; i <= 32; i++) (i % 2 ? odd : even).push(String(f * 100 + i));
-      html += `<div class="slab ${sel === String(f) ? "sel" : ""}" style="--i:${f - 1}" data-floor="${f}">
-        <div class="edge-f"></div><div class="edge-r"></div>
-        <div class="top"><div class="cells">${odd.map(cell).join("")}</div><div class="hall"></div><div class="cells">${even.map(cell).join("")}</div></div>
-      </div>`;
+    if (gl) gl.update();
+    else {
+      const cell = (s) => {
+        const d = state.docs[s];
+        const warn = needsWelfare(d) || auditOpen(d);
+        return `<i class="cell ${d ? "c-" + d.status : ""} ${warn ? "warn" : ""}" style="${matches(s) ? "" : "opacity:.18"}"></i>`;
+      };
+      let html = `<div class="ground"></div><div class="court"><div class="pool"></div><div class="gz a"></div><div class="gz b"></div><span class="lbl">East courtyard</span></div>`;
+      for (let f = 1; f <= 3; f++) {
+        const odd = [], even = [];
+        for (let i = 1; i <= 32; i++) (i % 2 ? odd : even).push(String(f * 100 + i));
+        html += `<div class="slab ${sel === String(f) ? "sel" : ""}" style="--i:${f - 1}" data-floor="${f}">
+          <div class="edge-f"></div><div class="edge-r"></div>
+          <div class="top"><div class="cells">${odd.map(cell).join("")}</div><div class="hall"></div><div class="cells">${even.map(cell).join("")}</div></div>
+        </div>`;
+      }
+      const b = $("bldg");
+      b.innerHTML = html;
+      b.classList.toggle("focus", !!sel);
+      b.style.setProperty("--rx", view3d.rx + "deg");
+      b.style.setProperty("--rz", view3d.rz + "deg");
     }
-    const b = $("bldg");
-    b.innerHTML = html;
-    b.classList.toggle("focus", !!sel);
-    b.style.setProperty("--rx", view3d.rx + "deg");
-    b.style.setProperty("--rz", view3d.rz + "deg");
     $("floorChips").innerHTML = [3, 2, 1].map((f) => {
       const st = floorStats(f);
       return `<button class="fchip" data-floor="${f}" aria-pressed="${sel === String(f)}"><b>Floor ${f}</b><span>${st.done} of ${st.total} done</span></button>`;
     }).join("") + `<button class="fchip" data-floor="all" aria-pressed="${state.floor === "all" && !state.filter}"><b>All</b><span>96 suites</span></button>`;
   }
+
+  // Simplified CSS model, used only where WebGL is unavailable
+  const view3d = { rx: 58, rz: -28 };
   function fitScene() {
+    if (gl) return;
     const w = $("scene").clientWidth;
     $("bldg").style.setProperty("--s", Math.min(1, Math.max(.42, (w - 20) / 820)).toFixed(3));
   }
-  (() => {
+  if (gl) {
+    $("bldg").hidden = true;
+    $("camBtns").addEventListener("click", (e) => { const b = e.target.closest("[data-cam]"); if (b) gl.preset(b.dataset.cam); });
+  } else (() => {
+    $("camBtns").hidden = true;
+    $("sceneHint").textContent = "Drag to turn · tap a floor";
     const sc = $("scene"); let start = null, moved = false;
     sc.addEventListener("pointerdown", (e) => { start = { x: e.clientX, y: e.clientY, rx: view3d.rx, rz: view3d.rz }; moved = false; });
     sc.addEventListener("pointermove", (e) => {
@@ -504,7 +914,6 @@ legend { font-family: var(--f-display); font-weight: 700; font-size: 1rem; margi
     };
     sc.addEventListener("pointerup", end);
     sc.addEventListener("pointercancel", () => { start = null; sc.classList.remove("dragging"); });
-    $("resetView").addEventListener("click", () => { view3d.rx = 58; view3d.rz = -28; renderBuilding(); });
     try { new ResizeObserver(fitScene).observe(sc); } catch { addEventListener("resize", fitScene); }
   })();
 
@@ -876,6 +1285,7 @@ legend { font-family: var(--f-display); font-weight: 700; font-size: 1rem; margi
     document.documentElement.setAttribute("data-mode", night ? "night" : "day");
     $("modeBtn").textContent = night ? "Day mode" : "Night mode";
     $("modeBtn").setAttribute("aria-pressed", String(night));
+    if (gl) gl.setNight(night);
   }
   let night = false;
   try { night = localStorage.getItem("iah-hk-mode") === "night"; } catch {}
@@ -898,5 +1308,4 @@ legend { font-family: var(--f-display); font-weight: 700; font-size: 1rem; margi
 })();
 </script>
 
-</body>
-</html>
+</body></html>

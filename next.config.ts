@@ -1,10 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Serve the standalone housekeeping board at /housekeeping without changing the URL.
-  async rewrites() {
-    return [{ source: "/housekeeping", destination: "/housekeeping.html" }];
-  },
+  // app/housekeeping/route.ts reads the board from disk at request time.
+  outputFileTracingIncludes: { "/housekeeping": ["./board/housekeeping.html"] },
 };
 
 export default nextConfig;
