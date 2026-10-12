@@ -23,6 +23,7 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
   const [viewScope, setViewScope] = useState<"assigned" | "all">("assigned");
   const [activeFloor, setActiveFloor] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Active Modals
@@ -73,7 +74,16 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
 
     return source.filter((r) => {
       if (activeFloor !== "all" && String(r.floor) !== activeFloor) return false;
-      if (statusFilter !== "all" && r.status !== statusFilter) return false;
+      if (statusFilter !== "all") {
+        if (statusFilter === "to_clean" && !(r.status === "dirty" || r.status === "assigned")) return false;
+        if (statusFilter === "in_progress" && r.status !== "in_progress") return false;
+        if (statusFilter === "done" && !(r.status === "clean" || r.status === "awaiting_inspection")) return false;
+        if (statusFilter === "urgent" && r.priority !== "urgent") return false;
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        if (!r.id.includes(q) && !r.type.toLowerCase().includes(q)) return false;
+      }
       return true;
     }).sort((a, b) => {
       // Prioritize urgent/in_progress first, then room number
@@ -82,7 +92,7 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
       if (pDiff !== 0) return pDiff;
       return a.id.localeCompare(b.id, undefined, { numeric: true });
     });
-  }, [myRooms, allRooms, viewScope, activeFloor, statusFilter]);
+  }, [myRooms, allRooms, viewScope, activeFloor, statusFilter, searchQuery]);
 
   // Housekeeper metrics
   const stats = useMemo(() => {
@@ -214,6 +224,37 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
             </div>
           </div>
 
+          {/* Shift Completion Progress Bar */}
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4, fontSize: 12 }}>
+              <span style={{ fontWeight: 700, color: "var(--text-secondary)" }}>
+                Shift Progress: {stats.completed} of {stats.total} suites complete
+              </span>
+              <span style={{ fontWeight: 800, color: "var(--esa-green-dark)" }}>
+                {stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0}%
+              </span>
+            </div>
+            <div
+              style={{
+                width: "100%",
+                height: 7,
+                backgroundColor: "var(--bg-muted)",
+                borderRadius: 4,
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  width: `${stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0}%`,
+                  height: "100%",
+                  backgroundColor: "var(--esa-green)",
+                  borderRadius: 4,
+                  transition: "width 0.3s ease",
+                }}
+              />
+            </div>
+          </div>
+
           {/* Scope & Floor Filters */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
             <div style={{ display: "flex", gap: 6 }}>
@@ -272,6 +313,56 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
                   }}
                 >
                   {fl === "all" ? "All" : `F${fl}`}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Search & Quick Status Filters */}
+          <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+            <div style={{ flex: 1, minWidth: 160 }}>
+              <input
+                type="text"
+                placeholder="Search room # or type..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "6px 10px",
+                  borderRadius: 8,
+                  border: "1px solid var(--border-default)",
+                  fontSize: 12,
+                  outline: "none",
+                }}
+              />
+            </div>
+
+            <div style={{ display: "flex", gap: 4, overflowX: "auto" }}>
+              {[
+                { key: "all", label: "All" },
+                { key: "to_clean", label: "To Clean" },
+                { key: "in_progress", label: "In Prog" },
+                { key: "done", label: "Done" },
+                { key: "urgent", label: "Urgent" },
+              ].map((st) => (
+                <button
+                  key={st.key}
+                  type="button"
+                  onClick={() => setStatusFilter(st.key)}
+                  style={{
+                    padding: "4px 8px",
+                    borderRadius: "var(--radius-pill)",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    border: "1px solid",
+                    borderColor: statusFilter === st.key ? "var(--esa-brown)" : "var(--border-default)",
+                    backgroundColor: statusFilter === st.key ? "var(--esa-brown)" : "#FFFFFF",
+                    color: statusFilter === st.key ? "#FFFFFF" : "var(--text-secondary)",
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {st.label}
                 </button>
               ))}
             </div>

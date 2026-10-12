@@ -43,7 +43,14 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
   const [batchAttendant, setBatchAttendant] = useState<string>(STAFF_ATTENDANTS[0]);
   const [batchPriority, setBatchPriority] = useState<"urgent" | "high" | "standard" | "low">("standard");
   const [isSubmittingBatch, setIsSubmittingBatch] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isResetting, setIsResetting] = useState<boolean>(false);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
 
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   // Live polling every 3 seconds (15s if tab is hidden)
   useEffect(() => {
@@ -86,6 +93,105 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
 
     return { total, dirty, assigned, inProgress, awaitingInspection, inspectionFailed, clean, maintenance, ooo, overdue };
   }, [allRooms]);
+
+  // Floor Readiness Metrics
+  const floorMetrics = useMemo(() => {
+    return [1, 2, 3].map((fl) => {
+      const rooms = allRooms.filter((r) => r.floor === fl);
+      const total = rooms.length;
+      const clean = rooms.filter((r) => r.status === "clean").length;
+      const dirty = rooms.filter((r) => r.status === "dirty").length;
+      const inProgress = rooms.filter((r) => r.status === "in_progress").length;
+      const awaitingInspection = rooms.filter((r) => r.status === "awaiting_inspection").length;
+      const percentage = total > 0 ? Math.round((clean / total) * 100) : 0;
+      return { floor: fl, total, clean, dirty, inProgress, awaitingInspection, percentage };
+    });
+  }, [allRooms]);
+
+  const handleExportCsv = () => {
+    const rows = filteredRooms.map((r) => [
+      `"${r.id}"`,
+      r.floor,
+      `"${r.type}"`,
+      `"${r.status}"`,
+      `"${r.priority}"`,
+      `"${r.attendant || "Unassigned"}"`,
+      `"${r.serviceType}"`,
+      `"${r.inspectedBy || "Pending"}"`,
+      `"${r.maintenanceIssues?.filter((m) => m.status === "open").length || 0}"`,
+      `"${r.updatedAt || ""}"`,
+    ]);
+
+    const header = [
+      "Suite",
+      "Floor",
+      "Room Type",
+      "Status",
+      "Priority",
+      "Attendant",
+      "Service Type",
+      "Inspected By",
+      "Open Maintenance",
+      "Last Updated",
+    ];
+    const csvContent = [header.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const downloadUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", downloadUrl);
+    link.setAttribute("download", `esa-iah-shift-roster-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(`Exported ${filteredRooms.length} suites to CSV`);
+  };
+
+  const handleResetBaseline = async () => {
+    if (!window.confirm("Reset all 96 suites to the morning baseline shift schedule? Any test updates made during this session will be reset.")) {
+      return;
+    }
+    setIsResetting(true);
+    try {
+      const res = await fetch("/api/suites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reset_baseline" }),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.docs) {
+          setDocs(json.docs);
+          setVersion(json.version);
+        }
+        showToast("Shift baseline restored: 96 suites reset to morning schedule.");
+      } else {
+        showToast("Error resetting demo baseline");
+      }
+    } catch {
+      showToast("Network error resetting baseline");
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
+  const handleManualSync = async () => {
+    setIsSyncing(true);
+    try {
+      const res = await fetch(`/api/suites`, { cache: "no-store" });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.docs) {
+          setDocs(json.docs);
+          setVersion(json.version);
+        }
+        showToast(`Dashboard updated: Live Sync v${json.version}`);
+      }
+    } catch {
+      showToast("Sync error");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   // Filtering & Sorting
   const filteredRooms = useMemo(() => {
@@ -278,6 +384,14 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
           width: calc(100% - 32px);
           flex-wrap: wrap;
         }
+        @keyframes pulseDot {
+          0% { transform: scale(0.9); opacity: 0.7; }
+          50% { transform: scale(1.3); opacity: 1; }
+          100% { transform: scale(0.9); opacity: 0.7; }
+        }
+        .pulse-live {
+          animation: pulseDot 2s infinite ease-in-out;
+        }
         @media (max-width: 640px) {
           .dash-kpi-grid {
             grid-template-columns: repeat(2, 1fr) !important;
@@ -303,7 +417,29 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
               Extended Stay America Suites · Houston IAH Airport (96 Total Suites across 3 Floors)
             </p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              title="Download shift roster as CSV"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "7px 12px",
+                borderRadius: 8,
+                backgroundColor: "#FFFFFF",
+                border: "1px solid var(--border-default)",
+                color: "var(--text-main)",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+                boxShadow: "var(--shadow-xs)",
+              }}
+            >
+              <span>📥</span> Export CSV
+            </button>
+
             <button
               type="button"
               onClick={() => setShowReportModal(true)}
@@ -346,9 +482,49 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
               <span>🔔</span> Activity & Alerts
             </button>
 
+            <button
+              type="button"
+              onClick={handleResetBaseline}
+              disabled={isResetting}
+              title="Reset all 96 suites to morning baseline shift state"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "7px 12px",
+                borderRadius: 8,
+                backgroundColor: "#FFFFFF",
+                border: "1px solid #FCA5A5",
+                color: "#B91C1C",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: isResetting ? "not-allowed" : "pointer",
+                boxShadow: "var(--shadow-xs)",
+                opacity: isResetting ? 0.7 : 1,
+              }}
+            >
+              <span>🔄</span> {isResetting ? "Resetting..." : "Reset Demo Shift"}
+            </button>
+
             <div style={{ display: "flex", alignItems: "center", gap: 6, paddingLeft: 4 }}>
               <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Live Sync: Active (v{version})</span>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--st-clean)", display: "inline-block" }}></span>
+              <span className="pulse-live" style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--st-clean)", display: "inline-block" }}></span>
+              <button
+                type="button"
+                onClick={handleManualSync}
+                disabled={isSyncing}
+                title="Force refresh now"
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 13,
+                  padding: "2px 4px",
+                  color: "var(--text-muted)",
+                }}
+              >
+                {isSyncing ? "⏳" : "⚡"}
+              </button>
             </div>
           </div>
         </div>
@@ -422,34 +598,35 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
               FILTER:
             </span>
             {[
-              "ALL",
-              "DIRTY",
-              "UNASSIGNED",
-              "ASSIGNED",
-              "IN PROGRESS",
-              "AWAITING INSPECTION",
-              "INSPECTION FAILED",
-              "CLEAN AND INSPECTED",
-              "MAINTENANCE REQUIRED",
-              "OUT OF SERVICE",
+              { key: "ALL", label: "ALL", count: metrics.total },
+              { key: "DIRTY", label: "DIRTY", count: metrics.dirty },
+              { key: "UNASSIGNED", label: "UNASSIGNED", count: allRooms.filter((r) => !r.attendant && (r.status === "dirty" || r.status === "assigned")).length },
+              { key: "ASSIGNED", label: "ASSIGNED", count: metrics.assigned },
+              { key: "IN PROGRESS", label: "IN PROGRESS", count: metrics.inProgress },
+              { key: "AWAITING INSPECTION", label: "AWAITING INSP.", count: metrics.awaitingInspection },
+              { key: "INSPECTION FAILED", label: "FAILED", count: metrics.inspectionFailed },
+              { key: "CLEAN AND INSPECTED", label: "CLEAN & READY", count: metrics.clean },
+              { key: "MAINTENANCE REQUIRED", label: "MAINTENANCE", count: metrics.maintenance },
+              { key: "OUT OF SERVICE", label: "OUT OF SERVICE", count: metrics.ooo },
             ].map((f) => (
               <button
-                key={f}
+                key={f.key}
                 type="button"
-                onClick={() => setActiveFilter(f)}
+                onClick={() => setActiveFilter(f.key)}
                 style={{
                   padding: "5px 11px",
                   borderRadius: "var(--radius-pill)",
                   fontSize: 12,
                   fontWeight: 600,
                   border: "1px solid",
-                  borderColor: activeFilter === f ? "var(--esa-green)" : "var(--border-default)",
-                  backgroundColor: activeFilter === f ? "var(--esa-green-soft)" : "transparent",
-                  color: activeFilter === f ? "var(--esa-green-dark)" : "var(--text-secondary)",
+                  borderColor: activeFilter === f.key ? "var(--esa-green)" : "var(--border-default)",
+                  backgroundColor: activeFilter === f.key ? "var(--esa-green-soft)" : "transparent",
+                  color: activeFilter === f.key ? "var(--esa-green-dark)" : "var(--text-secondary)",
                   cursor: "pointer",
+                  whiteSpace: "nowrap",
                 }}
               >
-                {f}
+                {f.label} ({f.count})
               </button>
             ))}
           </div>
@@ -533,6 +710,108 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Floor Progress & Clean Readiness Meters */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "var(--text-main)" }}>
+              Floor Readiness & Turnaround Progress
+            </h3>
+            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+              Click a floor card to quick-filter
+            </span>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gap: 12,
+            }}
+          >
+            {floorMetrics.map((fl) => {
+              const isActive = activeFloor === String(fl.floor);
+              return (
+                <div
+                  key={fl.floor}
+                  onClick={() => setActiveFloor(isActive ? "all" : String(fl.floor))}
+                  style={{
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: 12,
+                    border: isActive ? "2px solid var(--esa-green)" : "1px solid var(--border-default)",
+                    padding: "12px 14px",
+                    cursor: "pointer",
+                    boxShadow: isActive ? "var(--shadow-md)" : "var(--shadow-xs)",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: "var(--esa-brown)" }}>
+                        Floor {fl.floor}
+                      </span>
+                      <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                        ({fl.total} Suites)
+                      </span>
+                      {isActive && (
+                        <span
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            backgroundColor: "var(--esa-green-soft)",
+                            color: "var(--esa-green-dark)",
+                            padding: "2px 6px",
+                            borderRadius: 6,
+                          }}
+                        >
+                          ACTIVE FILTER
+                        </span>
+                      )}
+                    </div>
+                    <span
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 800,
+                        color: fl.percentage >= 80 ? "var(--esa-green-dark)" : fl.percentage >= 50 ? "#D97706" : "var(--st-dirty)",
+                      }}
+                    >
+                      {fl.percentage}% Clean ({fl.clean}/{fl.total})
+                    </span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div
+                    style={{
+                      width: "100%",
+                      height: 7,
+                      backgroundColor: "var(--bg-muted)",
+                      borderRadius: 4,
+                      overflow: "hidden",
+                      marginBottom: 8,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${fl.percentage}%`,
+                        height: "100%",
+                        backgroundColor: fl.percentage >= 80 ? "var(--esa-green)" : fl.percentage >= 50 ? "#F59E0B" : "var(--st-dirty)",
+                        borderRadius: 4,
+                        transition: "width 0.3s ease",
+                      }}
+                    />
+                  </div>
+
+                  {/* Status counts breakdown */}
+                  <div style={{ display: "flex", gap: 10, fontSize: 11, color: "var(--text-secondary)", flexWrap: "wrap" }}>
+                    <span>🔴 {fl.dirty} Dirty</span>
+                    <span>🟡 {fl.inProgress} Cleaning</span>
+                    <span>🟣 {fl.awaitingInspection} Awaiting Insp.</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -1171,6 +1450,30 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
           onClose={() => setShowNotifications(false)}
           onSelectRoom={(roomId) => setSearchQuery(roomId)}
         />
+      )}
+
+      {/* Floating Toast Notification */}
+      {toastMessage && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 24,
+            right: 24,
+            backgroundColor: "var(--esa-brown)",
+            color: "#FFFFFF",
+            padding: "12px 20px",
+            borderRadius: 10,
+            boxShadow: "0 10px 25px rgba(0,0,0,0.25)",
+            zIndex: 1100,
+            fontSize: 13,
+            fontWeight: 700,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <span>✨</span> {toastMessage}
+        </div>
       )}
     </div>
   );

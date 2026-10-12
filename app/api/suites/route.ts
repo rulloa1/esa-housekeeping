@@ -36,6 +36,18 @@ export async function POST(req: Request) {
     userName?: string;
   } | null;
 
+  if (body?.action === "reset_baseline") {
+    const { resetToDefault, getAll } = await import("@/lib/store");
+    await resetToDefault();
+    const updated = await getAll();
+    return NextResponse.json({
+      ok: true,
+      action: "reset_baseline",
+      version: updated.version,
+      docs: updated.docs,
+    });
+  }
+
   if (!body || !Array.isArray(body.suiteIds) || body.suiteIds.length === 0) {
     return NextResponse.json({ error: "suiteIds array required" }, { status: 400 });
   }

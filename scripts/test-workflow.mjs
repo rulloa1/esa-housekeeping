@@ -397,8 +397,25 @@ async function runTests() {
   }
   console.log("✓ Suites 101, 102, 103 verified with Carlos R., high priority & audit trails.\n");
 
+  // 21. Supervisor Resets Demo Shift Baseline
+  console.log("Test 21: Supervisor resets demo shift baseline via action 'reset_baseline'...");
+  const resetRes = await fetch(`${BASE_URL}/api/suites`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Cookie: supervisorCookie,
+    },
+    body: JSON.stringify({ action: "reset_baseline" }),
+  });
+  if (!resetRes.ok) throw new Error(`reset_baseline failed with status ${resetRes.status}`);
+  const resetData = await resetRes.json();
+  if (!resetData.ok || !resetData.docs || Object.keys(resetData.docs).length !== 96) {
+    throw new Error(`reset_baseline expected 96 suites, got: ${resetData.docs ? Object.keys(resetData.docs).length : 0}`);
+  }
+  console.log("✓ Demo shift baseline successfully restored across all 96 suites.\n");
+
   console.log("\n=================================================");
-  console.log("ALL 20 END-TO-END OPERATIONAL, BATCH & GUEST TESTS PASSED ✓");
+  console.log("ALL 21 END-TO-END OPERATIONAL, BATCH, GUEST & RESET TESTS PASSED ✓");
   console.log("=================================================");
 }
 
