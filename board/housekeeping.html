@@ -214,6 +214,39 @@ button { cursor: pointer; }
 .s-inspected { --sc: var(--st-insp); --sb: var(--st-insp-bg); }
 .s-ooo { --sc: var(--st-ooo); --sb: var(--st-ooo-bg); }
 
+/* ---- Polish (v13): dashboard cards, rings, tiles ---- */
+.ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.ringwrap { position: relative; width: var(--rs); height: var(--rs); display: inline-grid; place-items: center; flex: none; }
+.ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 5; stroke-linecap: round; transition: stroke-dasharray .5s ease; }
+.ring .trk { stroke: var(--surface-2); }
+.ringwrap .rl { position: relative; font-family: var(--f-display); font-weight: 800; font-size: calc(var(--rs) * .26); font-variant-numeric: tabular-nums; }
+.shiftcard { background: linear-gradient(160deg, var(--surface) 55%, color-mix(in srgb, var(--st-clean) 7%, var(--surface))); }
+.prog-label { align-items: center; flex-wrap: nowrap; gap: 14px; justify-content: start; }
+.prog-label .plt { display: grid; gap: 6px; min-width: 0; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { font-size: .74rem; font-weight: 700; border-radius: 999px; padding: 2px 9px; color: var(--c); background: color-mix(in srgb, var(--c) 12%, transparent); border: 1px solid color-mix(in srgb, var(--c) 25%, transparent); white-space: nowrap; }
+.prog { height: 8px; }
+.stat { padding: 12px 12px 14px; gap: 2px; min-height: 92px; overflow: hidden; background: linear-gradient(170deg, var(--surface) 60%, color-mix(in srgb, var(--c) 8%, var(--surface))); transition: transform .12s ease, box-shadow .15s ease, border-color .15s; }
+.stat::before { content: none; }
+.stat .sic { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); margin-bottom: 4px; }
+.stat .n { padding-left: 0; font-size: 1.7rem; }
+.stat .share { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: color-mix(in srgb, var(--c) 10%, transparent); }
+.stat .share i { display: block; height: 100%; background: var(--c); border-radius: 0 2px 2px 0; transition: width .4s ease; }
+.stat[aria-pressed="true"] { border-color: var(--c); box-shadow: 0 0 0 2px var(--c), var(--lift); }
+@media (hover: hover) { .stat:hover, .suite:hover { transform: translateY(-2px); box-shadow: 0 1px 2px rgba(15,27,42,.05), 0 14px 30px -14px color-mix(in srgb, var(--sc, var(--c, #2457a6)) 55%, transparent); } }
+.suite { background: linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--sb, var(--st-none-bg)) 85%, var(--surface)) 100%); border-radius: 12px; }
+.suite .st { display: inline-flex; align-items: center; gap: 3px; font-size: .6rem; padding: 2px 7px; border-radius: 999px; color: var(--sc, var(--muted)); background: color-mix(in srgb, var(--sc, var(--muted)) 13%, transparent); }
+.suite.unlogged .st { background: transparent; }
+.suite .who { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: .6rem; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, var(--sc, #7a8aa0))); box-shadow: 0 0 0 2px var(--surface); letter-spacing: 0; }
+.tag.dndt { display: inline-flex; align-items: center; gap: 2px; color: var(--accent); }
+.tag.dndt .ico { width: 10px; height: 10px; }
+.tag.dndt.alert { color: var(--surface); }
+.suite .note { background: none; width: 14px; height: 14px; color: var(--muted); }
+.suite .note .ico { width: 14px; height: 14px; }
+.mini { height: 5px; border-radius: 3px; }
+.mini i { border-radius: 3px; }
+
 /* Portrait iPad and phone: hallway runs top to bottom */
 @media (max-width: 1000px) {
   .hero { grid-template-columns: 1fr; }
@@ -324,6 +357,29 @@ legend { font-family: var(--f-display); font-weight: 700; font-size: 1rem; margi
 .svcbox .task { display: flex; gap: 12px; align-items: center; min-height: 46px; font-weight: 600; cursor: pointer; flex-wrap: wrap; }
 .svcbox .task input { width: 24px; height: 24px; accent-color: var(--st-prog); flex: none; }
 .svcbox .task .small { flex-basis: 100%; margin: -10px 0 4px 36px; font-weight: 500; }
+/* ---- Polish (v13): suite panel ---- */
+.drawer header { background: linear-gradient(180deg, color-mix(in srgb, var(--sb) 90%, var(--surface)), var(--surface)); position: relative; }
+.drawer header::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px; background: var(--sc); }
+.hpills { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+.spill { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; font-size: .82rem; color: #fff; background: var(--sc); border-radius: 999px; padding: 4px 11px 4px 8px; }
+.spill .ico { width: 16px; height: 16px; }
+.hpills .tag { font-size: .74rem; padding: 2px 8px; border-radius: 999px; }
+.tprog { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 700; color: var(--muted); }
+.drawer .iconbtn { width: 44px; height: 44px; border-radius: 12px; }
+.svcbox { border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--line)); padding: 14px; }
+.svcbox .tasks { gap: 6px; }
+.svcbox .task { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; min-height: 50px; transition: background .15s, border-color .15s; }
+.svcbox .task:has(input:checked) { border-color: color-mix(in srgb, var(--st-prog) 45%, var(--line)); background: color-mix(in srgb, var(--st-prog) 7%, var(--surface)); color: var(--muted); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--st-prog) 60%, transparent); }
+.svcbox .task .small { text-decoration: none; margin: -12px 0 8px 36px; }
+.statusgrid label { min-height: 56px; border-radius: 14px; transition: background .15s, color .15s, box-shadow .15s; }
+.statusgrid label::before { content: none; }
+.statusgrid label .ico { color: var(--sc); width: 20px; height: 20px; }
+.statusgrid label:has(input:checked) { background: var(--sc); color: #fff; border-color: var(--sc); box-shadow: 0 8px 18px -10px var(--sc); }
+.statusgrid label:has(input:checked) .ico { color: #fff; }
+.seg label { border-radius: 14px; min-height: 52px; }
+fieldset .check { border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; margin-bottom: 6px; background: var(--surface); }
+fieldset .check:has(input:checked) { background: color-mix(in srgb, var(--st-clean) 8%, var(--surface)); border-color: color-mix(in srgb, var(--st-clean) 40%, var(--line)); }
+.drawer footer { background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
 .welfare { background: var(--dnd-bg); border: 1px solid var(--dnd); border-radius: 14px; padding: 12px 14px; display: grid; gap: 6px; }
 .welfare strong { color: var(--dnd); }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 8px 8px 16px; border-radius: 14px; z-index: 20; font-weight: 700; display: flex; gap: 12px; align-items: center; max-width: calc(100% - 32px); box-shadow: var(--sheet); }
@@ -495,6 +551,26 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
   const isDone = (doc) => doc?.status === "clean" || doc?.status === "inspected";
   const inScope = (s) => !state.att || (state.docs[s]?.attendant || "") === state.att;
 
+  // Line icons (24px grid, stroke = currentColor) for stats, status buttons and tiles
+  const ic = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true" class="ico">${d}</svg>`;
+  const ICONS = {
+    dirty: ic('<path d="M2 5v15M2 9h17a3 3 0 0 1 3 3v8M2 16h20M6 9v7"/>'),
+    in_progress: ic('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2h5"/>'),
+    ready: ic('<circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16.5 9"/>'),
+    clean: ic('<circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16.5 9"/>'),
+    inspected: ic('<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>'),
+    ooo: ic('<circle cx="12" cy="12" r="9"/><path d="m5.7 5.7 12.6 12.6"/>'),
+    dnd: ic('<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/>'),
+    welfare: ic('<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4M12 16h.01"/>'),
+    audit: ic('<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>'),
+    note: ic('<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>'),
+  };
+  // Progress ring: segments = [[fraction, cssColor], ...]
+  const ring = (segs, size, label) => {
+    const r = 18, C = 2 * Math.PI * r; let off = 0;
+    const arcs = segs.filter(([f]) => f > 0).map(([f, c]) => { const a = `<circle cx="22" cy="22" r="${r}" stroke="${c}" stroke-dasharray="${(f * C).toFixed(2)} ${C.toFixed(2)}" stroke-dashoffset="${(-off * C).toFixed(2)}"/>`; off += f; return a; }).join("");
+    return `<span class="ringwrap" style="--rs:${size}px"><svg viewBox="0 0 44 44" class="ring" aria-hidden="true"><circle cx="22" cy="22" r="${r}" class="trk"/>${arcs}</svg><span class="rl">${label}</span></span>`;
+  };
   const FILTERS = {
     dirty: { label: "Needs service", color: "var(--st-dirty)", test: (d) => d?.status === "dirty" },
     in_progress: { label: "In progress", color: "var(--st-prog)", test: (d) => d?.status === "in_progress" },
@@ -1187,13 +1263,17 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     const parts = [["inspected", "--st-insp"], ["clean", "--st-clean"], ["in_progress", "--st-prog"]];
     $("progBar").innerHTML = work.length ? parts.map(([k, c]) => `<i style="width:${(n(k) / work.length) * 100}%;background:var(${c})"></i>`).join("") : "";
     $("progBar").setAttribute("aria-label", `${done} of ${work.length} scheduled services finished`);
-    $("progLabel").innerHTML = `<span><strong>${done}</strong> <span class="muted">of ${work.length} services done${state.att ? " · " + esc(state.att) : ""}</span></span><span class="muted small">${n("in_progress")} in progress · ${n("dirty")} to go</span>`;
+    const W = work.length || 1;
+    $("progLabel").innerHTML = `${ring([[n("inspected") / W, "var(--st-insp)"], [n("clean") / W, "var(--st-clean)"], [n("in_progress") / W, "var(--st-prog)"]], 66, work.length ? Math.round(done / W * 100) + "%" : "–")}
+      <span class="plt"><span><strong>${done}</strong> <span class="muted">of ${work.length} services done${state.att ? " · " + esc(state.att) : ""}</span></span>
+      <span class="chips"><span class="chip" style="--c:var(--st-prog)">${n("in_progress")} in progress</span><span class="chip" style="--c:var(--st-dirty)">${n("dirty")} to go</span><span class="chip" style="--c:var(--st-clean)">${done} done</span></span></span>`;
   }
 
   function renderSummary() {
     $("summary").innerHTML = Object.entries(FILTERS).map(([k, f]) => {
       const c = suites.filter((s) => inScope(s) && f.test(state.docs[s])).length;
-      return `<button class="stat" data-filter="${k}" aria-pressed="${state.filter === k}" style="--c:${f.color}"><span class="n">${c}</span><span class="l">${f.label}</span></button>`;
+      const tot = suites.filter(inScope).length || 1;
+      return `<button class="stat" data-filter="${k}" aria-pressed="${state.filter === k}" style="--c:${f.color}"><span class="sic">${ICONS[k] || ""}</span><span class="n">${c}</span><span class="l">${f.label}</span><span class="share" aria-hidden="true"><i style="width:${Math.min(100, c / tot * 100 * 4)}%"></i></span></button>`;
     }).join("");
     const fn = $("filterNote");
     fn.hidden = !state.filter;
@@ -1223,10 +1303,10 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     const label = `Suite ${s}: ${d ? STATUS_LABEL[d.status] : "Not logged"}${svc.code ? ", " + svc.label : ""}${days ? ", DND day " + days : ""}${d?.attendant ? ", " + d.attendant : ""}`;
     return `<button class="${cls}" data-suite="${s}" aria-label="${esc(label)}">
       ${needsWelfare(d) || auditOpen(d) ? '<span class="flag" aria-hidden="true"></span>' : ""}
-      ${d?.notes ? '<span class="note" aria-hidden="true"></span>' : ""}
+      ${d?.notes ? `<span class="note" aria-hidden="true">${ICONS.note}</span>` : ""}
       <span class="num">${s}</span>
       <span class="st">${d ? STATUS_SHORT[d.status] : "Not logged"}</span>
-      <span class="meta">${svc.code ? `<span class="tag svc">${svc.code}</span>` : ""}${occTag ? `<span class="tag">${occTag}</span>` : ""}${days ? `<span class="tag ${days >= 3 ? "alert" : ""}">DND ${days}</span>` : ""}</span>
+      <span class="meta">${svc.code ? `<span class="tag svc">${svc.code}</span>` : ""}${occTag ? `<span class="tag">${occTag}</span>` : ""}${days ? `<span class="tag dndt ${days >= 3 ? "alert" : ""}">${ICONS.dnd}${days}</span>` : ""}</span>
       ${d?.occ === "checkout" && d.status !== "ooo" ? `<span class="mini" aria-hidden="true"><i style="width:${auditCount(d) / AUDIT.length * 100}%"></i></span>` : (() => { const tp = d && d.status === "in_progress" && taskProgress(d); return tp && tp.n ? `<span class="mini" aria-hidden="true"><i style="width:${tp.n / tp.total * 100}%;background:var(--st-prog)"></i></span>` : ""; })()}
       ${d?.attendant ? `<span class="who">${esc(initials(d.attendant))}</span>` : ""}
     </button>`;
@@ -1420,10 +1500,11 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     const names = [...new Set(Object.values(state.docs).map((x) => x.attendant).filter(Boolean))].sort();
     const scroll = $("drawer").querySelector(".body")?.scrollTop || 0;
     $("drawer").innerHTML = `
-      <header>
+      <header style="--sc:var(--st-${stVar(d.status)});--sb:var(--st-${stVar(d.status)}-bg)">
         <div class="grab" aria-hidden="true"></div>
         <div class="hrow">
           <div><div class="eyebrow">Floor ${s[0]} · ${side}</div><h2 id="dTitle" style="font-size:1.8rem">Suite ${s}</h2>
+          <div class="hpills"><span class="spill">${ICONS[d.status] || ""}${saved || state.dirtyDraft ? STATUS_LABEL[d.status] : "Not logged"}</span>${svc.code ? `<span class="tag svc">${esc(svc.label)}</span>` : ""}${(() => { const tp = taskProgress(d); return tp ? `<span class="tprog">${ring([[tp.n / tp.total, "var(--st-prog)"]], 26, "")}${tp.n}/${tp.total} tasks</span>` : ""; })()}</div>
           <div class="muted small">${saved?.updatedAt ? "Updated " + esc(ago(saved.updatedAt)) + (saved.updatedBy ? " by " + (saved.updatedBy === "housekeeping" ? "Housekeeping" : "Front desk") : "") : saved ? "Example status" : "Not logged yet"}${state.dirtyDraft ? ' · <span class="dirty-dot">Unsaved changes</span>' : state.role === "housekeeping" && state.savedLive && Date.now() - state.savedLive < 4000 ? ' · <span class="saved-live">Saved · front desk can see it</span>' : ""}</div></div>
           <div class="nav">
             <button class="iconbtn" id="dPrev" aria-label="Previous suite">‹</button>
@@ -1440,7 +1521,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
           ${(() => { const tp = taskProgress(d); return tp && tp.n === tp.total && d.status === "in_progress" && !auditOpen(d) && state.canWrite ? `<button type="button" class="btn primary" id="dMarkClean" style="justify-self:start;margin-top:6px">All tasks done · Mark clean</button>` : ""; })()}` : ""}
           ${state.autoStarted === s ? `<span class="small" style="color:var(--st-prog);font-weight:700">Set to In progress when the first task was ticked</span>` : ""}</div>
         <fieldset><legend>Room status</legend><div class="statusgrid">
-          ${STATUSES.map(([k, l]) => `<label style="--sc:var(--st-${stVar(k)});--sb:var(--st-${stVar(k)}-bg)"><input type="radio" name="status" value="${k}" ${d.status === k ? "checked" : ""} ${ro}>${l}</label>`).join("")}
+          ${STATUSES.map(([k, l]) => `<label style="--sc:var(--st-${stVar(k)});--sb:var(--st-${stVar(k)}-bg)"><input type="radio" name="status" value="${k}" ${d.status === k ? "checked" : ""} ${ro}>${ICONS[k]}${l}</label>`).join("")}
         </div>
         ${auditOpen(d) && isDone(d) ? `<div class="small" style="color:var(--dnd)">Turnover audit is incomplete. Finish all 5 checks before releasing this suite.</div>` : ""}
         </fieldset>
