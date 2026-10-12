@@ -13,7 +13,7 @@ export async function GET(req: Request) {
   const role = await getRole();
   if (!role) return NextResponse.redirect(new URL("/login", req.url));
   const html = await readFile(path.join(process.cwd(), "board/housekeeping.html"), "utf8");
-  const inject = `<script>try{localStorage.setItem("iah-hk-role","${role}")}catch{}</script>\n<script src="/hk-db.js"></script>`;
+  const inject = `<script>try{localStorage.setItem("iah-hk-role","${role}")}catch{}</script>\n<script src="/hk-db.js"></script>\n<link rel="icon" href="/icon.png" type="image/png"><link rel="apple-touch-icon" href="/apple-icon.png">`;
   const out = html.replace("<head>", `<head>\n${inject}`);
   return new NextResponse(out, {
     headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" },

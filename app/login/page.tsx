@@ -3,6 +3,8 @@ import { getLang } from "@/lib/lang";
 import LangToggle from "@/components/LangToggle";
 import BrandLogo from "@/components/BrandLogo";
 
+export const metadata = { title: "Sign in" };
+
 const TEXT = {
   en: { signIn: "Sign in", role: "Role", pin: "PIN", error: "That PIN didn't match. Try again.", roles: ROLES },
   es: {

@@ -6,7 +6,7 @@ import { SUITES, guestKey } from "@/lib/guest";
 import BrandLogo from "@/components/BrandLogo";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Guest QR cards · ESA Housekeeping" };
+export const metadata = { title: "Guest QR cards" };
 
 // Staff-only sheet of QR cards, one per suite, to print and place in each suite.
 // Each code opens that suite's guest request page.

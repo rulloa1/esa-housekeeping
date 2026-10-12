@@ -5,7 +5,7 @@ import { getLang } from "@/lib/lang";
 import GuestApp from "./GuestApp";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Housekeeping · Extended Stay America" };
+export const metadata: Metadata = { title: { absolute: "Housekeeping · Extended Stay America" } };
 export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#338802" };
 
 // Guest-facing request page, opened from the QR code or link on a suite's card:

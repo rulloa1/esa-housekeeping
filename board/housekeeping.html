@@ -508,6 +508,83 @@ fieldset .check:has(input:checked) { background: color-mix(in srgb, var(--st-cle
   .scene .hud .hfloors { margin: 0; }
   .tabbar i { position: absolute; top: 2px; left: calc(50% + 6px); min-width: 17px; height: 17px; border-radius: 9px; background: var(--st-dirty); color: #fff; font: 800 .62rem/17px var(--f-body); font-style: normal; padding: 0 4px; }
 }
+/* ---- Overview (v18), after Rory's front-desk dashboard: greeting header, glowing KPI cards, room status donut,
+   priority tasks. Light theme kept. ---- */
+.titleblock { display: none; }
+.greet { display: grid; position: relative; overflow: hidden; gap: 4px; padding: 18px 22px 20px; border-radius: 22px; background: linear-gradient(120deg, #ffffff 30%, #f6f0e5 75%, #efe5d2); border: 1px solid var(--line); box-shadow: var(--lift); color: #16202b; }
+:root[data-mode="night"] .greet { background: linear-gradient(120deg, #18222e 30%, #231f19); color: var(--fg); }
+.greet .gtop { display: flex; align-items: center; gap: 14px; position: relative; z-index: 1; }
+.greet .gwho { font-size: .74rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); flex: 1; }
+.greet .gclock { display: flex; align-items: center; gap: 10px; font-weight: 700; font-variant-numeric: tabular-nums; font-size: .9rem; }
+.greet .gsep { width: 1px; height: 16px; background: var(--line); }
+.greet .gbell { position: relative; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; color: var(--fg); flex: none; }
+.greet .gbell .ico { width: 20px; height: 20px; }
+.greet .gbell i { position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--st-dirty); color: #fff; font: 800 .66rem/18px var(--f-body); font-style: normal; padding: 0 4px; }
+.greet h1 { font-size: 2.1rem; line-height: 1.1; margin-top: 8px; position: relative; z-index: 1; }
+.greet p { margin: 0; color: var(--muted); font-size: 1rem; position: relative; z-index: 1; max-width: 70%; }
+.greet .gart { position: absolute; right: 18px; bottom: -6px; width: 150px; opacity: .95; }
+.hero-left { grid-template-areas: "greet" "kpis" "donut" "shift" "tasks"; }
+.greet { grid-area: greet; } .summary { grid-area: kpis; } .donutcard { grid-area: donut; } .shiftcard { grid-area: shift; } .ptasks { grid-area: tasks; }
+@media (min-width: 641px) {
+  .hero-left { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "greet greet" "kpis kpis" "donut shift" "tasks tasks"; align-items: stretch; }
+  .summary { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+}
+@media (min-width: 1100px) {
+  .hero-left { grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr); grid-template-areas: "greet greet" "kpis donut" "tasks shift"; }
+  .shiftcard { align-content: start; align-self: start; }
+}
+@media (min-width: 641px) {
+  .stat { display: flex; flex-direction: column; min-height: 158px; border-radius: 18px; padding: 14px 16px 16px; gap: 2px; border: 1px solid color-mix(in srgb, var(--c) 35%, var(--line)); background: linear-gradient(160deg, color-mix(in srgb, var(--c) 16%, var(--surface)), var(--surface) 70%); box-shadow: 0 12px 30px -16px color-mix(in srgb, var(--c) 70%, transparent), inset 0 1px 0 rgba(255,255,255,.7); }
+  .stat .sic { position: absolute; top: 14px; left: 16px; width: 34px; height: 34px; border-radius: 50%; margin: 0; }
+  .stat .kt { padding-left: 44px; min-height: 34px; display: flex; align-items: center; font-weight: 800; font-size: .86rem; color: color-mix(in srgb, var(--c) 75%, var(--fg)); }
+  .stat .n { font-size: 2.6rem; margin-top: 6px; }
+  .stat .l { font-size: .8rem; }
+  .stat .go { margin-top: auto; padding-top: 8px; font-size: .8rem; font-weight: 700; color: color-mix(in srgb, var(--c) 80%, var(--fg)); }
+  .stat .share { display: none; }
+  .stat[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--c), 0 12px 30px -14px var(--c); }
+}
+.donutcard, .ptasks { padding: 14px 16px; display: grid; gap: 10px; align-content: start; }
+.donutcard h3, .ptasks h3 { font-size: 1.05rem; }
+.dwrap { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.dwrap .ringwrap .ring circle { stroke-width: 6; stroke-linecap: butt; }
+.dwrap .rl { display: grid; justify-items: center; line-height: 1; }
+.dwrap .dn { font-size: 2rem; }
+.dwrap .dl { font: 600 .72rem/1.3 var(--f-body); color: var(--muted); }
+.dleg { display: grid; gap: 2px; flex: 1; min-width: 170px; }
+.dleg .dr { display: flex; align-items: center; gap: 8px; border: 0; background: none; padding: 4px 6px; border-radius: 8px; font-size: .86rem; font-weight: 600; text-align: left; min-height: 30px; color: var(--fg); }
+.dleg button.dr:active, .dleg button.dr:hover { background: var(--surface-2); }
+.dleg .dr i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.dleg .dr b { margin-left: auto; font-variant-numeric: tabular-nums; }
+.ptasks .pth { display: flex; justify-content: space-between; align-items: center; }
+.ptasks .count { font-size: .8rem; color: var(--muted); font-weight: 700; margin-left: 4px; }
+.linkbtn { border: 0; background: none; color: var(--accent); font-weight: 700; font-size: .85rem; min-height: 36px; padding: 0 4px; }
+.ptl { display: grid; }
+.ptr { display: grid; grid-template-columns: 30px minmax(0, 1fr) 48px 84px 70px; align-items: center; gap: 10px; border: 0; border-top: 1px solid var(--line); background: none; text-align: left; min-height: 48px; padding: 4px 2px; color: var(--fg); }
+.ptr:first-child { border-top: 0; }
+.ptr:active { background: var(--surface-2); }
+.ptr .pti { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; color: var(--sc); background: var(--sb); }
+.ptr .pti .ico { width: 17px; height: 17px; }
+.ptr .ptt { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ptr .pts { font-weight: 800; font-variant-numeric: tabular-nums; }
+.ptr .pto { color: var(--muted); font-size: .84rem; }
+.pp { justify-self: start; font-size: .74rem; font-weight: 800; padding: 3px 10px; border-radius: 999px; }
+.pp.high { color: var(--st-dirty); background: var(--st-dirty-bg); }
+.pp.medium { color: color-mix(in srgb, var(--st-prog) 75%, #000); background: var(--st-prog-bg); }
+.pp.low { color: var(--st-clean); background: var(--st-clean-bg); }
+@media (max-width: 640px) {
+  .greet .gclock { display: none; }
+  .greet .gwho { text-transform: none; letter-spacing: 0; font-size: .78rem; font-weight: 700; }
+  .greet h1 { font-size: 1.9rem; max-width: 64%; }
+  .greet p { max-width: 62%; font-size: .92rem; }
+  .greet .gart { right: -4px; width: 46%; max-width: 170px; }
+  .stat .kt { order: 3; color: #fff; font-weight: 800; font-size: .88rem; padding-right: 30px; }
+  .stat .n { order: 2; }
+  .stat .l { display: none; }
+  .stat .go { display: none; }
+  .stat { display: flex; flex-direction: column; justify-content: flex-end; }
+  .ptr { grid-template-columns: 30px minmax(0, 1fr) 40px 62px; }
+  .ptr .pto { display: none; }
+}
 </style>
 
 <div class="wrap">
@@ -525,6 +602,8 @@ fieldset .check:has(input:checked) { background: color-mix(in srgb, var(--st-cle
         <div class="prog" id="progBar" role="img"></div>
       </div>
       <section class="summary" id="summary" aria-label="Filter suites by status"></section>
+      <section class="donutcard panel" id="donut" aria-label="Room status"></section>
+      <section class="ptasks panel" id="ptasks" aria-label="Priority tasks"></section>
     </div>
     <div class="stage panel" aria-label="3D view of the building">
       <div class="stage-head">
@@ -699,10 +778,12 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     const arcs = segs.filter(([f]) => f > 0).map(([f, c]) => { const a = `<circle cx="22" cy="22" r="${r}" stroke="${c}" stroke-dasharray="${(f * C).toFixed(2)} ${C.toFixed(2)}" stroke-dashoffset="${(-off * C).toFixed(2)}"/>`; off += f; return a; }).join("");
     return `<span class="ringwrap" style="--rs:${size}px"><svg viewBox="0 0 44 44" class="ring" aria-hidden="true"><circle cx="22" cy="22" r="${r}" class="trk"/>${arcs}</svg><span class="rl">${label}</span></span>`;
   };
+  const attnOpen = (d) => needsWelfare(d) || auditOpen(d) || guestOpen(d);
   const FILTERS = {
-    dirty: { label: "Needs service", color: "var(--st-dirty)", test: (d) => d?.status === "dirty" },
+    attention: { label: "High priority", color: "var(--dnd)", test: (d) => attnOpen(d) },
+    dirty: { label: "Due for service", color: "var(--st-dirty)", test: (d) => d?.status === "dirty" },
     in_progress: { label: "In progress", color: "var(--st-prog)", test: (d) => d?.status === "in_progress" },
-    ready: { label: "Clean or inspected", color: "var(--st-clean)", test: (d) => isDone(d) },
+    ready: { label: "Completed", color: "var(--st-clean)", test: (d) => isDone(d) },
     dnd: { label: "On DND", color: "var(--accent)", test: (d) => dndDays(d) > 0 },
     welfare: { label: "Welfare checks due", color: "var(--dnd)", test: (d) => needsWelfare(d) },
     audit: { label: "Turnover audits open", color: "var(--brass)", test: (d) => auditOpen(d) },
@@ -1550,24 +1631,61 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
   }
 
   function renderSummary() {
-    $("summary").innerHTML = Object.entries(FILTERS).filter(([k]) => k !== "guest").map(([k, f]) => {
-      const c = suites.filter((s) => inScope(s) && f.test(state.docs[s])).length;
-      const tot = suites.filter(inScope).length || 1;
-      return `<button class="stat" data-filter="${k}" aria-pressed="${state.filter === k}" style="--c:${f.color}"><span class="sic">${ICONS[k] || ""}</span><span class="n">${c}</span><span class="l">${f.label}</span><span class="share" aria-hidden="true"><i style="width:${Math.min(100, c / tot * 100 * 4)}%"></i></span></button>`;
+    const cnt = (k) => suites.filter((s) => inScope(s) && FILTERS[k].test(state.docs[s])).length;
+    const tot = suites.filter(inScope).length || 1;
+    const sub = { attention: [["welfare", "welfare"], ["audit", "audit"], ["guest", "guest"]].map(([k, l]) => cnt(k) ? `${cnt(k)} ${l}` : "").filter(Boolean).join(" · ") || "Nothing urgent", dirty: "suites to clean", in_progress: "being cleaned now", ready: "clean or inspected" };
+    $("summary").innerHTML = ["attention", "dirty", "in_progress", "ready"].map((k) => {
+      const f = FILTERS[k], c = cnt(k);
+      return `<button class="stat k-${k}" data-filter="${k}" aria-pressed="${state.filter === k}" style="--c:${f.color}"><span class="sic">${ICONS[k] || ""}</span><span class="kt">${f.label}</span><span class="n">${c}</span><span class="l">${sub[k]}</span><span class="go" aria-hidden="true">View suites →</span><span class="share" aria-hidden="true"><i style="width:${Math.min(100, c / tot * 100 * 4)}%"></i></span></button>`;
     }).join("");
+    renderDonut(); renderTasks();
     const fn = $("filterNote");
     fn.hidden = !state.filter;
     if (state.filter) fn.innerHTML = `<span>Showing <strong>${FILTERS[state.filter].label.toLowerCase()}</strong> on all floors.</span><button class="btn" data-filter="${state.filter}">Show all suites</button>`;
+  }
+
+  // Room status donut: every suite by status, the legend doubles as filters
+  function renderDonut() {
+    const all = suites.filter(inScope), T = all.length || 1;
+    const n = (k) => all.filter((s) => state.docs[s]?.status === k).length;
+    const none = all.filter((s) => !state.docs[s]).length;
+    const rows = [["clean", "Clean", "--st-clean", "ready"], ["inspected", "Inspected", "--st-insp", "ready"], ["in_progress", "In progress", "--st-prog", "in_progress"], ["dirty", "Needs service", "--st-dirty", "dirty"], ["ooo", "Out of order", "--st-ooo", ""]];
+    const segs = rows.map(([k, , v]) => [n(k) / T, `var(${v})`]);
+    const dnd = all.filter((s) => dndDays(state.docs[s]) > 0).length;
+    $("donut").innerHTML = `<h3>Room status</h3><div class="dwrap">${ring(segs, 128, `<span class="dn">${all.length}</span><span class="dl">suites</span>`)}
+      <div class="dleg">${rows.map(([k, l, v, f]) => `<${f ? `button type="button" data-filter="${f}"` : "div"} class="dr"><i style="background:var(${v})"></i>${l}<b>${n(k)}</b></${f ? "button" : "div"}>`).join("")}
+      <div class="dr"><i style="background:var(--st-none)"></i>Not logged<b>${none}</b></div>
+      <button type="button" class="dr" data-filter="dnd"><i style="background:var(--accent)"></i>On DND<b>${dnd}</b></button></div></div>`;
+  }
+  // Priority tasks: the next jobs in work-list order, with a plain-language task and a priority pill
+  function renderTasks() {
+    const list = suites.filter((s) => inScope(s) && state.docs[s] && priority(s) < 7).sort((a, b) => priority(a) - priority(b) || a.localeCompare(b));
+    const task = (s) => {
+      const d = state.docs[s], svc = service(d);
+      if (needsWelfare(d)) return ["Welfare check", "high", ICONS.welfare];
+      if (guestOpen(d)) return ["Guest: " + guestSummary(d), "high", ICONS.guest];
+      if (d.status === "in_progress") return ["Finish " + svc.label.toLowerCase(), "medium", ICONS.in_progress];
+      if (dndDays(d)) return ["On DND, check later", "low", ICONS.dnd];
+      if (svc.code === "T") return ["Turnover clean" + (auditOpen(d) ? " + audit" : ""), "high", ICONS.audit];
+      if (svc.code === "W") return ["Weekly full service", "medium", ICONS.dirty];
+      if (svc.code === "R") return ["Mid-week refresh", "low", ICONS.dirty];
+      return ["Service suite", "low", ICONS.dirty];
+    };
+    const OCCL = Object.fromEntries(OCC);
+    $("ptasks").innerHTML = `<div class="pth"><h3>Priority tasks <span class="count">${list.length}</span></h3><button type="button" class="linkbtn" data-view="list">View all →</button></div>
+      ${list.length ? `<div class="ptl" role="list">${list.slice(0, 6).map((s) => { const [t, p, ico] = task(s), d = state.docs[s]; return `<button type="button" class="ptr s-${d.status}" role="listitem" data-suite="${s}"><span class="pti">${ico}</span><span class="ptt">${esc(t)}</span><span class="pts">${s}</span><span class="pto">${esc(OCCL[d.occ] || "")}</span><span class="pp ${p}">${p[0].toUpperCase() + p.slice(1)}</span></button>`; }).join("")}</div>` : `<div class="empty small">Nothing waiting. Every logged suite is done.</div>`}`;
   }
 
   function renderGreet() {
     const h = new Date().getHours(), hi = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
     const n = (k) => suites.filter((s) => state.docs[s]?.status === k).length;
     const g = suites.filter((s) => guestOpen(state.docs[s])).length;
-    $("greet").innerHTML = `<div class="gtop"><span class="gwho">${state.role === "housekeeping" ? "Housekeeping" : "Front desk"} · Houston IAH</span>
+    const now = new Date();
+    $("greet").innerHTML = `<div class="gtop"><span class="gwho">Extended Stay America · Houston IAH Airport · ${state.role === "housekeeping" ? "Housekeeping" : "Front desk"}</span>
+        <span class="gclock">${now.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })}<span class="gsep"></span>${now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
         <button type="button" class="gbell" data-filter="guest" aria-label="${g} guest requests">${ICONS.guest}${g ? `<i>${g}</i>` : ""}</button></div>
       <h1>${hi} <span aria-hidden="true">👋</span></h1>
-      <p>${n("dirty")} suites to service and ${n("in_progress")} in progress today.</p>
+      <p>Here's what's happening with housekeeping today: ${n("dirty")} suites to service, ${n("in_progress")} in progress.</p>
       <svg class="gart" viewBox="0 0 120 90" aria-hidden="true"><path d="M92 46c-2-14 4-26 14-32-1 12-5 22-14 32zM90 47c-10-8-14-20-12-30 8 6 12 17 12 30zM93 48c6-10 16-14 24-13-6 7-14 11-24 13z" fill="#5aa04a"/><rect x="84" y="46" width="14" height="22" rx="4" fill="#e8eef3" stroke="#cfd8e0"/>
         <rect x="18" y="62" width="62" height="14" rx="7" fill="#fff" stroke="#dfe3e8"/><rect x="22" y="49" width="54" height="14" rx="7" fill="#fbfbfa" stroke="#dfe3e8"/><rect x="26" y="36" width="46" height="14" rx="7" fill="#fff" stroke="#dfe3e8"/><path d="M30 43h38M26 56h46M22 69h54" stroke="#eef1f4" stroke-width="2"/></svg>`;
     const tn = $("tabReqN"); tn.hidden = !g; tn.textContent = g;
@@ -1729,6 +1847,8 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     else $("board").innerHTML = `<div class="worklist">${workList(suites.filter((s) => fl.includes(Number(s[0])) && matches(s)))}</div>`;
   }
 
+  ICONS.attention = ic('<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>');
+  ICONS.ready = ICONS.clean;
   // Who made the last change. Guests write through the guest request page (updatedBy "guest", guestRequests [{type, at}]).
   const WHO = { housekeeping: "Housekeeping", frontdesk: "Front desk", guest: "Guest" };
   const who = (u) => WHO[u] || "";
@@ -2061,6 +2181,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
   })();
   // Keep "2 min ago" labels fresh
   setInterval(() => { if (state.mode === "db") renderLive(); }, 30000);
+  setInterval(() => { try { renderGreet(); } catch {} }, 30000);
   // Phone tab bar: jumps between the sections of the page
   $("tabbar").addEventListener("click", (e) => {
     const b = e.target.closest("[data-tab]"); if (!b) return;
