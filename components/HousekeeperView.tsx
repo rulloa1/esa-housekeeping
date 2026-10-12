@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { toRoom, toRooms } from "@/lib/roomView";
 import type { RoomDoc, RoomStatus, Role } from "@/lib/models";
 import { STAFF_ATTENDANTS, DEFAULT_CHECKLIST_TEMPLATE } from "@/lib/models";
 import { NavigationHeader } from "./NavigationHeader";
@@ -60,7 +61,7 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
     return () => clearTimeout(timer);
   }, [version]);
 
-  const allRooms = useMemo(() => Object.values(docs), [docs]);
+  const allRooms = useMemo(() => Object.values(toRooms(docs)), [docs]);
 
   // Rooms filtered by staff assignment and options
   const myRooms = useMemo(() => {
@@ -619,7 +620,7 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
 
       {historyRoom && (
         <RoomHistoryDrawer
-          room={docs[historyRoom.id] ?? historyRoom}
+          room={docs[historyRoom.id] ? toRoom(historyRoom.id, docs[historyRoom.id]) : historyRoom}
           onClose={() => setHistoryRoom(null)}
           canManage={["supervisor", "frontdesk", "admin"].includes(currentRole)}
           userName={selectedAttendant}
