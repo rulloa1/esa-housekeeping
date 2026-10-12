@@ -33,6 +33,9 @@ export default async function GuestPage({
     );
   }
   const doc = ((await get(suite)) ?? {}) as Record<string, any>;
-  const requests = Array.isArray(doc.guestRequests) ? doc.guestRequests : [];
+  // Only what the guest needs: staff names stay on the staff side.
+  const requests = (Array.isArray(doc.guestRequests) ? doc.guestRequests : []).map(
+    (r: { type: string; at: string; doneAt?: string }) => ({ type: r.type, at: r.at, doneAt: r.doneAt }),
+  );
   return <GuestApp lang={lang} suite={suite} k={k!} dnd={Boolean(doc.dndSince)} initialRequests={requests} />;
 }

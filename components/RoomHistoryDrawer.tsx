@@ -1,16 +1,67 @@
 "use client";
 
-import type { RoomDoc } from "@/lib/models";
+import { useState } from "react";
+import { isGuestTask, type RoomDoc } from "@/lib/models";
 
 interface RoomHistoryDrawerProps {
   room: RoomDoc;
   onClose: () => void;
+  // Supervisors can resolve maintenance and mark supplies delivered; anyone can close a guest request.
+  canManage?: boolean;
+  userName?: string;
+  onUpdated?: (room: RoomDoc) => void;
 }
 
-export function RoomHistoryDrawer({ room, onClose }: RoomHistoryDrawerProps) {
+const GUEST_LABEL: Record<string, string> = {
+  cleaning: "Cleaning requested",
+  towels: "Fresh towels requested",
+  amenities: "Amenities refill requested",
+  dnd_on: "Do Not Disturb on",
+  dnd_off: "Do Not Disturb off",
+};
+
+const timeOf = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+const actionButton = {
+  padding: "6px 12px",
+  minHeight: 32,
+  borderRadius: 8,
+  border: "1px solid var(--esa-green)",
+  background: "#FFFFFF",
+  color: "var(--esa-green)",
+  fontWeight: 700,
+  fontSize: 12,
+  cursor: "pointer",
+  whiteSpace: "nowrap" as const,
+};
+
+export function RoomHistoryDrawer({ room, onClose, canManage = false, userName, onUpdated }: RoomHistoryDrawerProps) {
   const history = room.history || [];
   const maintenance = room.maintenanceIssues || [];
   const supplies = room.supplyRequests || [];
+  const guestRequests = room.guestRequests || [];
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Sends one close-out action (resolve_maintenance, fulfill_supplies, guest_request_done).
+  const act = async (key: string, body: Record<string, unknown>) => {
+    setBusy(key);
+    setError(null);
+    try {
+      const res = await fetch(`/api/suites/${room.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...body, userName }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Couldn't save. Try again.");
+      onUpdated?.(data.room);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't save. Try again.");
+    } finally {
+      setBusy(null);
+    }
+  };
 
   return (
     <div
@@ -121,6 +172,57 @@ export function RoomHistoryDrawer({ room, onClose }: RoomHistoryDrawerProps) {
             </div>
           )}
 
+          {error && (
+            <div role="alert" style={{ padding: "8px 12px", borderRadius: 8, background: "#FEF2F2", color: "#B91C1C", fontSize: 13 }}>
+              {error}
+            </div>
+          )}
+
+          {/* Guest Requests */}
+          {guestRequests.length > 0 && (
+            <div>
+              <h3 style={{ margin: "0 0 8px", fontSize: 14, fontWeight: 700, color: "#1D4ED8" }}>
+                Guest Requests ({guestRequests.filter((g) => isGuestTask(g.type) && !g.doneAt).length} open)
+              </h3>
+              <div style={{ display: "grid", gap: 8 }}>
+                {guestRequests.map((g) => (
+                  <div
+                    key={g.at}
+                    style={{
+                      padding: "8px 12px",
+                      borderRadius: 8,
+                      border: "1px solid #BFDBFE",
+                      background: isGuestTask(g.type) && !g.doneAt ? "#EFF6FF" : "#FFFFFF",
+                      fontSize: 12,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
+                    <div>
+                      <strong>{GUEST_LABEL[g.type] ?? g.type}</strong>
+                      <div style={{ color: "var(--text-muted)", fontSize: 11 }}>
+                        {timeOf(g.at)}
+                        {g.doneAt ? ` · Done by ${g.doneBy} at ${timeOf(g.doneAt)}` : ""}
+                      </div>
+                    </div>
+                    {isGuestTask(g.type) && !g.doneAt && onUpdated && (
+                      <button
+                        type="button"
+                        style={actionButton}
+                        disabled={busy !== null}
+                        onClick={() => act(`g-${g.at}`, { action: "guest_request_done", requestAt: g.at })}
+                      >
+                        {busy === `g-${g.at}` ? "Saving…" : "Mark done"}
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Maintenance Issues */}
           {maintenance.length > 0 && (
             <div>
@@ -145,8 +247,19 @@ export function RoomHistoryDrawer({ room, onClose }: RoomHistoryDrawerProps) {
                     </div>
                     <div style={{ margin: "4px 0", color: "var(--text-main)" }}>{m.description}</div>
                     <div style={{ color: "var(--text-muted)", fontSize: 11 }}>
-                      Reported by {m.reportedBy} at {new Date(m.reportedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      Reported by {m.reportedBy} at {timeOf(m.reportedAt)}
+                      {m.resolvedAt ? ` · Resolved by ${m.resolvedBy} at ${timeOf(m.resolvedAt)}` : ""}
                     </div>
+                    {m.status !== "resolved" && canManage && onUpdated && (
+                      <button
+                        type="button"
+                        style={{ ...actionButton, marginTop: 8 }}
+                        disabled={busy !== null}
+                        onClick={() => act(`m-${m.id}`, { action: "resolve_maintenance", issueId: m.id })}
+                      >
+                        {busy === `m-${m.id}` ? "Saving…" : room.status === "maintenance" ? "Resolve & return to service" : "Mark resolved"}
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -180,6 +293,16 @@ export function RoomHistoryDrawer({ room, onClose }: RoomHistoryDrawerProps) {
                         Requested by {s.requestedBy}
                       </div>
                     </div>
+                    {s.status !== "fulfilled" && canManage && onUpdated ? (
+                      <button
+                        type="button"
+                        style={actionButton}
+                        disabled={busy !== null}
+                        onClick={() => act(`s-${s.id}`, { action: "fulfill_supplies", requestId: s.id })}
+                      >
+                        {busy === `s-${s.id}` ? "Saving…" : "Mark delivered"}
+                      </button>
+                    ) : (
                     <span
                       style={{
                         padding: "2px 8px",
@@ -192,6 +315,7 @@ export function RoomHistoryDrawer({ room, onClose }: RoomHistoryDrawerProps) {
                     >
                       {s.status.toUpperCase()}
                     </span>
+                    )}
                   </div>
                 ))}
               </div>
