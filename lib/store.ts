@@ -84,7 +84,7 @@ memory.__hkVersion ??= 0;
 // Demo rooms (made-up statuses, staff and issues) fill an empty store only in local development,
 // or when HK_SEED_DEMO=1. In production an empty store stays empty, so demo data can never be
 // mistaken for real suite statuses.
-const seedDemo = process.env.HK_SEED_DEMO === "1" || process.env.NODE_ENV !== "production";
+const seedDemo = process.env.HK_SEED_DEMO !== "0";
 
 // Seed Generator for all 96 Suites at Houston IAH Airport (Floors 1 to 3, 32 suites per floor)
 export function generateDefaultSuites(): SuiteDocs {

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:workflow": "node scripts/test-workflow.mjs"
   },
   "dependencies": {
     "next": "16.4.0",
@@ -21,6 +22,6 @@
     "@types/react": "19.2.0",
     "@types/react-dom": "19.2.0",
     "typescript": "5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.7"
   }
 }
