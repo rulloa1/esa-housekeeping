@@ -479,7 +479,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                 <span>•</span>
                 <span>🌤️ Morning Shift (7:00 AM – 3:30 PM)</span>
                 <span>•</span>
-                <span>📍 15615 John F Kennedy Blvd</span>
+                <span>📍 1500 N Sam Houston Pkwy E</span>
               </div>
             </div>
 
