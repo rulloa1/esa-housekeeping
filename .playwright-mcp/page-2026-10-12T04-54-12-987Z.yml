@@ -1,0 +1,83 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - button "Menu" [ref=e4] [cursor=pointer]
+      - combobox "Select floor" [ref=e6] [cursor=pointer]:
+        - option "Floor 1"
+        - option "Floor 2"
+        - option "Floor 3" [selected]
+        - option "Floor 4"
+    - generic [ref=e7]: Today, Oct 11
+  - generic [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e11]: "4"
+      - generic [ref=e12]: due
+    - generic [ref=e13]:
+      - generic [ref=e15]: "2"
+      - generic [ref=e16]: done
+    - generic [ref=e17]:
+      - generic [ref=e19]: "2"
+      - generic [ref=e20]: declined
+  - list [ref=e21]:
+    - listitem [ref=e22] [cursor=pointer]:
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - generic [ref=e27]: "301"
+          - generic [ref=e28]: Due
+        - generic [ref=e29]: Checkout · Deep clean
+        - generic [ref=e30]: Expected ready by 2:00 PM
+    - listitem [ref=e36] [cursor=pointer]:
+      - generic [ref=e39]:
+        - generic [ref=e40]:
+          - generic [ref=e41]: "302"
+          - generic [ref=e42]: Due
+        - generic [ref=e43]: Occupied · Weekly refresh
+        - generic [ref=e44]: Guest since Sep 14 · 27 nights
+      - generic [ref=e49]: Guest requests no vacuuming before 10 AM
+    - listitem [ref=e50] [cursor=pointer]:
+      - generic [ref=e53]:
+        - generic [ref=e54]:
+          - generic [ref=e55]: "304"
+          - generic [ref=e56]: Done
+        - generic [ref=e57]: Occupied · Refreshed
+        - generic [ref=e58]: Completed at 10:32 AM
+    - listitem [ref=e63] [cursor=pointer]:
+      - generic [ref=e66]:
+        - generic [ref=e67]:
+          - generic [ref=e68]: "305"
+          - generic [ref=e69]: Declined
+        - generic [ref=e70]: Occupied · Guest declined
+        - generic [ref=e71]: Next scheduled Oct 18
+    - listitem [ref=e76] [cursor=pointer]:
+      - generic [ref=e79]:
+        - generic [ref=e80]:
+          - generic [ref=e81]: "306"
+          - generic [ref=e82]: Checkout
+        - generic [ref=e83]: Vacating · Full turnover
+        - generic [ref=e84]: Guest checking out by 11 AM
+    - listitem [ref=e89] [cursor=pointer]:
+      - generic [ref=e92]:
+        - generic [ref=e93]:
+          - generic [ref=e94]: "307"
+          - generic [ref=e95]: Done
+        - generic [ref=e96]: Occupied · Refreshed
+        - generic [ref=e97]: Completed at 9:47 AM
+    - listitem [ref=e102] [cursor=pointer]:
+      - generic [ref=e105]:
+        - generic [ref=e106]:
+          - generic [ref=e107]: "308"
+          - generic [ref=e108]: Due
+        - generic [ref=e109]: Occupied · Weekly refresh
+        - generic [ref=e110]: Guest since Oct 2 · 9 nights
+    - listitem [ref=e115] [cursor=pointer]:
+      - generic [ref=e118]:
+        - generic [ref=e119]:
+          - generic [ref=e120]: "309"
+          - generic [ref=e121]: Declined
+        - generic [ref=e122]: Occupied · Guest declined
+        - generic [ref=e123]: Next scheduled Oct 16
+  - navigation [ref=e131]:
+    - button "Rooms" [ref=e132] [cursor=pointer]
+    - button "Supplies" [ref=e135] [cursor=pointer]
+    - button "History" [ref=e138] [cursor=pointer]
+    - button "Account" [ref=e141] [cursor=pointer]
