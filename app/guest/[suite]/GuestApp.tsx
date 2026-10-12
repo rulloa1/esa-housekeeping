@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import LangToggle from "@/components/LangToggle";
+import BrandLogo from "@/components/BrandLogo";
 
 type Req = { type: string; at: string };
 type Lang = "en" | "es";
@@ -69,8 +70,9 @@ const TEXT = {
   },
 };
 
-const ink = "#0f172a";
-const muted = "#5b6474";
+const ink = "#483729";
+const muted = "#7a6a5d";
+const green = "#338802";
 
 // Simple line icons, drawn in white on the coloured tiles.
 const icon = (d: string) => (
@@ -137,20 +139,20 @@ export default function GuestApp({ lang, suite, k, dnd: initialDnd, initialReque
 
   const tile = (type: string, [title, sub, done]: string[], bg: string, ic: React.ReactNode) => ({ type, title, sub, done, bg, ic });
   const tiles = [
-    tile("cleaning", t.cleaning, "linear-gradient(150deg, #2c4fa3, #1d3577)", ICONS.cleaning),
-    tile("towels", t.towels, "linear-gradient(150deg, #4a9a7a, #2f7558)", ICONS.towels),
-    tile("amenities", t.amenities, "linear-gradient(150deg, #6c5bd0, #4c3da6)", ICONS.amenities),
+    tile("cleaning", t.cleaning, "linear-gradient(150deg, #3d9a0a, #338802)", ICONS.cleaning),
+    tile("towels", t.towels, "linear-gradient(150deg, #1d7006, #145E00)", ICONS.towels),
+    tile("amenities", t.amenities, "linear-gradient(150deg, #6b5442, #483729)", ICONS.amenities),
     dnd
-      ? tile("dnd_off", t.dndOff, "linear-gradient(150deg, #c2410c, #9a3412)", ICONS.dnd)
-      : tile("dnd_on", t.dndOn, "linear-gradient(150deg, #f2a043, #e07d1f)", ICONS.dnd),
+      ? tile("dnd_off", t.dndOff, "linear-gradient(150deg, #b45309, #92400e)", ICONS.dnd)
+      : tile("dnd_on", t.dndOn, "linear-gradient(150deg, #e59a2e, #c97d12)", ICONS.dnd),
   ];
 
   return (
-    <div lang={lang} style={{ minHeight: "100dvh", background: "#f6f7fb", color: ink, fontFamily: "ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif" }}>
+    <div lang={lang} style={{ minHeight: "100dvh", background: "#f5f6f4", color: ink, fontFamily: 'Arial, "Helvetica Neue", Helvetica, sans-serif' }}>
       <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 16px calc(96px + env(safe-area-inset-bottom))" }}>
         <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 2px 10px" }}>
-          <span style={{ display: "grid", gap: 2 }}>
-            <span style={{ fontSize: 11, letterSpacing: 1.1, textTransform: "uppercase", color: muted, fontWeight: 600 }}>Extended Stay America</span>
+          <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <BrandLogo height={36} />
             <span style={{ fontWeight: 700, fontSize: 17 }}>{t.suite} {suite}</span>
           </span>
           <LangToggle lang={lang} />
@@ -160,10 +162,11 @@ export default function GuestApp({ lang, suite, k, dnd: initialDnd, initialReque
           <>
             <section
               style={{
-                borderRadius: 22,
+                borderRadius: 4,
                 padding: "26px 22px 24px",
-                background: "radial-gradient(120% 140% at 100% 0%, #e3eefc 0%, #f4f1ea 55%, #ffffff 100%)",
-                boxShadow: "0 1px 2px rgba(15,23,42,.05), 0 10px 30px rgba(15,23,42,.06)",
+                background: "linear-gradient(135deg, #ffffff 0%, #ffffff 55%, #eef6e8 100%)",
+                borderLeft: `4px solid ${green}`,
+                boxShadow: "0 1px 2px rgba(72,55,41,.08), 0 8px 24px rgba(72,55,41,.06)",
               }}
             >
               <h1 style={{ margin: 0, fontSize: 30, lineHeight: 1.15, letterSpacing: -0.4 }}>
@@ -171,7 +174,7 @@ export default function GuestApp({ lang, suite, k, dnd: initialDnd, initialReque
               </h1>
               <p style={{ margin: "10px 0 0", fontSize: 16, color: muted, maxWidth: 260 }}>{t.intro}</p>
               {dnd && (
-                <p style={{ margin: "14px 0 0", display: "inline-block", padding: "6px 12px", borderRadius: 999, background: "#fff1e6", color: "#9a3412", fontSize: 13, fontWeight: 600 }}>
+                <p style={{ margin: "14px 0 0", display: "inline-block", padding: "6px 12px", borderRadius: 4, background: "#fff1e0", color: "#92400e", fontSize: 13, fontWeight: 600 }}>
                   {t.dndOnBadge}
                 </p>
               )}
@@ -190,12 +193,12 @@ export default function GuestApp({ lang, suite, k, dnd: initialDnd, initialReque
                     position: "relative",
                     textAlign: "left",
                     border: 0,
-                    borderRadius: 18,
+                    borderRadius: 4,
                     padding: "16px 14px 14px",
                     minHeight: 150,
                     color: "#fff",
                     background: tl.bg,
-                    boxShadow: "0 8px 20px rgba(15,23,42,.14)",
+                    boxShadow: "0 6px 16px rgba(72,55,41,.16)",
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "space-between",
@@ -211,7 +214,7 @@ export default function GuestApp({ lang, suite, k, dnd: initialDnd, initialReque
                   </span>
                   <span
                     aria-hidden="true"
-                    style={{ position: "absolute", right: 12, bottom: 14, width: 26, height: 26, borderRadius: 13, background: "rgba(255,255,255,.95)", color: "#1f2937", display: "grid", placeItems: "center", fontSize: 15, fontWeight: 700 }}
+                    style={{ position: "absolute", right: 12, bottom: 14, width: 26, height: 26, borderRadius: 13, background: "rgba(255,255,255,.95)", color: ink, display: "grid", placeItems: "center", fontSize: 15, fontWeight: 700 }}
                   >
                     ›
                   </span>
@@ -219,8 +222,8 @@ export default function GuestApp({ lang, suite, k, dnd: initialDnd, initialReque
               ))}
             </div>
 
-            <div style={{ marginTop: 16, display: "flex", gap: 14, alignItems: "center", padding: "16px", borderRadius: 16, background: "#fff", boxShadow: "0 1px 2px rgba(15,23,42,.05)" }}>
-              <span style={{ width: 40, height: 40, borderRadius: 20, background: "#e8f4ec", color: "#2f7558", display: "grid", placeItems: "center", flexShrink: 0 }}>{ICONS.leaf}</span>
+            <div style={{ marginTop: 16, display: "flex", gap: 14, alignItems: "center", padding: "16px", borderRadius: 4, background: "#fff", border: "1px solid #DBDEDB" }}>
+              <span style={{ width: 40, height: 40, borderRadius: 20, background: "#eef6e8", color: green, display: "grid", placeItems: "center", flexShrink: 0 }}>{ICONS.leaf}</span>
               <span>
                 <b style={{ display: "block", fontSize: 15 }}>{t.elseTitle}</b>
                 <span style={{ color: muted, fontSize: 14 }}>{t.elseBody}</span>
@@ -235,7 +238,7 @@ export default function GuestApp({ lang, suite, k, dnd: initialDnd, initialReque
             ) : (
               <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 10 }}>
                 {requests.map((r) => (
-                  <li key={r.at + r.type} style={{ background: "#fff", borderRadius: 14, padding: "14px 16px", boxShadow: "0 1px 2px rgba(15,23,42,.05)", display: "flex", justifyContent: "space-between", gap: 12 }}>
+                  <li key={r.at + r.type} style={{ background: "#fff", borderRadius: 4, padding: "14px 16px", border: "1px solid #DBDEDB", display: "flex", justifyContent: "space-between", gap: 12 }}>
                     <b style={{ fontWeight: 600 }}>{t.labels[r.type] ?? r.type}</b>
                     <span style={{ color: muted, fontSize: 14, whiteSpace: "nowrap" }}>{when(r.at, lang)}</span>
                   </li>
@@ -257,8 +260,8 @@ export default function GuestApp({ lang, suite, k, dnd: initialDnd, initialReque
             maxWidth: 448,
             margin: "0 auto",
             padding: "12px 16px",
-            borderRadius: 14,
-            background: toast.ok ? "#0f172a" : "#b42318",
+            borderRadius: 4,
+            background: toast.ok ? ink : "#b42318",
             color: "#fff",
             fontSize: 15,
             boxShadow: "0 10px 30px rgba(15,23,42,.25)",
@@ -277,7 +280,7 @@ export default function GuestApp({ lang, suite, k, dnd: initialDnd, initialReque
           background: "rgba(255,255,255,.94)",
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
-          borderTop: "1px solid #e5e7eb",
+          borderTop: "1px solid #DBDEDB",
           paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
@@ -292,7 +295,7 @@ export default function GuestApp({ lang, suite, k, dnd: initialDnd, initialReque
               key={id}
               onClick={() => setTab(id)}
               aria-current={tab === id ? "page" : undefined}
-              style={{ border: 0, background: "none", padding: "10px 0 12px", display: "grid", justifyItems: "center", gap: 2, color: tab === id ? "#1d4ed8" : muted, font: "inherit", fontSize: 12, fontWeight: tab === id ? 700 : 500, cursor: "pointer" }}
+              style={{ border: 0, background: "none", padding: "10px 0 12px", display: "grid", justifyItems: "center", gap: 2, color: tab === id ? green : muted, font: "inherit", fontSize: 12, fontWeight: tab === id ? 700 : 500, cursor: "pointer" }}
             >
               {ic}
               {label}

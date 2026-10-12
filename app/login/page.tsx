@@ -1,6 +1,7 @@
 import { ROLES, type Role } from "@/lib/auth";
 import { getLang } from "@/lib/lang";
 import LangToggle from "@/components/LangToggle";
+import BrandLogo from "@/components/BrandLogo";
 
 const TEXT = {
   en: { signIn: "Sign in", role: "Role", pin: "PIN", error: "That PIN didn't match. Try again.", roles: ROLES },
@@ -20,7 +21,7 @@ const BACKGROUND =
   "url(/login-bg.jpg) center / cover no-repeat, " +
   "linear-gradient(160deg, #1d3c5e 0%, #3f6f93 55%, #c9d8e4 100%)";
 
-const field = { padding: 12, fontSize: 16, borderRadius: 10, border: "1px solid #cbd5e1", background: "#fff" };
+const field = { padding: 12, fontSize: 16, borderRadius: 0, border: "1px solid #DBDEDB", background: "#fff", color: "#483729", fontFamily: "inherit" };
 
 export default async function Login({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;
@@ -47,16 +48,18 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
           maxWidth: 380,
           boxSizing: "border-box",
           padding: "28px 24px",
-          borderRadius: 18,
-          background: "rgba(255, 255, 255, 0.86)",
+          borderRadius: 4,
+          borderTop: "4px solid #338802",
+          background: "rgba(255, 255, 255, 0.92)",
           backdropFilter: "blur(14px)",
           WebkitBackdropFilter: "blur(14px)",
           boxShadow: "0 20px 50px rgba(0, 0, 0, 0.3)",
-          color: "#0f172a",
+          color: "#483729",
         }}
       >
-        <p style={{ margin: 0, fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase", color: "#475569" }}>
-          Extended Stay America · Houston IAH
+        <BrandLogo height={44} />
+        <p style={{ margin: "14px 0 0", fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase", color: "#7a6a5d" }}>
+          Houston IAH Airport
         </p>
         <h1 style={{ margin: "6px 0 20px", fontSize: 28 }}>{t.signIn}</h1>
         <form method="post" action="/api/login" style={{ display: "grid", gap: 14 }}>
@@ -75,7 +78,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
           {error && <p style={{ color: "#b42318", margin: 0 }}>{t.error}</p>}
           <button
             type="submit"
-            style={{ padding: 14, fontSize: 16, fontWeight: 600, borderRadius: 10, border: 0, background: "#1d4ed8", color: "#fff" }}
+            style={{ padding: 14, fontSize: 16, fontWeight: 600, borderRadius: 0, border: "1px solid #338802", background: "#338802", color: "#fff", fontFamily: "inherit", cursor: "pointer" }}
           >
             {t.signIn}
           </button>

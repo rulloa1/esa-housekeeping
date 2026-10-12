@@ -17,14 +17,14 @@ export default function LangToggle({ lang, style }: { lang: "en" | "es"; style?:
       lang={l}
       style={{
         border: 0,
-        borderRadius: 999,
+        borderRadius: 3,
         padding: "6px 12px",
         font: "inherit",
         fontSize: 13,
         fontWeight: 700,
         cursor: "pointer",
-        background: lang === l ? "#0f172a" : "transparent",
-        color: lang === l ? "#fff" : "#334155",
+        background: lang === l ? "#338802" : "transparent",
+        color: lang === l ? "#fff" : "#483729",
       }}
     >
       {label}
@@ -34,7 +34,7 @@ export default function LangToggle({ lang, style }: { lang: "en" | "es"; style?:
     <div
       role="group"
       aria-label={lang === "es" ? "Idioma" : "Language"}
-      style={{ display: "inline-flex", gap: 2, padding: 3, borderRadius: 999, background: "rgba(255,255,255,.9)", boxShadow: "0 1px 3px rgba(15,23,42,.15)", ...style }}
+      style={{ display: "inline-flex", gap: 2, padding: 3, borderRadius: 4, background: "#fff", border: "1px solid #DBDEDB", ...style }}
     >
       {btn("en", "EN")}
       {btn("es", "ES")}

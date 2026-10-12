@@ -6,7 +6,7 @@ import GuestApp from "./GuestApp";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Housekeeping · Extended Stay America" };
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#f6f7fb" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#338802" };
 
 // Guest-facing request page, opened from the QR code or link on a suite's card:
 // /guest/231?k=<key>. No login; the key ties the page to that one suite.
@@ -22,9 +22,9 @@ export default async function GuestPage({
   const lang = await getLang();
   if (!(await validGuest(suite, k))) {
     return (
-      <main lang={lang} style={{ maxWidth: 420, margin: "0 auto", padding: "64px 24px", textAlign: "center", color: "#0f172a" }}>
+      <main lang={lang} style={{ maxWidth: 420, margin: "0 auto", padding: "64px 24px", textAlign: "center", color: "#483729" }}>
         <h1 style={{ fontSize: 22 }}>{lang === "es" ? "Este enlace no es válido" : "This link isn't valid"}</h1>
-        <p style={{ color: "#475569" }}>
+        <p style={{ color: "#7a6a5d" }}>
           {lang === "es"
             ? "Escanea el código QR de la tarjeta en tu suite o llama a recepción."
             : "Scan the QR code on the card in your suite, or call the front desk."}
