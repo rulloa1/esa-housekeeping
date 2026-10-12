@@ -42,37 +42,40 @@ export async function POST(req: Request) {
 
   const now = new Date().toISOString();
   const userName = body.userName || "Supervisor";
-  const { get, put } = await import("@/lib/store");
+  const { get, put, withSuiteLock } = await import("@/lib/store");
 
   let updatedCount = 0;
   for (const suiteId of body.suiteIds) {
-    const existing = await get(suiteId);
-    if (!existing) continue;
+    // Each suite under its own lock, so a board or housekeeper save at the same moment isn't lost.
+    await withSuiteLock(suiteId, async () => {
+      const existing = await get(suiteId);
+      if (!existing) return;
 
-    const room = { ...existing };
-    if (body.action === "batch_assign") {
-      room.attendant = body.attendant || null;
-      if (body.priority) room.priority = body.priority;
-      if (body.instructions !== undefined) room.instructions = body.instructions;
-      if (room.status === "dirty" && room.attendant) {
-        room.status = "assigned";
+      const room = { ...existing };
+      if (body.action === "batch_assign") {
+        room.attendant = body.attendant || null;
+        if (body.priority) room.priority = body.priority;
+        if (body.instructions !== undefined) room.instructions = body.instructions;
+        if (room.status === "dirty" && room.attendant) {
+          room.status = "assigned";
+        }
+
+        const auditEntry = {
+          id: `hist_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          event: "Batch Assignment",
+          details: `Assigned to ${room.attendant || "Unassigned"}${body.priority ? ` (${body.priority} priority)` : ""}`,
+          by: userName,
+          role,
+          timestamp: now,
+        };
+
+        room.history = [auditEntry, ...(room.history || [])].slice(0, 50);
+        room.updatedAt = now;
+        room.updatedBy = userName;
+        await put(suiteId, room);
+        updatedCount++;
       }
-
-      const auditEntry = {
-        id: `hist_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-        event: "Batch Assignment",
-        details: `Assigned to ${room.attendant || "Unassigned"}${body.priority ? ` (${body.priority} priority)` : ""}`,
-        by: userName,
-        role,
-        timestamp: now,
-      };
-
-      room.history = [auditEntry, ...(room.history || [])];
-      room.updatedAt = now;
-      room.updatedBy = userName;
-      await put(suiteId, room);
-      updatedCount++;
-    }
+    });
   }
 
   const updated = await getAll();

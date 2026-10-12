@@ -1,5 +1,6 @@
 // Extended Stay America Suites — Houston IAH Airport
 // Authentication and Authorization with Signed HMAC Cookies
+import { createHash, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import type { Role } from "./models";
 
@@ -40,6 +41,18 @@ export function pinFor(role: string): string | undefined {
   return undefined;
 }
 
+const digest = (s: string) => createHash("sha256").update(s).digest();
+
+// Constant-time comparison, so response timing doesn't reveal how much of a PIN or signature matched.
+export function safeEqual(a: string, b: string): boolean {
+  return timingSafeEqual(digest(a), digest(b));
+}
+
+export function checkPin(role: string, pin: string): boolean {
+  const expected = pinFor(role);
+  return Boolean(expected) && safeEqual(pin, expected!);
+}
+
 let key: Promise<CryptoKey> | undefined;
 
 export async function sign(value: string): Promise<string> {
@@ -71,7 +84,7 @@ export async function getRole(): Promise<Role | null> {
   if (!raw) return null;
   const [role, expires, sig] = raw.split(".");
   if (!(role in ROLES) || Number(expires) < Date.now()) return null;
-  if (sig !== (await sign(`${role}.${expires}`))) return null;
+  if (!sig || !safeEqual(sig, await sign(`${role}.${expires}`))) return null;
   return role as Role;
 }
 

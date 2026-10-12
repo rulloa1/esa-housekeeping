@@ -9,6 +9,7 @@ const TEXT = {
     role: "Role",
     pin: "Staff PIN",
     error: "That PIN didn't match. Try again.",
+    locked: (min: number) => `Too many wrong PINs from this device. Try again in ${min} minute${min === 1 ? "" : "s"}.`,
     pinPlaceholder: "Enter PIN",
     roles: {
       housekeeper: "Housekeeper",
@@ -21,6 +22,7 @@ const TEXT = {
     role: "Puesto",
     pin: "PIN del personal",
     error: "Ese PIN no coincide. Inténtalo de nuevo.",
+    locked: (min: number) => `Demasiados PIN incorrectos desde este dispositivo. Inténtalo de nuevo en ${min} minuto${min === 1 ? "" : "s"}.`,
     pinPlaceholder: "Ingresar PIN",
     roles: {
       housekeeper: "Limpieza / Housekeeping",
@@ -49,8 +51,8 @@ const field = {
   outline: "none",
 };
 
-export default async function Login({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
-  const { error } = await searchParams;
+export default async function Login({ searchParams }: { searchParams: Promise<{ error?: string; wait?: string }> }) {
+  const { error, wait } = await searchParams;
   const lang = await getLang();
   const t = TEXT[lang];
 
@@ -120,8 +122,8 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
           </label>
 
           {error && (
-            <div style={{ padding: "10px 12px", borderRadius: 8, background: "#FEE2E2", border: "1px solid #FECACA", color: "#DC2626", fontSize: 13, fontWeight: 600 }}>
-              {t.error}
+            <div role="alert" style={{ padding: "10px 12px", borderRadius: 8, background: "#FEE2E2", border: "1px solid #FECACA", color: "#DC2626", fontSize: 13, fontWeight: 600 }}>
+              {error === "locked" ? t.locked(Math.max(1, Number(wait) || 15)) : t.error}
             </div>
           )}
 

@@ -60,6 +60,7 @@ async function redis(...command: Command): Promise<unknown> {
   return ((await call("", command)) as Reply).result;
 }
 
+// Runs the commands as one MULTI/EXEC transaction. Returns the last command's result.
 async function transaction(...commands: Command[]): Promise<unknown> {
   if (redisUrl) {
     const results = await withTimeout(tcp().then((client) => {
@@ -76,9 +77,14 @@ async function transaction(...commands: Command[]): Promise<unknown> {
 }
 
 // In-Memory store for development
-const memory = globalThis as unknown as { __hkDocs?: Map<string, string>; __hkVersion?: number };
+const memory = globalThis as unknown as { __hkDocs?: Map<string, string>; __hkVersion?: number; __hkSnapshots?: Record<string, string> };
 memory.__hkDocs ??= new Map();
 memory.__hkVersion ??= 0;
+
+// Demo rooms (made-up statuses, staff and issues) fill an empty store only in local development,
+// or when HK_SEED_DEMO=1. In production an empty store stays empty, so demo data can never be
+// mistaken for real suite statuses.
+const seedDemo = process.env.HK_SEED_DEMO === "1" || process.env.NODE_ENV !== "production";
 
 // Seed Generator for all 96 Suites at Houston IAH Airport (Floors 1 to 3, 32 suites per floor)
 export function generateDefaultSuites(): SuiteDocs {
@@ -267,7 +273,7 @@ export async function getVersion(): Promise<number> {
 
 export async function getAll(): Promise<{ version: number; docs: SuiteDocs }> {
   if (!usingRedis) {
-    if (!memory.__hkDocs || memory.__hkDocs.size === 0) {
+    if (seedDemo && (!memory.__hkDocs || memory.__hkDocs.size === 0)) {
       // Auto-seed in-memory store
       const defaults = generateDefaultSuites();
       for (const [id, doc] of Object.entries(defaults)) {
@@ -283,7 +289,7 @@ export async function getAll(): Promise<{ version: number; docs: SuiteDocs }> {
   const [version, flat] = await Promise.all([getVersion(), redis("HGETALL", DOCS_KEY)]);
   const list = (flat as string[] | null) ?? [];
 
-  if (list.length === 0) {
+  if (list.length === 0 && seedDemo) {
     // Auto-seed Redis
     const defaults = generateDefaultSuites();
     const commands: Command[] = [];
@@ -337,4 +343,78 @@ export async function resetToDefault(): Promise<number> {
   }
   commands.push(["INCR", VERSION_KEY]);
   return Number(await transaction(...commands));
+}
+
+// Runs `fn` while holding a short per-suite lock, so two saves to the same suite (a board tap, a
+// guest request, a dashboard action) can't read-modify-write over each other. The lock expires
+// on its own if a server instance dies mid-save.
+const localLocks = new Map<string, Promise<unknown>>();
+export async function withSuiteLock<T>(id: string, fn: () => Promise<T>): Promise<T> {
+  if (!usingRedis) {
+    const run = (localLocks.get(id) ?? Promise.resolve()).catch(() => {}).then(fn);
+    localLocks.set(id, run);
+    return run;
+  }
+  const key = `hk:lock:${id}`;
+  const token = Math.random().toString(36).slice(2);
+  const deadline = Date.now() + 4000;
+  while ((await redis("SET", key, token, "NX", "PX", 5000)) !== "OK") {
+    if (Date.now() > deadline) throw new Error(`suite ${id} is busy`);
+    await new Promise((r) => setTimeout(r, 40 + Math.random() * 60));
+  }
+  try {
+    return await fn();
+  } finally {
+    if ((await redis("GET", key).catch(() => null)) === token) await redis("DEL", key).catch(() => {});
+  }
+}
+
+// ---------- Sign-in attempt counters ----------
+const kv = globalThis as unknown as { __hkKv?: Map<string, { v: number; exp: number }> };
+kv.__hkKv ??= new Map();
+
+// Adds 1 to a counter that expires `ttlSeconds` after it was created. Returns the new count.
+export async function hit(key: string, ttlSeconds: number): Promise<number> {
+  if (!usingRedis) {
+    const now = Date.now();
+    const cur = kv.__hkKv!.get(key);
+    const live = cur && cur.exp > now;
+    kv.__hkKv!.set(key, { v: live ? cur.v + 1 : 1, exp: live ? cur.exp : now + ttlSeconds * 1000 });
+    return kv.__hkKv!.get(key)!.v;
+  }
+  // SET … NX starts the window only when the counter is new; works on every Redis version.
+  return Number(await transaction(["SET", key, 0, "EX", ttlSeconds, "NX"], ["INCR", key]));
+}
+
+export async function count(key: string): Promise<number> {
+  if (!usingRedis) {
+    const cur = kv.__hkKv!.get(key);
+    return cur && cur.exp > Date.now() ? cur.v : 0;
+  }
+  return Number((await redis("GET", key)) ?? 0);
+}
+
+// Seconds until the counter expires (0 if there is none).
+export async function ttl(key: string): Promise<number> {
+  if (!usingRedis) {
+    const cur = kv.__hkKv!.get(key);
+    return cur && cur.exp > Date.now() ? Math.ceil((cur.exp - Date.now()) / 1000) : 0;
+  }
+  return Math.max(0, Number(await redis("TTL", key)));
+}
+
+export async function forget(key: string): Promise<void> {
+  if (!usingRedis) { kv.__hkKv!.delete(key); return; }
+  await redis("DEL", key);
+}
+
+// ---------- Daily snapshots ----------
+// A copy of every suite under hk:snapshot:<date>, kept 30 days (see app/api/cron/snapshot).
+const SNAPSHOT_DAYS = 30;
+export async function snapshot(date: string): Promise<number> {
+  const { docs } = await getAll();
+  const raw = JSON.stringify({ takenAt: new Date().toISOString(), docs });
+  if (usingRedis) await redis("SET", `hk:snapshot:${date}`, raw, "EX", SNAPSHOT_DAYS * 86400);
+  else memory.__hkSnapshots = { ...(memory.__hkSnapshots ?? {}), [date]: raw };
+  return Object.keys(docs).length;
 }
