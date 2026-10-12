@@ -13,12 +13,12 @@ The board (`board/housekeeping.html`) reads and writes suites through `window.cl
 - `PUT /api/suites/:id` saves one suite's document (101–332); the server sets `updatedBy` from the signed-in role, overriding the board's own role picker (which is preset to the same role)
 - `DELETE /api/suites/:id` clears a suite
 
-Every open board polls every 3 seconds (15 seconds while the tab is hidden), so a change made by housekeeping shows up for the front desk within a few seconds. Data lives in Upstash Redis.
+Every open board polls every 3 seconds (15 seconds while the tab is hidden), so a change made by housekeeping shows up for the front desk within a few seconds. Data lives in Redis.
 
 ## Deploy on Vercel
 
 1. Import this repo into Vercel.
-2. In the project's Storage tab, add Upstash Redis (free tier). It sets `KV_REST_API_URL` and `KV_REST_API_TOKEN`.
+2. In the project's Storage tab, add a Redis database (free tier). The app uses `REDIS_URL` if it is set, otherwise Upstash's `KV_REST_API_URL` and `KV_REST_API_TOKEN`.
 3. Add `AUTH_SECRET`, `HOUSEKEEPING_PIN` and `FRONTDESK_PIN` under Environment Variables, then redeploy.
 
 ## Run locally

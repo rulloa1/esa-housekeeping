@@ -1,17 +1,34 @@
-// Shared suite storage. Uses Upstash Redis (REST) when configured, otherwise an
-// in-memory map that only lasts for the life of one server process (local dev).
+// Shared suite storage, in order of preference:
+//   REDIS_URL           a Redis connection string (Vercel's Redis integration)
+//   KV_REST_API_*       Upstash Redis over REST
+//   neither             an in-memory map that lasts for one server process (local dev)
+import { createClient } from "redis";
 
 export type SuiteDocs = Record<string, unknown>;
+
+const redisUrl = process.env.REDIS_URL;
 
 const url = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
 const token = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
 
+const TIMEOUT_MS = 8000;
 const DOCS_KEY = "hk:suites";
 const VERSION_KEY = "hk:version";
 
-export const usingRedis = Boolean(url && token);
+export const usingRedis = Boolean(redisUrl || (url && token));
 
-const TIMEOUT_MS = 8000;
+// One connection per server instance, opened on first use and reused across requests.
+type TcpClient = ReturnType<typeof createClient>;
+const g = globalThis as unknown as { __hkRedis?: Promise<TcpClient> };
+function tcp(): Promise<TcpClient> {
+  g.__hkRedis ??= (async () => {
+    const client = createClient({ url: redisUrl, socket: { connectTimeout: TIMEOUT_MS } });
+    client.on("error", (err) => console.error("redis", err));
+    await client.connect();
+    return client;
+  })().catch((err) => { g.__hkRedis = undefined; throw err; });
+  return g.__hkRedis;
+}
 
 type Command = (string | number)[];
 type Reply = { result?: unknown; error?: string };
@@ -32,12 +49,19 @@ async function call(path: string, body: unknown): Promise<unknown> {
 }
 
 async function redis(...command: Command): Promise<unknown> {
+  if (redisUrl) return (await tcp()).sendCommand(command.map(String));
   return ((await call("", command)) as Reply).result;
 }
 
 // Runs the commands as one MULTI/EXEC transaction, so a write and its version bump
 // land together or not at all. Returns the last command's result.
 async function transaction(...commands: Command[]): Promise<unknown> {
+  if (redisUrl) {
+    const multi = (await tcp()).multi();
+    for (const c of commands) multi.addCommand(c.map(String));
+    const results = await multi.exec();
+    return results[results.length - 1];
+  }
   const replies = (await call("/multi-exec", commands)) as Reply[];
   const failed = replies.find((r) => r.error);
   if (failed) throw new Error(failed.error);

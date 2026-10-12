@@ -10,7 +10,8 @@
   "dependencies": {
     "next": "16.4.0",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "redis": "^5.8.2"
   },
   "devDependencies": {
     "@types/node": "22.15.0",
