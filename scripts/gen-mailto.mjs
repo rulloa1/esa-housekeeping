@@ -1,3 +1,4 @@
+const recipient = process.argv[2] || "";
 const subject = "Access Credentials: ESA Houston IAH Housekeeping Operations Platform";
 const body = `Dear General Manager,
 
@@ -22,11 +23,13 @@ EXECUTIVE FEATURES & WORKFLOWS
 • Mobile Attendant Workspace: Smartphone interface for room attendants at /housekeeper (PIN: 1234).
 • Guest Self-Service: Contactless QR cards for guest towel and amenity requests at /guest-links.
 
-Please let us know if you need any adjustments or custom staff roles configured.
+Please feel free to explore the system and let me know if you have any questions or would like any tailored adjustments configured.
 
 Best regards,
-Extended Stay America — Houston IAH Airport
-Housekeeping & Operations Team`;
+Rory Ulloa
+rory@theroyeffect.com
+The Roy Effect`;
 
-const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+const mailto = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 console.log(mailto);
+
