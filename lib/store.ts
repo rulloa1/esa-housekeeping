@@ -102,6 +102,11 @@ export async function getAll(): Promise<{ version: number; docs: SuiteDocs }> {
   return { version, docs };
 }
 
+export async function get(id: string): Promise<Record<string, unknown> | null> {
+  const raw = usingRedis ? ((await redis("HGET", DOCS_KEY, id)) as string | null) : memory.__hkDocs!.get(id);
+  return raw ? JSON.parse(raw) : null;
+}
+
 export async function put(id: string, doc: unknown): Promise<number> {
   const raw = JSON.stringify(doc);
   if (!usingRedis) {

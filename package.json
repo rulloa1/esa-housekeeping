@@ -9,12 +9,14 @@
   },
   "dependencies": {
     "next": "16.4.0",
+    "qrcode": "^1.5.4",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "redis": "^5.8.2"
   },
   "devDependencies": {
     "@types/node": "22.15.0",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "19.2.0",
     "@types/react-dom": "19.2.0",
     "typescript": "5.9.3"

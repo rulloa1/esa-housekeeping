@@ -22,7 +22,7 @@ export function pinFor(role: Role): string | undefined {
 
 let key: Promise<CryptoKey> | undefined;
 
-async function sign(value: string): Promise<string> {
+export async function sign(value: string): Promise<string> {
   key ??= crypto.subtle
     .importKey("raw", new TextEncoder().encode(secret()), { name: "HMAC", hash: "SHA-256" }, false, ["sign"])
     .catch((err) => { key = undefined; throw err; });

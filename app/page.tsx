@@ -7,6 +7,9 @@ export default function Home() {
       <p>
         <Link href="/housekeeping">Open the housekeeping board</Link>
       </p>
+      <p>
+        <Link href="/guest-links">Print guest QR cards</Link>
+      </p>
       <form method="post" action="/api/logout">
         <button type="submit">Sign out</button>
       </form>

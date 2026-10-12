@@ -12,14 +12,14 @@
   --line: #e0e6ee; --fg: #0f1b2a; --muted: #5b6b7f; --accent: #2457a6; --accent-fg: #ffffff; --accent-soft: #e6effb;
   --brass: #b7832a; --brass-soft: #fbf1de;
   --slab: #ffffff; --slab-edge: #c9d5e2; --ground: #e4edf5; --lawn: #c6e7ba; --pool: #9fd6ee;
-  --st-dirty: #d0820c; --st-dirty-bg: #fff4e0;
-  --st-prog: #2a6fd1; --st-prog-bg: #e8f1fe;
-  --st-clean: #2e8a4a; --st-clean-bg: #e6f6ea;
-  --st-insp: #10857d; --st-insp-bg: #e0f5f3;
+  --st-dirty: #d8413a; --st-dirty-bg: #fdeceb;
+  --st-prog: #d69a05; --st-prog-bg: #fff5d9;
+  --st-clean: #2e9a4f; --st-clean-bg: #e6f6ea;
+  --st-insp: #2f72d6; --st-insp-bg: #e8f1fe;
   --st-ooo: #6b7480; --st-ooo-bg: #eef0f3;
   --st-none: #b4bdc8; --st-none-bg: #fbfcfd;
   --unlogged-bg: #e3e7ec; --unlogged-line: #cdd3da; --unlogged-fg: #8b96a2;
-  --dnd: #c62f25; --dnd-bg: #fdeceb;
+  --dnd: #b8287f; --dnd-bg: #fbe8f3;
   --f-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
   --f-body: "Figtree", -apple-system, system-ui, "Segoe UI", sans-serif;
   --lift: 0 1px 2px rgba(15,27,42,.04), 0 10px 30px -14px rgba(36,87,166,.22);
@@ -32,14 +32,14 @@
   --line: #263444; --fg: #e8eef5; --muted: #95a5b7; --accent: #8db8e6; --accent-fg: #0a1522; --accent-soft: #1a2e45;
   --brass: #d9ad5f; --brass-soft: #3a2f1a;
   --slab: #1d2936; --slab-edge: #0f1822; --ground: #101a25; --lawn: #1f3a26; --pool: #1f5670;
-  --st-dirty: #f0b04a; --st-dirty-bg: #382a12;
-  --st-prog: #7eaef0; --st-prog-bg: #182e4c;
+  --st-dirty: #f27a70; --st-dirty-bg: #3a1a18;
+  --st-prog: #f2c14e; --st-prog-bg: #382c10;
   --st-clean: #6cc283; --st-clean-bg: #15301f;
-  --st-insp: #5cc9c0; --st-insp-bg: #113330;
+  --st-insp: #7eaef0; --st-insp-bg: #182e4c;
   --st-ooo: #a3adb8; --st-ooo-bg: #29313a;
   --st-none: #4f5d6c; --st-none-bg: #17212c;
   --unlogged-bg: #1d2630; --unlogged-line: #2c3743; --unlogged-fg: #66727f;
-  --dnd: #ff8a80; --dnd-bg: #421b19;
+  --dnd: #f08ac8; --dnd-bg: #3d1830;
   --lift: 0 1px 0 rgba(255,255,255,.04) inset, 0 8px 24px -10px rgba(0,0,0,.6);
   --sheet: 0 20px 60px rgba(0, 0, 0, .6);
   color-scheme: dark;
@@ -247,6 +247,52 @@ button { cursor: pointer; }
 .mini { height: 5px; border-radius: 3px; }
 .mini i { border-radius: 3px; }
 
+/* Map overlays (v14): HUD, tools, legend, callouts, after Rory's render */
+.hero { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) {
+  .hero-left { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); align-items: start; }
+  .hero-left > :first-child { grid-column: 1 / -1; }
+}
+.scene.gl-on { min-height: clamp(420px, 58vh, 660px); }
+.scene .hud, .scene .maplegend, .scene .callout, .scene .maptools .mt, .scene .compass { background: rgba(22,28,36,.86); color: #fff; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); box-shadow: 0 6px 20px rgba(10,16,24,.28); }
+.scene .hud { position: absolute; left: 12px; top: 12px; z-index: 3; border-radius: 12px; padding: 8px 12px 9px; pointer-events: none; max-width: calc(100% - 90px); }
+.scene .hud .ht { display: flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scene .hud .ht span { font-weight: 600; opacity: .7; }
+.scene .hud svg, .scene .maptools svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.scene .hud .hn { display: flex; gap: 0; margin-top: 4px; font-size: .9rem; font-weight: 700; flex-wrap: wrap; }
+.scene .hud .hn span { color: color-mix(in srgb, var(--c) 55%, #fff); padding: 0 9px; border-left: 1px solid rgba(255,255,255,.25); white-space: nowrap; }
+.scene .hud .hn span:first-child { padding-left: 0; border-left: 0; }
+.scene .hud .hn b { font-variant-numeric: tabular-nums; }
+.scene .maptools { position: absolute; right: 12px; top: 12px; z-index: 3; display: grid; justify-items: center; gap: 8px; }
+.scene .maptools .mt { width: 40px; height: 40px; border: 0; border-radius: 10px; display: grid; place-items: center; font-size: 1.35rem; font-weight: 600; line-height: 1; }
+.scene .maptools .mt[aria-pressed="true"] { background: #fff; color: #16202b; }
+.scene .maptools .zoom { display: grid; border-radius: 10px; overflow: hidden; box-shadow: 0 6px 20px rgba(10,16,24,.28); }
+.scene .maptools .zoom .mt { border-radius: 0; box-shadow: none; }
+.scene .maptools .zoom .mt + .mt { border-top: 1px solid rgba(255,255,255,.18); }
+.scene .compass { position: relative; width: 58px; height: 58px; border: 0; border-radius: 50%; display: grid; place-items: center; padding: 0; }
+.scene .compass svg { width: 22px; height: 22px; color: #cfe1f5; }
+.scene .compass .cring { position: absolute; inset: 3px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.22); }
+.scene .compass .cring b { position: absolute; font-size: .58rem; font-weight: 800; line-height: 1; }
+.scene .compass .cring .n { top: 2px; left: 50%; translate: -50% 0; color: #ff8a7a; }
+.scene .compass .cring .s { bottom: 2px; left: 50%; translate: -50% 0; }
+.scene .compass .cring .e { right: 3px; top: 50%; translate: 0 -50%; }
+.scene .compass .cring .w { left: 3px; top: 50%; translate: 0 -50%; }
+.scene .maplegend { position: absolute; left: 50%; bottom: 12px; translate: -50% 0; z-index: 3; display: flex; gap: 14px; padding: 8px 14px; border-radius: 12px; font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; pointer-events: none; }
+.scene .maplegend span { display: flex; align-items: center; gap: 6px; }
+.scene .maplegend i { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 0 2px rgba(255,255,255,.18), 0 0 10px currentColor; }
+.scene .floorbadge { top: 74px; bottom: auto; left: 12px; }
+.scene .callouts { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+.scene .callout { position: absolute; left: 0; top: 0; pointer-events: auto; display: flex; align-items: center; gap: 6px; border: 1.5px solid rgba(232,193,94,.75); border-radius: 9px; padding: 6px 10px; font: 700 .74rem/1 var(--f-body); letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; margin: 0; translate: -50% calc(-100% - 9px); }
+.scene .callout::after { content: ""; position: absolute; left: 50%; bottom: -7px; width: 11px; height: 11px; translate: -50% 0; rotate: 45deg; background: inherit; border: inherit; border-top: 0; border-left: 0; border-radius: 0 0 2px 0; }
+.scene .callout b { font-weight: 700; }
+.scene .callout i { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,.6); }
+.scene .callout span { color: color-mix(in srgb, var(--sc) 50%, #fff); font-weight: 800; }
+.scene .callout .ico { width: 14px; height: 14px; fill: none; stroke: color-mix(in srgb, var(--sc) 50%, #fff); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.scene .callout.open { border-color: #fff; }
+.scene .callout[hidden] { display: none; }
+@media (max-width: 760px) { .scene .maplegend { gap: 9px; padding: 7px 10px; font-size: .62rem; } .scene .hud .ht span { display: none; } }
+@media (max-width: 520px) { .scene .maplegend { display: none; } .scene .callout { font-size: .66rem; padding: 5px 8px; } .scene .compass { width: 48px; height: 48px; } }
+
 /* Portrait iPad and phone: hallway runs top to bottom */
 @media (max-width: 1000px) {
   .hero { grid-template-columns: 1fr; }
@@ -412,7 +458,7 @@ fieldset .check:has(input:checked) { background: color-mix(in srgb, var(--st-cle
     <div class="stage panel" aria-label="3D view of the building">
       <div class="stage-head">
         <div><div class="eyebrow">Building view</div><div class="hint" id="sceneHint">Drag to orbit · pinch to zoom · tap a window to open a suite · tap a wall to focus that floor</div></div>
-        <div class="cam" id="camBtns" role="group" aria-label="Camera"><button data-cam="front">Front</button><button data-cam="rear">Rear</button><button data-cam="court">Courtyard</button><button data-cam="top">Top</button><button data-cam="spin" aria-pressed="false" title="Slowly circle the building">Orbit</button><button data-cam="ground" aria-pressed="true" title="Switch between the aerial photo and the drawn model">Photo map</button></div>
+        <div class="cam" id="camBtns" role="group" aria-label="Camera"><button data-cam="front">Front</button><button data-cam="rear">Rear</button><button data-cam="court">Courtyard</button><button data-cam="top">Top</button><button data-cam="spin" aria-pressed="false" title="Slowly circle the building">Orbit</button></div>
       </div>
       <div class="scene" id="scene"><div class="bldg" id="bldg"></div></div>
       <div class="floor-chips" id="floorChips"></div>
@@ -620,7 +666,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     renderer.shadowMap.type = T.PCFSoftShadowMap;
     renderer.outputEncoding = T.sRGBEncoding;
     renderer.toneMapping = T.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = .9;
+    renderer.toneMappingExposure = .82;
     renderer.domElement.className = "gl";
     renderer.domElement.setAttribute("aria-label", "3D model of the hotel. Drag to orbit, pinch to zoom, tap a window to open that suite.");
     host.appendChild(renderer.domElement);
@@ -645,7 +691,8 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     sun.shadow.bias = -0.0004; sun.shadow.normalBias = .04;
     scene.add(sun);
 
-    const M = (c, o = {}) => new T.MeshStandardMaterial({ color: c, roughness: .88, metalness: 0, envMapIntensity: .35, ...o });
+    // Colours are written as sRGB hex; convert so the render shows them true rather than washed out
+    const M = (c, o = {}) => new T.MeshStandardMaterial({ color: new T.Color(c).convertSRGBToLinear(), roughness: .88, metalness: 0, envMapIntensity: .35, ...o });
     const add = (geo, mat, x, y, z, { cast = true, recv = true, ry = 0, rx = 0 } = {}) => {
       const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.y = ry; m.rotation.x = rx;
       m.castShadow = cast; m.receiveShadow = recv; scene.add(m); return m;
@@ -659,7 +706,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     // hedge, the retention pond and Northgreen Blvd. North (rear) lot: a row, an aisle and an outer row, brush beyond.
     // A drive with stalls wraps the west end; the east courtyard spans 11 m south to 25 m north.
     const E0 = LEN / 2 + 1, CU = 23.5, CX1 = E0 + CU, CZS = 11, CZN = -25, W0 = -LEN / 2 - 15;
-    flat(900, 900, M(0x6e8264, { envMapIntensity: .2 }), 0, 0, 0);
+    flat(900, 900, M(0x5c9a3c, { envMapIntensity: .2 }), 0, 0, 0);
     // Photo map: the aerial, warped top-down and laid on the ground. modelOnly/mapOnly hold what each ground mode shows.
     const modelOnly = [], mapOnly = [];
     const D = window.IAH_DRAPE;
@@ -672,15 +719,15 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     }
     let mark = scene.children.length;
     const takeModel = () => { modelOnly.push(...scene.children.slice(mark)); mark = scene.children.length; };
-    const paving = M(0xc4c1b9, { roughness: .95 });
-    const concrete = M(0xdedad1, { roughness: .95 });
-    const road = M(0x8b9097, { roughness: .95 });
+    const paving = M(0x9da3ab, { roughness: .95 });
+    const concrete = M(0xc9c5bc, { roughness: .95 });
+    const road = M(0x737980, { roughness: .95 });
     const stripe = M(0xfafaf6);
     const curbMat = M(0xb4553b, { roughness: .8 });
     const rect = (x0, x1, z0, z1, mat, y) => flat(Math.abs(x1 - x0), Math.abs(z1 - z0), mat, (x0 + x1) / 2, y, (z0 + z1) / 2);
     const curb = (x0, x1, z0, z1) => box(Math.max(.25, Math.abs(x1 - x0)), .16, Math.max(.25, Math.abs(z1 - z0)), curbMat, (x0 + x1) / 2, .08, (z0 + z1) / 2, { cast: false });
     // Brush field north of the rear lot
-    rect(-160, 160, -40, -150, M(0xa9b98a, { roughness: 1 }), .01);
+    rect(-160, 160, -40, -150, M(0x649f41, { roughness: 1 }), .01);
     // Paving: south lot, west drive, north lot, and the drive that jogs round the courtyard's north side
     rect(W0, E0, HALF_D + 2.5, 49, paving, .02);
     rect(E0, CX1 + 2, CZS + .3, 49, paving, .02);
@@ -708,7 +755,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     stallsX(-8, 40, W0 + 2.75);
     // Planted median between the back-to-back rows
     box(E0 - W0 - 20, .2, 1, M(0x7d9a5c), (W0 + 10 + E0 - 10) / 2, .1, 30.5, { cast: false });
-    for (let x = W0 + 14; x < E0 - 10; x += 14) add(new T.IcosahedronGeometry(1.1, 0), M(0x5e8c45, { flatShading: true }), x, 1.4, 30.5);
+    for (let x = W0 + 14; x < E0 - 10; x += 14) add(new T.SphereGeometry(1.2, 14, 10), M(0x46983f), x, 1.4, 30.5);
     // Accessible stalls just west of the entrance
     rect(ENTRY_X - 13, ENTRY_X - 6.5, HALF_D + 2.6, HALF_D + 7.9, M(0x2f6fb3, { roughness: .8 }), .035);
     curb(W0, CX1 + 2, 49, 49.1); curb(W0, E0, -38, -38.1); curb(W0, W0 + .1, -38, 49);
@@ -732,16 +779,16 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     box(.25, 1.8, 6.6, M(0xcfc6b6), W0 - 5.9, .9, -33.5);
     box(2, 1.3, 1.6, M(0x3b6e4a, { roughness: .6 }), W0 - 4, .65, -35.5);
     // Hedge, retention pond with brush, and Northgreen Blvd
-    box(E0 - W0 + 30, 1.1, 1.2, M(0x4a7a36, { flatShading: true }), (W0 - 10 + CX1) / 2, .55, 50.4);
-    rect(W0 - 10, CX1 - 2, 51, 96, M(0x8f9a5a, { roughness: 1 }), .015);
+    box(E0 - W0 + 30, 1.1, 1.2, M(0x3f8f3c), (W0 - 10 + CX1) / 2, .55, 50.4);
+    rect(W0 - 10, CX1 - 2, 51, 96, M(0x5f9a3e, { roughness: 1 }), .015);
     rect(W0 + 4, CX1 - 14, 60, 88, M(0x55665a, { roughness: .25, metalness: .1 }), .025);
-    const brush = [M(0x6f7f45, { flatShading: true }), M(0x5f7040, { flatShading: true }), M(0x7d8b52, { flatShading: true })];
+    const brush = [M(0x3f8f3c), M(0x4c9e44), M(0x358535)];
     for (let i = 0; i < 140; i++) {
       const x = W0 - 8 + rnd() * (CX1 - W0 + 4), z = 52 + rnd() * 43;
       if (x > W0 + 6 && x < CX1 - 16 && z > 61 && z < 87) continue;
-      add(new T.IcosahedronGeometry(.8 + rnd() * 1.2, 0), brush[i % 3], x, .5, z, { cast: false });
+      add(new T.SphereGeometry(.9 + rnd() * 1.2, 12, 9), brush[i % 3], x, .7, z, { cast: false });
     }
-    box(E0 - W0 + 30, 1.1, 1.2, M(0x4a7a36, { flatShading: true }), (W0 - 10 + CX1) / 2, .55, 96.6);
+    box(E0 - W0 + 30, 1.1, 1.2, M(0x3f8f3c), (W0 - 10 + CX1) / 2, .55, 96.6);
     rect(-200, CX1 + 4.5, 100, 112, road, .02);
     for (let x = -196; x < CX1; x += 6) box(3, .02, .18, M(0xf2c94c), x, .04, 106, { cast: false });
 
@@ -762,6 +809,23 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       w.userData.edges = e;
     }
     tag(1, box(LEN + 2.3, .9, HALF_D * 2 + .3, base, 0, .45, 0));
+    // Facade colour blocks between the bays (beige, cream, gold, tan) over a brick ground storey, as in Rory's render
+    const facadeCols = [0xe9dab9, 0xf4ecd8, 0xe8c15e, 0xdcc6a0, 0xf4ecd8, 0xe9dab9];
+    const brick = M(0x9c4f37, { roughness: .95 });
+    for (const [side, dir] of [["n", -1], ["s", 1]]) {
+      const cuts = [-LEN / 2 - 1, ...BAYS[side].flatMap((b) => [b - BAY_W / 2, b + BAY_W / 2]), LEN / 2 + 1];
+      let k = side === "n" ? 1 : 0;
+      for (let i = 0; i < cuts.length; i += 2) {
+        const x0 = cuts[i], x1 = cuts[i + 1], parts = x1 - x0 > 22 ? [[x0, (x0 + x1) / 2], [(x0 + x1) / 2, x1]] : [[x0, x1]];
+        for (const [a, b] of parts) {
+          const fc = facadeCols[k++ % facadeCols.length];
+          for (let f = 1; f <= 3; f++) {
+            const y0 = f === 1 ? .9 : (f - 1) * FLOOR_H + .14, y1 = f * FLOOR_H - .14;
+            tag(f, box(b - a - .08, y1 - y0, .1, f === 1 ? brick : M(fc), (a + b) / 2, (y0 + y1) / 2, dir * (HALF_D + .05), { cast: false }));
+          }
+        }
+      }
+    }
     [FLOOR_H, 2 * FLOOR_H].forEach((y, i) => tag(i + 1, box(LEN + 2.5, .28, HALF_D * 2 + .5, trim, 0, y, 0)));
     tag(4, box(LEN + 2.6, 1.1, HALF_D * 2 + .6, M(0xf3f1ec), 0, H + .55, 0));
     // White membrane roof with rooftop units, as in the photos
@@ -837,6 +901,21 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       w.userData.suite = s;
       windows.push(w);
     }
+    // Glowing room volumes: a translucent box in the status colour over each logged suite, with bright edges
+    const glows = [];
+    const glowGeo = new T.BoxGeometry(1, 1, 1), glowEdgeGeo = new T.EdgesGeometry(glowGeo);
+    for (const w of windows) {
+      const s = w.userData.suite, side = sideOf(s), f = Number(s[0]), dir = side === "n" ? -1 : 1, x = suiteX(s);
+      const gap = Math.min(...SLOTS[side].filter((v) => v !== x).map((v) => Math.abs(v - x)));
+      const g = new T.Mesh(glowGeo, new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .34, depthWrite: false, toneMapped: false }));
+      g.scale.set(Math.min(4.8, gap) - .45, FLOOR_H - .5, 1.4);
+      g.position.set(x, (f - .5) * FLOOR_H + .08, dir * (HALF_D + .72));
+      g.renderOrder = 2; g.visible = false;
+      g.userData = { suite: s, glow: true, win: w };
+      const e = new T.LineSegments(glowEdgeGeo, new T.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: .95, toneMapped: false }));
+      e.renderOrder = 3; g.add(e); g.userData.edge = e;
+      scene.add(g); glows.push(g); w.userData.glowMesh = g;
+    }
     // Floor highlight rings
     const ringMat = new T.MeshStandardMaterial({ color: 0xc8963a, emissive: 0xd9a441, emissiveIntensity: 1.1, roughness: .4 });
     const rings = [0, 1].map(() => { const r = box(LEN + 3.6, .38, HALF_D * 2 + 2.2, ringMat, 0, 0, 0, { cast: false, recv: false }); r.visible = false; return r; });
@@ -849,7 +928,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     const CY = { x0: LEN / 2 + 1, deckX1: 62.8, deckZ0: -24, deckZ1: 7.5, walkX1: 65, lawnX1: 76.5, z0: -25, z1: 11 };
     // Flat ground pieces: drawn-model mode only (the photo map already shows them)
     mark = scene.children.length;
-    rect(CY.x0, CY.lawnX1, CY.z1, CY.z0, M(0x67a84a), .04);
+    rect(CY.x0, CY.lawnX1, CY.z1, CY.z0, M(0x5fa040), .04);
     curb(CY.x0, CY.lawnX1, CY.z1, CY.z1 + .15); curb(CY.x0, CY.lawnX1, CY.z0, CY.z0 - .15);
     rect(CY.x0, CY.deckX1, CY.deckZ1, CY.deckZ0, M(0xd9cdb6, { roughness: .95 }), .06);
     rect(CY.deckX1, CY.walkX1, CY.z1, CY.z0, concrete, .06);
@@ -908,17 +987,22 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       }
     };
     palm(74.5, -21.5);
-    const shrub = M(0x4a7a36, { flatShading: true });
-    for (const [x, z] of [[66.2, -9.5], [73.2, -11.2], [69, 8.2], [60.4, 9.6], [64.4, 10], [73.5, 3.2], [66.4, -23.2]]) add(new T.IcosahedronGeometry(.7, 0), shrub, x, .55, z);
+    const shrub = M(0x3f8f3c);
+    for (const [x, z] of [[66.2, -9.5], [73.2, -11.2], [69, 8.2], [60.4, 9.6], [64.4, 10], [73.5, 3.2], [66.4, -23.2]]) add(new T.SphereGeometry(.8, 12, 9), shrub, x, .6, z);
     box(1.4, 1, 1, M(0x6f7f5e), 75, .5, -16);
     mark = scene.children.length;
 
     // Trees
-    const leaf = [M(0x4f7d3a, { flatShading: true }), M(0x5e8c45, { flatShading: true }), M(0x467235, { flatShading: true })];
+    // Puffy cartoon trees: a cluster of soft spheres on a short trunk
+    const leaf = [M(0x3f9a3c, { roughness: .8 }), M(0x4caa45, { roughness: .8 }), M(0x358b37, { roughness: .8 })];
     const trunk = M(0x6b5440);
+    const puff = new T.SphereGeometry(1, 16, 12);
     const tree = (x, z, s = 1) => {
-      add(new T.CylinderGeometry(.25 * s, .35 * s, 2.6 * s, 6), trunk, x, 1.3 * s, z);
-      add(new T.IcosahedronGeometry(2.4 * s, 0), leaf[Math.floor(rnd() * 3)], x, 3.6 * s, z);
+      add(new T.CylinderGeometry(.25 * s, .35 * s, 2.6 * s, 8), trunk, x, 1.3 * s, z);
+      const lf = leaf[Math.floor(rnd() * 3)];
+      for (const [dx, dy, dz, r] of [[0, 3.9, 0, 2.2], [1.3, 3.2, .6, 1.5], [-1.2, 3.3, -.5, 1.6], [.2, 3.1, -1.3, 1.4], [-.4, 5, .3, 1.3]]) {
+        const m = add(puff, lf, x + dx * s, dy * s, z + dz * s); m.scale.setScalar(r * s);
+      }
     };
     for (let x = W0 - 6; x <= CX1; x += 16) tree(x + rnd() * 3, 98 + rnd() * 1, .9 + rnd() * .3);
     for (let x = W0 - 20; x <= E0; x += 7) tree(x + rnd() * 4, -40 - rnd() * 30, .9 + rnd() * .5);
@@ -927,14 +1011,13 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     takeModel();
 
     let ground = "map";
-    try { ground = localStorage.getItem("iah-hk-ground") || (D ? "map" : "model"); } catch {}
+    try { ground = localStorage.getItem("iah-hk-ground2") || "model"; } catch {}
     function setGround(g) {
       ground = D ? g : "model";
       for (const o of modelOnly) o.visible = ground === "model";
       for (const o of mapOnly) o.visible = ground === "map";
-      const b = document.querySelector('#camBtns [data-cam="ground"]');
-      if (b) { b.setAttribute("aria-pressed", String(ground === "map")); b.hidden = !D; }
-      try { localStorage.setItem("iah-hk-ground", ground); } catch {}
+      layersBtn.setAttribute("aria-pressed", String(ground === "map")); layersBtn.hidden = !D;
+      try { localStorage.setItem("iah-hk-ground2", ground); } catch {}
       wake();
     }
 
@@ -949,7 +1032,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       g.fillText(text, 256, 58);
       const tex = new T.CanvasTexture(c); tex.encoding = T.sRGBEncoding; tex.anisotropy = 4;
       const sp = new T.Sprite(new T.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
-      sp.scale.set(15, 3.3, 1); sp.position.set(x, y, z); sp.renderOrder = 10; scene.add(sp);
+      sp.scale.set(11, 2.4, 1); sp.position.set(x, y, z); sp.renderOrder = 10; scene.add(sp);
     };
     label("Main entrance", ENTRY_X, 7.5, HALF_D + 7);
     label("Pool & spa", 57.8, 6, -4);
@@ -969,7 +1052,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
 
     // Camera presets
     const PRESETS = {
-      front: { pos: [18, 34, 84], tgt: [8, 2, 2] },
+      front: { pos: [-12, 50, 74], tgt: [8, 0, 8] },
       rear: { pos: [-22, 42, -104], tgt: [6, 2, -4] },
       court: { pos: [112, 34, 44], tgt: [60, 2, -4] },
       top: { pos: [12, 205, 30], tgt: [12, 0, 12] },
@@ -978,7 +1061,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     const preset = (name, instant) => {
       const p = PRESETS[name];
       const tgt = new T.Vector3(...p.tgt);
-      const k = Math.min(2.4, Math.max(1, 1.5 / (camera.aspect || 1.5)));
+      const k = Math.min(2.4, Math.max(1, 1.9 / (camera.aspect || 1.5)));
       const to = { pos: new T.Vector3(...p.pos).sub(tgt).multiplyScalar(k).add(tgt), tgt };
       if (instant || matchMedia("(prefers-reduced-motion: reduce)").matches) { camera.position.copy(to.pos); controls.target.copy(to.tgt); controls.update(); wake(); return; }
       tween = { from: { pos: camera.position.clone(), tgt: controls.target.clone() }, to, t0: performance.now() };
@@ -1003,6 +1086,67 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       mt.depthWrite = !tr;
       if (!m.userData.suite) m.castShadow = !dim;
     };
+    // Map overlays, after Rory's render: live counts (top left), layers / compass / zoom (top right),
+    // a status legend (bottom) and floating callouts over the open suite and the latest changes
+    const hud = document.createElement("div"); hud.className = "hud";
+    const tools = document.createElement("div"); tools.className = "maptools";
+    tools.innerHTML = `<button type="button" class="mt layers" title="Switch between the drawn model and the aerial photo" aria-label="Map layers" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg></button>
+      <button type="button" class="compass" title="Back to the front view" aria-label="Compass. Tap for the front view"><span class="cring"><b class="n">N</b><b class="e">E</b><b class="s">S</b><b class="w">W</b></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></svg></button>
+      <div class="zoom"><button type="button" class="mt" data-z=".75" aria-label="Zoom in">+</button><button type="button" class="mt" data-z="1.33" aria-label="Zoom out">&minus;</button></div>`;
+    const legend3d = document.createElement("div"); legend3d.className = "maplegend";
+    legend3d.innerHTML = [["--st-dirty", "Needs service"], ["--st-prog", "In progress"], ["--st-clean", "Clean"], ["--st-insp", "Inspected"]].map(([v, l]) => `<span><i style="background:var(${v})"></i>${l}</span>`).join("");
+    const callLayer = document.createElement("div"); callLayer.className = "callouts";
+    host.append(hud, tools, legend3d, callLayer);
+    const layersBtn = tools.querySelector(".layers"), cring = tools.querySelector(".cring");
+    layersBtn.addEventListener("click", () => setGround(ground === "map" ? "model" : "map"));
+    tools.querySelector(".compass").addEventListener("click", () => preset("front"));
+    tools.querySelector(".zoom").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-z]"); if (!b) return;
+      const off = camera.position.clone().sub(controls.target);
+      off.setLength(Math.min(controls.maxDistance, Math.max(controls.minDistance, off.length() * Number(b.dataset.z))));
+      tween = { from: { pos: camera.position.clone(), tgt: controls.target.clone() }, to: { pos: controls.target.clone().add(off), tgt: controls.target.clone() }, t0: performance.now() };
+      wake();
+    });
+    callLayer.addEventListener("click", (e) => { const b = e.target.closest("[data-s]"); if (b) openSuite(b.dataset.s); });
+    let calls = [];
+    const renderHud = () => {
+      const n = (k) => suites.filter((s) => state.docs[s]?.status === k).length;
+      hud.innerHTML = `<div class="ht"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21v-6h6v6"/></svg>Housekeeping <span>· ESA Houston IAH</span></div>
+        <div class="hn"><span style="--c:var(--st-clean)">Clean <b>${n("clean") + n("inspected")}</b></span><span style="--c:var(--st-dirty)">Needs service <b>${n("dirty")}</b></span><span style="--c:var(--st-prog)">In progress <b>${n("in_progress")}</b></span></div>`;
+    };
+    const renderCallouts = (sel) => {
+      const shown = (s) => matches(s) && (!sel || Number(s[0]) === sel) && state.docs[s];
+      const recent = suites.filter((s) => shown(s) && state.docs[s].updatedAt).sort((a, b) => String(state.docs[b].updatedAt).localeCompare(String(state.docs[a].updatedAt)));
+      const pick = [...new Set([state.open, ...recent].filter((s) => s && state.docs[s]))].slice(0, 12);
+      callLayer.innerHTML = pick.map((s) => {
+        const d = state.docs[s];
+        return `<button type="button" class="callout s-${d.status}${s === state.open ? " open" : ""}" data-s="${s}"><b>Suite ${s}</b><i></i><span>${STATUS_LABEL[d.status]}</span>${ICONS[d.status] || ""}</button>`;
+      }).join("");
+      calls = [...callLayer.children].map((el) => {
+        const s = el.dataset.s, p = suitePos(s);
+        return { el, dir: p.dir, v: new T.Vector3(p.x, (Number(s[0]) - 1) * FLOOR_H + FLOOR_H + .2, p.dir * (HALF_D + .7)) };
+      });
+    };
+    const pv = new T.Vector3();
+    const placeCallouts = () => {
+      if (!calls.length) return;
+      const w = host.clientWidth, h = host.clientHeight;
+      // The open suite plus the three most recent changes on the side of the building facing the camera
+      // (skipping any that would overlap one already shown)
+      let shownN = 0; const boxes = [];
+      for (const c of calls) {
+        pv.copy(c.v).project(camera);
+        const facing = camera.position.z * c.dir > HALF_D - 2;
+        const isOpen = c.el.classList.contains("open");
+        if (!c.w) { c.el.hidden = false; c.w = c.el.offsetWidth || 170; c.h = c.el.offsetHeight || 28; }
+        const x = Math.min(w - c.w / 2 - 8, Math.max(c.w / 2 + 8, (pv.x + 1) / 2 * w)), y = (1 - pv.y) / 2 * h;
+        const clash = boxes.some((b) => Math.abs(b.x - x) < (b.w + c.w) / 2 + 6 && Math.abs(b.y - y) < (b.h + c.h) / 2 + 4);
+        const off = pv.z > 1 || !facing || pv.x < -1.05 || pv.x > 1.05 || pv.y < -1.05 || pv.y > 1.05 || (!isOpen && (shownN >= 3 || clash));
+        if (!off) { if (!isOpen) shownN++; boxes.push({ x, y, w: c.w, h: c.h }); }
+        c.el.hidden = off;
+        if (!off) c.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+      }
+    };
     // "Floor N in focus" badge with a one-tap way back to the whole building
     const badge = document.createElement("div");
     badge.className = "floorbadge"; badge.hidden = true;
@@ -1025,7 +1169,15 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
           m.color.copy(c).lerp(whiteC, .15);
           m.emissive.copy(c);
           m.emissiveIntensity = (isNight ? 1.1 : .55) * (dimmed ? .35 : 1);
-        } else {
+        }
+        const g = w.userData.glowMesh;
+        g.visible = !!(d && on && !floorDim);
+        if (g.visible) {
+          const c = col[statusVar[d.status]];
+          g.material.color.copy(c).convertSRGBToLinear(); g.material.opacity = isNight ? .52 : .46;
+          g.userData.edge.material.color.copy(c).lerp(whiteC, .45);
+        }
+        if (d && on) {} else {
           // Not logged: flat grey glass, no glow
           m.color.copy(greyC);
           m.emissive.copy(greyC);
@@ -1049,6 +1201,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       }
       badge.hidden = !sel;
       if (sel) badge.firstChild.textContent = `Floor ${sel} in focus`;
+      renderHud(); renderCallouts(sel); placeCallouts();
       rings.forEach((r, i) => { r.visible = !!sel; if (sel) r.position.y = i ? sel * FLOOR_H : sel === 1 ? .95 : (sel - 1) * FLOOR_H; });
       floorTags.forEach((t, i) => { t.material.opacity = !sel || sel === i + 1 ? 1 : .35; });
       wake();
@@ -1062,7 +1215,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       sun.intensity = n ? .35 : (envTex ? 1.15 : 1.5);
       sun.color.set(n ? 0x9db4ff : 0xfff1d8);
       scene.fog.color.set(n ? 0x0f1824 : 0xeaf4fe);
-      renderer.toneMappingExposure = n ? 1.15 : .9;
+      renderer.toneMappingExposure = n ? 1.15 : .82;
       update();
     }
 
@@ -1076,7 +1229,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       const r = renderer.domElement.getBoundingClientRect();
       ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
       ray.setFromCamera(ndc, camera);
-      const hit = ray.intersectObjects(scene.children, false).find((h) => h.object.type === "Mesh" && !h.object.userData.noHit && !(h.object.material.transparent && h.object.material.opacity < .3 && !h.object.userData.suite));
+      const hit = ray.intersectObjects(scene.children, false).find((h) => h.object.type === "Mesh" && h.object.visible && !h.object.userData.noHit && !(h.object.material.transparent && h.object.material.opacity < .3 && !h.object.userData.suite));
       if (!hit) return;
       if (hit.object.userData.suite) return openSuite(hit.object.userData.suite);
       const p = hit.point;
@@ -1112,9 +1265,9 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
         const r = renderer.domElement.getBoundingClientRect();
         ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
         ray.setFromCamera(ndc, camera);
-        const h = ray.intersectObjects(windows, false)[0];
-        const blocker = h && ray.intersectObjects(scene.children, false).find((x) => x.object.type === "Mesh" && !x.object.userData.noHit && !(x.object.material.transparent && x.object.material.opacity < .3));
-        setHover(h && blocker && blocker.object === h.object ? h.object : null, ev);
+        const h = ray.intersectObjects([...windows, ...glows.filter((g) => g.visible)], false)[0];
+        const blocker = h && ray.intersectObjects(scene.children, false).find((x) => x.object.type === "Mesh" && x.object.visible && !x.object.userData.noHit && !(x.object.material.transparent && x.object.material.opacity < .3 && !x.object.userData.glow));
+        setHover(h && blocker && blocker.object === h.object ? (h.object.userData.win || h.object) : null, ev);
       });
     });
     renderer.domElement.addEventListener("pointerleave", () => setHover(null));
@@ -1158,6 +1311,8 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
         idleAt = now + 300;
       }
       controls.update();
+      cring.style.transform = `rotate(${controls.getAzimuthalAngle().toFixed(3)}rad)`;
+      placeCallouts();
       if (attention.size) {
         const p = .5 + .5 * Math.sin(now / 280);
         for (const w of attention) { w.material.emissive.copy(col["--dnd"]); w.material.color.copy(col["--dnd"]); w.material.emissiveIntensity = (isNight ? 1 : .5) + p * .9; }
@@ -1166,6 +1321,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       for (const [w, until] of pings) {
         if (now > until) { pings.delete(w); w.scale.set(1, 1, 1); update(); continue; }
         const k = .5 + .5 * Math.sin(now / 160); w.scale.set(1 + k * .25, 1 + k * .25, 1); w.material.emissiveIntensity = 1.2 + k * 1.2;
+        if (w.userData.glowMesh.visible) w.userData.glowMesh.material.opacity = .3 + k * .4;
       }
       renderer.render(scene, camera);
       if ((attention.size || pings.size || pin.visible || controls.autoRotate || now < idleAt || tween) && visible) requestAnimationFrame(frame); else running = false;
