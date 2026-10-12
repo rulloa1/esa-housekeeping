@@ -353,8 +353,52 @@ async function runTests() {
   }
   console.log("✓ Duplicate tap within 2 minutes successfully debounced.\n");
 
+  // 19. Batch Suite Assignment (Phase 10)
+  console.log("Test 19: Supervisor performs batch assignment on Suites 101, 102, 103 to Carlos R....");
+  const batchRes = await fetch(`${BASE_URL}/api/suites`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Cookie: supervisorCookie,
+    },
+    body: JSON.stringify({
+      action: "batch_assign",
+      suiteIds: ["101", "102", "103"],
+      attendant: "Carlos R.",
+      priority: "high",
+      userName: "Supervisor Sarah J.",
+    }),
+  });
+  if (!batchRes.ok) throw new Error(`POST /api/suites batch failed: ${batchRes.status}`);
+  const batchData = await batchRes.json();
+  if (!batchData.ok || batchData.updatedCount !== 3) {
+    throw new Error(`Batch assignment expected 3 updated suites, got: ${batchData.updatedCount}`);
+  }
+  console.log("✓ Batch assignment processed successfully for 3 suites.\n");
+
+  // 20. Verify Batch Assignment Integrity in Store & Audit Trail
+  console.log("Test 20: Verifying batch assignment persisted in store and history log...");
+  const verifyBatchRes = await fetch(`${BASE_URL}/api/suites`, {
+    headers: { Cookie: supervisorCookie },
+  });
+  const verifyBatchData = await verifyBatchRes.json();
+  for (const sId of ["101", "102", "103"]) {
+    const room = verifyBatchData.docs[sId];
+    if (room.attendant !== "Carlos R.") {
+      throw new Error(`Expected suite ${sId} attendant to be Carlos R., got: ${room.attendant}`);
+    }
+    if (room.priority !== "high") {
+      throw new Error(`Expected suite ${sId} priority to be high, got: ${room.priority}`);
+    }
+    const hasBatchAudit = room.history?.some((h) => h.event === "Batch Assignment");
+    if (!hasBatchAudit) {
+      throw new Error(`Suite ${sId} history missing 'Batch Assignment' log entry`);
+    }
+  }
+  console.log("✓ Suites 101, 102, 103 verified with Carlos R., high priority & audit trails.\n");
+
   console.log("\n=================================================");
-  console.log("ALL 18 END-TO-END OPERATIONAL & GUEST TESTS PASSED ✓");
+  console.log("ALL 20 END-TO-END OPERATIONAL, BATCH & GUEST TESTS PASSED ✓");
   console.log("=================================================");
 }
 

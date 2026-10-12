@@ -2,11 +2,15 @@
 
 import { useState, useEffect, useMemo } from "react";
 import type { RoomDoc, RoomStatus, Role } from "@/lib/models";
+import { STAFF_ATTENDANTS } from "@/lib/models";
 import { NavigationHeader } from "./NavigationHeader";
 import { InspectionModal } from "./InspectionModal";
 import { AssignmentModal } from "./AssignmentModal";
 import { MaintenanceModal } from "./MaintenanceModal";
 import { RoomHistoryDrawer } from "./RoomHistoryDrawer";
+import { WorkloadDistribution } from "./WorkloadDistribution";
+import { OperationsReportModal } from "./OperationsReportModal";
+import { NotificationsDrawer } from "./NotificationsDrawer";
 
 interface DashboardProps {
   initialDocs: Record<string, RoomDoc>;
@@ -29,6 +33,16 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
   const [assigningRoom, setAssigningRoom] = useState<RoomDoc | null>(null);
   const [maintenanceRoom, setMaintenanceRoom] = useState<RoomDoc | null>(null);
   const [viewingHistoryRoom, setViewingHistoryRoom] = useState<RoomDoc | null>(null);
+  const [showReportModal, setShowReportModal] = useState<boolean>(false);
+  const [showNotifications, setShowNotifications] = useState<boolean>(false);
+
+  // Workload and batch assignment state
+  const [activeAttendantFilter, setActiveAttendantFilter] = useState<string | null>(null);
+  const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>([]);
+  const [batchAttendant, setBatchAttendant] = useState<string>(STAFF_ATTENDANTS[0]);
+  const [batchPriority, setBatchPriority] = useState<"urgent" | "high" | "standard" | "low">("standard");
+  const [isSubmittingBatch, setIsSubmittingBatch] = useState<boolean>(false);
+
 
   // Live polling every 3 seconds (15s if tab is hidden)
   useEffect(() => {
@@ -78,6 +92,15 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
       // Floor filter
       if (activeFloor !== "all" && String(room.floor) !== activeFloor) return false;
 
+      // Attendant filter (from Workload Distribution)
+      if (activeAttendantFilter) {
+        if (activeAttendantFilter === "Unassigned") {
+          if (room.attendant) return false;
+        } else if (room.attendant !== activeAttendantFilter) {
+          return false;
+        }
+      }
+
       // Search query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
@@ -122,11 +145,62 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
       else if (sortField === "updatedAt") cmp = (b.updatedAt || "").localeCompare(a.updatedAt || "");
       return sortAsc ? cmp : -cmp;
     });
-  }, [allRooms, activeFloor, searchQuery, activeFilter, sortField, sortAsc]);
+  }, [allRooms, activeFloor, activeAttendantFilter, searchQuery, activeFilter, sortField, sortAsc]);
 
   const handleRoomUpdated = (updated: RoomDoc) => {
     setDocs((prev) => ({ ...prev, [updated.id]: updated }));
   };
+
+  const handleBatchAssign = async () => {
+    if (selectedRoomIds.length === 0) return;
+    setIsSubmittingBatch(true);
+    try {
+      const res = await fetch("/api/suites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "batch_assign",
+          suiteIds: selectedRoomIds,
+          attendant: batchAttendant === "Unassigned" ? null : batchAttendant,
+          priority: batchPriority,
+          userName: "Supervisor Sarah J.",
+        }),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.docs) {
+          setDocs(json.docs);
+          setVersion(json.version);
+        }
+        setSelectedRoomIds([]);
+      }
+    } catch (err) {
+      console.error("Batch assignment error:", err);
+    } finally {
+      setIsSubmittingBatch(false);
+    }
+  };
+
+  const selectAllFiltered = () => {
+    if (selectedRoomIds.length === filteredRooms.length) {
+      setSelectedRoomIds([]);
+    } else {
+      setSelectedRoomIds(filteredRooms.map((r) => r.id));
+    }
+  };
+
+  const selectFloorRooms = (fl: number) => {
+    const floorIds = allRooms.filter((r) => r.floor === fl).map((r) => r.id);
+    setSelectedRoomIds((prev) => Array.from(new Set([...prev, ...floorIds])));
+  };
+
+  const selectUnassignedDirty = () => {
+    const ids = allRooms
+      .filter((r) => (r.status === "dirty" || r.status === "assigned") && !r.attendant)
+      .map((r) => r.id);
+    setSelectedRoomIds(ids);
+  };
+
 
   const getStatusBadge = (status: RoomStatus) => {
     switch (status) {
@@ -179,9 +253,53 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
               Extended Stay America Suites · Houston IAH Airport (96 Total Suites across 3 Floors)
             </p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Live Sync: Active (v{version})</span>
-            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--st-clean)", display: "inline-block" }}></span>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              onClick={() => setShowReportModal(true)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "7px 12px",
+                borderRadius: 8,
+                backgroundColor: "#FFFFFF",
+                border: "1px solid var(--border-default)",
+                color: "var(--text-main)",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+                boxShadow: "var(--shadow-xs)",
+              }}
+            >
+              <span>📈</span> Operations Report
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowNotifications(true)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "7px 12px",
+                borderRadius: 8,
+                backgroundColor: "#FFFFFF",
+                border: "1px solid var(--border-default)",
+                color: "var(--text-main)",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+                boxShadow: "var(--shadow-xs)",
+              }}
+            >
+              <span>🔔</span> Activity & Alerts
+            </button>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 6, paddingLeft: 4 }}>
+              <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Live Sync: Active (v{version})</span>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--st-clean)", display: "inline-block" }}></span>
+            </div>
           </div>
         </div>
 
@@ -233,6 +351,13 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
             );
           })}
         </section>
+
+        {/* Staff Workload & Assignment Distribution (Phase 10) */}
+        <WorkloadDistribution
+          rooms={allRooms}
+          activeAttendantFilter={activeAttendantFilter}
+          onSelectAttendant={setActiveAttendantFilter}
+        />
 
         {/* Filter & Search Bar */}
         <div
@@ -396,6 +521,15 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
               <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: 13 }}>
                 <thead>
                   <tr style={{ backgroundColor: "var(--esa-brown-soft)", borderBottom: "1px solid var(--border-default)" }}>
+                    <th style={{ width: 40, padding: "12px 10px", textAlign: "center" }}>
+                      <input
+                        type="checkbox"
+                        checked={filteredRooms.length > 0 && selectedRoomIds.length === filteredRooms.length}
+                        onChange={selectAllFiltered}
+                        style={{ cursor: "pointer", width: 16, height: 16 }}
+                        title="Select all filtered suites"
+                      />
+                    </th>
                     <th
                       style={{ padding: "12px 14px", fontWeight: 700, color: "var(--esa-brown)", cursor: "pointer" }}
                       onClick={() => { setSortField("id"); setSortAsc(!sortAsc); }}
@@ -424,7 +558,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                 <tbody>
                   {filteredRooms.length === 0 ? (
                     <tr>
-                      <td colSpan={8} style={{ padding: "36px 16px", textAlign: "center", color: "var(--text-muted)" }}>
+                      <td colSpan={9} style={{ padding: "36px 16px", textAlign: "center", color: "var(--text-muted)" }}>
                         No suites match the selected filter criteria.
                       </td>
                     </tr>
@@ -433,15 +567,30 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                       const st = getStatusBadge(room.status);
                       const pr = getPriorityBadge(room.priority);
                       const hasOpenMaint = room.maintenanceIssues && room.maintenanceIssues.some((m) => m.status === "open");
+                      const isRowSelected = selectedRoomIds.includes(room.id);
 
                       return (
                         <tr
                           key={room.id}
                           style={{
                             borderBottom: "1px solid var(--border-subtle)",
+                            backgroundColor: isRowSelected ? "rgba(47, 122, 30, 0.05)" : "transparent",
                             transition: "background-color 0.15s ease",
                           }}
                         >
+                          {/* Checkbox */}
+                          <td style={{ width: 40, padding: "12px 10px", textAlign: "center" }}>
+                            <input
+                              type="checkbox"
+                              checked={isRowSelected}
+                              onChange={(e) => {
+                                if (e.target.checked) setSelectedRoomIds((prev) => [...prev, room.id]);
+                                else setSelectedRoomIds((prev) => prev.filter((id) => id !== room.id));
+                              }}
+                              style={{ cursor: "pointer", width: 16, height: 16 }}
+                            />
+                          </td>
+
                           {/* Room Number */}
                           <td style={{ padding: "12px 14px", fontWeight: 800, color: "var(--text-main)" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -771,6 +920,160 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
             })}
           </div>
         )}
+        {/* Floating Batch Assignment Bar (Phase 10) */}
+        {selectedRoomIds.length > 0 && (
+          <div
+            style={{
+              position: "fixed",
+              bottom: 24,
+              left: "50%",
+              transform: "translateX(-50%)",
+              backgroundColor: "var(--esa-brown)",
+              color: "#FFFFFF",
+              borderRadius: 14,
+              padding: "12px 20px",
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              boxShadow: "0 10px 30px rgba(0, 0, 0, 0.35)",
+              zIndex: 900,
+              maxWidth: 960,
+              width: "calc(100% - 32px)",
+              flexWrap: "wrap",
+            }}
+          >
+            <div style={{ fontWeight: 700, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
+              <span
+                style={{
+                  backgroundColor: "var(--esa-green)",
+                  color: "#FFFFFF",
+                  padding: "3px 9px",
+                  borderRadius: "var(--radius-pill)",
+                  fontSize: 12,
+                  fontWeight: 800,
+                }}
+              >
+                {selectedRoomIds.length}
+              </span>
+              <span>Suites Selected</span>
+            </div>
+
+            {/* Quick Floor & Filter Selectors */}
+            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <span style={{ fontSize: 11, opacity: 0.8 }}>Add:</span>
+              {[1, 2, 3].map((fl) => (
+                <button
+                  key={fl}
+                  type="button"
+                  onClick={() => selectFloorRooms(fl)}
+                  style={{
+                    padding: "3px 8px",
+                    borderRadius: 4,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    backgroundColor: "rgba(255, 255, 255, 0.15)",
+                    color: "#FFFFFF",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  Fl {fl}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={selectUnassignedDirty}
+                style={{
+                  padding: "3px 8px",
+                  borderRadius: 4,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                  color: "#FFFFFF",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                Unassigned Dirty
+              </button>
+            </div>
+
+            {/* Batch Controls */}
+            <div style={{ display: "flex", gap: 8, alignItems: "center", marginLeft: "auto", flexWrap: "wrap" }}>
+              <select
+                value={batchAttendant}
+                onChange={(e) => setBatchAttendant(e.target.value)}
+                style={{
+                  padding: "6px 10px",
+                  borderRadius: 6,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  backgroundColor: "#FFFFFF",
+                  color: "var(--text-main)",
+                  border: "none",
+                }}
+              >
+                {STAFF_ATTENDANTS.map((att) => (
+                  <option key={att} value={att}>{att}</option>
+                ))}
+                <option value="Unassigned">Unassigned</option>
+              </select>
+
+              <select
+                value={batchPriority}
+                onChange={(e) => setBatchPriority(e.target.value as any)}
+                style={{
+                  padding: "6px 10px",
+                  borderRadius: 6,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  backgroundColor: "#FFFFFF",
+                  color: "var(--text-main)",
+                  border: "none",
+                }}
+              >
+                <option value="standard">Standard Priority</option>
+                <option value="high">High Priority</option>
+                <option value="urgent">Urgent Priority</option>
+                <option value="low">Low Priority</option>
+              </select>
+
+              <button
+                type="button"
+                onClick={handleBatchAssign}
+                disabled={isSubmittingBatch}
+                style={{
+                  padding: "7px 14px",
+                  borderRadius: 6,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  backgroundColor: "var(--esa-green)",
+                  color: "#FFFFFF",
+                  border: "none",
+                  cursor: isSubmittingBatch ? "not-allowed" : "pointer",
+                }}
+              >
+                {isSubmittingBatch ? "Assigning..." : "Apply Batch Assignment"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedRoomIds([])}
+                style={{
+                  padding: "6px 10px",
+                  borderRadius: 6,
+                  fontSize: 12,
+                  backgroundColor: "transparent",
+                  color: "rgba(255, 255, 255, 0.8)",
+                  border: "1px solid rgba(255, 255, 255, 0.3)",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Modals */}
@@ -803,6 +1106,23 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
         <RoomHistoryDrawer
           room={viewingHistoryRoom}
           onClose={() => setViewingHistoryRoom(null)}
+        />
+      )}
+
+      {/* Operations Report Modal (Phase 12) */}
+      {showReportModal && (
+        <OperationsReportModal
+          rooms={allRooms}
+          onClose={() => setShowReportModal(false)}
+        />
+      )}
+
+      {/* Activity & Operational Alerts Center (Phase 12) */}
+      {showNotifications && (
+        <NotificationsDrawer
+          rooms={allRooms}
+          onClose={() => setShowNotifications(false)}
+          onSelectRoom={(roomId) => setSearchQuery(roomId)}
         />
       )}
     </div>
