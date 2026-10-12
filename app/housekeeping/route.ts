@@ -24,7 +24,9 @@ export async function GET(req: Request) {
     `var S=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){S.apply(this,arguments);` +
     `if(k===K&&(v==="en"||v==="es"))document.cookie="${LANG_COOKIE}="+v+"; path=/; max-age=31536000; samesite=lax"}}catch(e){}`;
 
-  const inject = `<script>try{localStorage.setItem("iah-hk-role","${role}")}catch{}${langSync}</script>\n<script src="/hk-db.js"></script>\n<link rel="icon" href="/icon.png" type="image/png"><link rel="apple-touch-icon" href="/apple-icon.png">`;
+  // The board knows two device modes: "housekeeping" (each tap saves) and "frontdesk" (Save button).
+  const boardRole = role === "housekeeper" || role === "housekeeping" ? "housekeeping" : "frontdesk";
+  const inject = `<script>try{localStorage.setItem("iah-hk-role","${boardRole}")}catch{}${langSync}</script>\n<script src="/hk-db.js"></script>\n<link rel="icon" href="/icon.png" type="image/png"><link rel="apple-touch-icon" href="/apple-icon.png">`;
 
   const navBanner = `
 <div style="position:sticky;top:0;z-index:9999;background:#2F7A1E;color:#FFFFFF;padding:8px 16px;font-family:system-ui,-apple-system,sans-serif;font-size:13px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
