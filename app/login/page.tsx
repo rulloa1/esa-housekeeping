@@ -2,6 +2,7 @@ import { ROLES, type Role } from "@/lib/auth";
 import { getLang } from "@/lib/lang";
 import { BrandLogo } from "@/components/BrandLogo";
 import { LangToggle } from "@/components/LangToggle";
+import { LoginForm } from "@/components/LoginForm";
 
 const TEXT = {
   en: {
@@ -98,54 +99,14 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
           </h1>
         </div>
 
-        <form method="post" action="/api/login" style={{ display: "grid", gap: 14 }}>
-          <label style={{ display: "grid", gap: 6, fontWeight: 600, fontSize: 13, color: "#4A3728" }}>
-            {t.role}
-            <select name="role" defaultValue="housekeeper" style={field}>
-              {Object.entries(t.roles).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
-            </select>
-          </label>
-
-          <label style={{ display: "grid", gap: 6, fontWeight: 600, fontSize: 13, color: "#4A3728" }}>
-            {t.pin}
-            <input
-              name="pin"
-              type="password"
-              inputMode="numeric"
-              autoComplete="current-password"
-              placeholder={t.pinPlaceholder}
-              required
-              style={field}
-            />
-          </label>
-
-          {error && (
-            <div role="alert" style={{ padding: "10px 12px", borderRadius: 8, background: "#FEE2E2", border: "1px solid #FECACA", color: "#DC2626", fontSize: 13, fontWeight: 600 }}>
-              {error === "locked" ? t.locked(Math.max(1, Number(wait) || 15)) : t.error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            style={{
-              padding: "13px 16px",
-              fontSize: 15,
-              fontWeight: 700,
-              borderRadius: 8,
-              border: "none",
-              background: "#2F7A1E",
-              color: "#FFFFFF",
-              fontFamily: "inherit",
-              cursor: "pointer",
-              boxShadow: "0 2px 6px rgba(47, 122, 30, 0.25)",
-              marginTop: 4,
-            }}
-          >
-            {t.signIn}
-          </button>
-        </form>
+        <LoginForm
+          roles={t.roles}
+          signInText={t.signIn}
+          roleText={t.role}
+          pinText={t.pin}
+          pinPlaceholder={t.pinPlaceholder}
+          errorMessage={error ? (error === "locked" ? t.locked(Math.max(1, Number(wait) || 15)) : t.error) : undefined}
+        />
 
         <div style={{ marginTop: 20, paddingTop: 14, borderTop: "1px solid #EBE5DB", textAlign: "center", fontSize: 12, color: "#827263" }}>
           Extended Stay America Suites Operations
