@@ -9,9 +9,10 @@ describe("toRoom", () => {
     expect(r.maintenanceIssues).toEqual([]);
   });
   it("copes with empty and odd records", () => {
-    const rooms = Object.values(toRooms({ "101": {}, "102": null, "103": { status: "bogus", history: "nope" } }));
-    expect(rooms.map((r) => r.status)).toEqual(["dirty", "dirty", "dirty"]);
-    const sorted = rooms.sort((a, b) => a.id.localeCompare(b.id) || a.status.localeCompare(b.status) || b.updatedAt.localeCompare(a.updatedAt));
-    expect(sorted.map((r) => r.id)).toEqual(["101", "102", "103"]);
+    const rooms = toRooms({ "101": {}, "102": null, "103": { status: "bogus", history: "nope" } });
+    expect(rooms["101"].status).toBe("dirty");
+    expect(rooms["102"].status).toBe("not_logged");
+    expect(rooms["103"].status).toBe("dirty");
+    expect(Object.keys(rooms)).toHaveLength(96);
   });
 });
