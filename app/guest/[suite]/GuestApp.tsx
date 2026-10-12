@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import css from "./guest.module.css";
 import LangToggle from "@/components/LangToggle";
 import BrandLogo from "@/components/BrandLogo";
 
@@ -23,7 +24,16 @@ const TEXT = {
     dndOn: ["Do Not Disturb", "Privacy please", "Do Not Disturb is on. We won't knock."],
     dndOff: ["Do Not Disturb", "On · tap to turn off", "Do Not Disturb is off. Housekeeping may stop by."],
     elseTitle: "Need something else?",
-    elseBody: "Stop by or call the front desk anytime.",
+    elseBody: "Call or stop by the front desk. Check-out is at 11 AM.",
+    call: "Call",
+    send: "Send request",
+    more: "More for your stay",
+    dndTitle: "Do Not Disturb",
+    dndSubOff: "Housekeeping may stop by",
+    dndSubOn: "On. We won't knock.",
+    around: "Around the hotel",
+    photos: ["Seasonal outdoor pool", "Full kitchen in your suite", "Free grab-and-go breakfast"],
+    pending: "Sent",
     yourRequests: "Your requests",
     none: "Nothing yet. Requests you send from Home show up here.",
     failed: "That didn't go through. Please try again or call the front desk.",
@@ -56,7 +66,16 @@ const TEXT = {
     dndOn: ["No molestar", "Privacidad, por favor", "No molestar está activado. No tocaremos la puerta."],
     dndOff: ["No molestar", "Activado · toca para quitar", "No molestar está desactivado. Limpieza puede pasar."],
     elseTitle: "¿Necesitas algo más?",
-    elseBody: "Pasa o llama a recepción cuando quieras.",
+    elseBody: "Llama o pasa por recepción. La salida es a las 11 AM.",
+    call: "Llamar",
+    send: "Enviar solicitud",
+    more: "Más para tu estancia",
+    dndTitle: "No molestar",
+    dndSubOff: "Limpieza puede pasar",
+    dndSubOn: "Activado. No tocaremos la puerta.",
+    around: "En el hotel",
+    photos: ["Piscina al aire libre de temporada", "Cocina completa en tu suite", "Desayuno gratis para llevar"],
+    pending: "Enviada",
     yourRequests: "Tus solicitudes",
     none: "Aún no hay nada. Las solicitudes que envíes desde Inicio aparecen aquí.",
     failed: "No se pudo enviar. Inténtalo de nuevo o llama a recepción.",
@@ -77,12 +96,11 @@ const TEXT = {
 };
 
 const ink = "#483729";
-const muted = "#7a6a5d";
 const green = "#338802";
 
-// Simple line icons, drawn in white on the coloured tiles.
-const icon = (d: string) => (
-  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+// Simple line icons; they take the colour of their container.
+const icon = (d: string, size = 26) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <g dangerouslySetInnerHTML={{ __html: d }} />
   </svg>
 );
@@ -93,6 +111,7 @@ const ICONS = {
   dnd: icon('<rect x="7" y="9" width="10" height="13" rx="2"/><circle cx="12" cy="5.5" r="2.5"/><circle cx="12" cy="16" r="1.4"/>'),
   home: icon('<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/>'),
   list: icon('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/>'),
+  phone: icon('<path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>', 18),
   leaf: icon('<path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14"/><path d="M5 19c3-4 6-6 9-7"/>'),
 };
 
@@ -147,176 +166,155 @@ export default function GuestApp({ lang, suite, k, dnd: initialDnd, initialReque
     }
   }
 
-  const tile = (type: string, [title, sub, done]: string[], bg: string, ic: React.ReactNode) => ({ type, title, sub, done, bg, ic });
-  const tiles = [
-    tile("cleaning", t.cleaning, "linear-gradient(150deg, #3d9a0a, #338802)", ICONS.cleaning),
-    tile("towels", t.towels, "linear-gradient(150deg, #1d7006, #145E00)", ICONS.towels),
-    tile("amenities", t.amenities, "linear-gradient(150deg, #6b5442, #483729)", ICONS.amenities),
-    dnd
-      ? tile("dnd_off", t.dndOff, "linear-gradient(150deg, #b45309, #92400e)", ICONS.dnd)
-      : tile("dnd_on", t.dndOn, "linear-gradient(150deg, #e59a2e, #c97d12)", ICONS.dnd),
+  const open = requests.filter((r) => !r.doneAt && r.type !== "dnd_on" && r.type !== "dnd_off").length;
+  const small = [
+    { type: "towels", txt: t.towels, ic: ICONS.towels, tint: "#e7f0fb", fg: "#1f5fa8" },
+    { type: "amenities", txt: t.amenities, ic: ICONS.amenities, tint: "#f3ece4", fg: ink },
+  ];
+  const photos = [
+    ["/guest/pool.jpg", t.photos[0]],
+    ["/guest/kitchen.jpg", t.photos[1]],
+    ["/guest/lobby.jpg", t.photos[2]],
   ];
 
   return (
-    <div lang={lang} style={{ minHeight: "100dvh", background: "#f5f6f4", color: ink, fontFamily: 'Arial, "Helvetica Neue", Helvetica, sans-serif' }}>
-      <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 16px calc(96px + env(safe-area-inset-bottom))" }}>
-        <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 2px 10px" }}>
-          <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <BrandLogo height={36} />
-            <span style={{ fontWeight: 700, fontSize: 17 }}>{t.suite} {suite}</span>
-          </span>
-          <LangToggle lang={lang} />
-        </header>
-
-        {tab === "home" ? (
-          <>
-            <section
-              style={{
-                borderRadius: 4,
-                padding: "64px 22px 22px",
-                color: "#fff",
-                // Hotel pool photo under a green shade so the greeting stays readable.
-                backgroundColor: "#145e00",
-                backgroundImage:
-                  'linear-gradient(0deg, rgba(20,60,8,.88) 0%, rgba(20,60,8,.55) 55%, rgba(20,60,8,.1) 100%), url("/banners/pool.jpg")',
-                backgroundSize: "cover",
-                backgroundPosition: "center 55%",
-                boxShadow: "0 1px 2px rgba(72,55,41,.08), 0 8px 24px rgba(72,55,41,.12)",
-              }}
-            >
-              <h1 style={{ margin: 0, fontSize: 30, lineHeight: 1.15, letterSpacing: -0.4, color: "#fff" }}>
-                {hello} <span aria-hidden="true">👋</span>
-              </h1>
-              <p style={{ margin: "10px 0 0", fontSize: 16, color: "rgba(255,255,255,.9)", maxWidth: 300 }}>{t.intro}</p>
+    <div lang={lang} className={css.page}>
+      {tab === "home" ? (
+        <div className={css.wrap}>
+          <section className={css.hero}>
+            <div className={css.topbar}>
+              <span className={css.logoChip}>
+                <BrandLogo height={30} />
+              </span>
+              <LangToggle lang={lang} style={{ borderRadius: 12, border: 0, boxShadow: "0 6px 18px rgba(0,0,0,.18)" }} />
+            </div>
+            <div className={css.heroText}>
+              <span className={css.suiteChip}>
+                {t.suite} {suite}
+              </span>
+              <h1 className={css.hello}>{hello}</h1>
+              <p className={css.intro}>{t.intro}</p>
               {dnd && (
-                <p style={{ margin: "14px 0 0", display: "inline-block", padding: "6px 12px", borderRadius: 4, background: "#fff1e0", color: "#92400e", fontSize: 13, fontWeight: 600 }}>
+                <span className={css.dndBadge}>
+                  <span className={css.dndDot} aria-hidden="true" />
                   {t.dndOnBadge}
-                </p>
+                </span>
               )}
-            </section>
+            </div>
+          </section>
 
-            <h2 style={{ margin: "26px 2px 2px", fontSize: 21 }}>{t.services}</h2>
-            <p style={{ margin: "0 2px 14px", color: muted }}>{t.help}</p>
+          <section className={css.feature} aria-labelledby="clean-title">
+            <span className={css.featureImg} aria-hidden="true" />
+            <span>
+              <h2 id="clean-title" className={css.featureTitle}>{t.cleaning[0]}</h2>
+              <p className={css.featureSub}>{t.cleaning[1]}</p>
+            </span>
+            <button className={css.primary} onClick={() => send("cleaning", t.cleaning[2])} disabled={busy !== null}>
+              {busy === "cleaning" ? t.sending : t.send}
+            </button>
+          </section>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              {tiles.map((tl) => (
-                <button
-                  key={tl.type}
-                  onClick={() => send(tl.type, tl.done)}
-                  disabled={busy !== null}
-                  style={{
-                    position: "relative",
-                    textAlign: "left",
-                    border: 0,
-                    borderRadius: 4,
-                    padding: "16px 14px 14px",
-                    minHeight: 150,
-                    color: "#fff",
-                    background: tl.bg,
-                    boxShadow: "0 6px 16px rgba(72,55,41,.16)",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    cursor: "pointer",
-                    opacity: busy && busy !== tl.type ? 0.6 : 1,
-                    font: "inherit",
-                  }}
-                >
-                  {tl.ic}
+          <div className={css.pad}>
+            <h2 className={css.sectionTitle}>{t.more}</h2>
+            <div className={css.grid}>
+              {small.map((x) => (
+                <button key={x.type} className={css.tile} onClick={() => send(x.type, x.txt[2])} disabled={busy !== null}>
+                  <span className={css.iconWrap} style={{ background: x.tint, color: x.fg }}>{x.ic}</span>
                   <span>
-                    <span style={{ display: "block", fontSize: 18, fontWeight: 700, lineHeight: 1.2, paddingRight: 30 }}>{tl.title}</span>
-                    <span style={{ display: "block", fontSize: 13, opacity: 0.9, marginTop: 4, paddingRight: 30 }}>{busy === tl.type ? t.sending : tl.sub}</span>
-                  </span>
-                  <span
-                    aria-hidden="true"
-                    style={{ position: "absolute", right: 12, bottom: 14, width: 26, height: 26, borderRadius: 13, background: "rgba(255,255,255,.95)", color: ink, display: "grid", placeItems: "center", fontSize: 15, fontWeight: 700 }}
-                  >
-                    ›
+                    <span className={css.tileTitle}>{x.txt[0]}</span>
+                    <span className={css.tileSub}>{busy === x.type ? t.sending : x.txt[1]}</span>
                   </span>
                 </button>
               ))}
             </div>
 
-            <div style={{ marginTop: 16, display: "flex", gap: 14, alignItems: "center", padding: "16px", borderRadius: 4, background: "#fff", border: "1px solid #DBDEDB" }}>
-              <span style={{ width: 40, height: 40, borderRadius: 20, background: "#eef6e8", color: green, display: "grid", placeItems: "center", flexShrink: 0 }}>{ICONS.leaf}</span>
-              <span>
-                <b style={{ display: "block", fontSize: 15 }}>{t.elseTitle}</b>
-                <span style={{ color: muted, fontSize: 14 }}>{t.elseBody}</span>
+            <button
+              className={css.row}
+              role="switch"
+              aria-checked={dnd}
+              onClick={() => (dnd ? send("dnd_off", t.dndOff[2]) : send("dnd_on", t.dndOn[2]))}
+              disabled={busy !== null}
+            >
+              <span className={css.iconWrap} style={{ background: "#fff4e5", color: "#c97d12" }}>{ICONS.dnd}</span>
+              <span className={css.rowText}>
+                <span className={css.tileTitle}>{t.dndTitle}</span>
+                <span className={css.tileSub}>{busy === "dnd_on" || busy === "dnd_off" ? t.sending : dnd ? t.dndSubOn : t.dndSubOff}</span>
               </span>
+              <span className={`${css.switch} ${dnd ? css.switchOn : ""}`} aria-hidden="true" />
+            </button>
+
+            <h2 className={css.sectionTitle}>{t.around}</h2>
+            <div className={css.strip}>
+              {photos.map(([src, label]) => (
+                <div key={src} className={css.photo} style={{ backgroundImage: `url(${src})` }} role="img" aria-label={label}>
+                  <span>{label}</span>
+                </div>
+              ))}
             </div>
-          </>
-        ) : (
-          <section>
-            <h1 style={{ margin: "8px 2px 14px", fontSize: 26 }}>{t.yourRequests}</h1>
+
+            <div className={css.desk}>
+              <span className={css.iconWrap} style={{ background: "#fff", color: green }}>{ICONS.leaf}</span>
+              <span>
+                <b className={css.tileTitle}>{t.elseTitle}</b>
+                <span className={css.tileSub}>{t.elseBody}</span>
+              </span>
+              <a className={css.call} href="tel:+12819873900">
+                {ICONS.phone}
+                {t.call}
+              </a>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className={css.wrap}>
+          <header className={css.reqHead}>
+            <BrandLogo height={30} />
+            <LangToggle lang={lang} />
+          </header>
+          <section className={css.pad}>
+            <h1 style={{ margin: "10px 2px 4px", fontSize: 28 }}>{t.yourRequests}</h1>
+            <p style={{ margin: "0 2px 16px", color: "var(--muted)" }}>
+              {t.suite} {suite}
+            </p>
             {requests.length === 0 ? (
-              <p style={{ color: muted, margin: "0 2px" }}>{t.none}</p>
+              <p className={css.empty}>{t.none}</p>
             ) : (
-              <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 10 }}>
+              <ul className={css.list}>
                 {requests.map((r) => (
-                  <li key={r.at + r.type} style={{ background: "#fff", borderRadius: 4, padding: "14px 16px", border: "1px solid #DBDEDB", display: "flex", justifyContent: "space-between", gap: 12 }}>
-                    <b style={{ fontWeight: 600 }}>{t.labels[r.type] ?? r.type}</b>
-                    <span style={{ color: muted, fontSize: 14, whiteSpace: "nowrap" }}>
-                      {r.doneAt ? <b style={{ color: green, fontWeight: 600 }}>{t.done} · </b> : null}
-                      {when(r.at, lang)}
+                  <li key={r.at + r.type} className={css.item}>
+                    <span style={{ flex: 1, minWidth: 0 }}>
+                      <b className={css.tileTitle}>{t.labels[r.type] ?? r.type}</b>
+                      <span className={css.tileSub}>{when(r.at, lang)}</span>
+                    </span>
+                    <span className={`${css.state} ${r.doneAt || r.type.startsWith("dnd") ? css.stateDone : css.stateOpen}`}>
+                      {r.doneAt || r.type.startsWith("dnd") ? t.done : t.pending}
                     </span>
                   </li>
                 ))}
               </ul>
             )}
           </section>
-        )}
-      </div>
+        </div>
+      )}
 
       {toast && (
-        <div
-          role="status"
-          style={{
-            position: "fixed",
-            left: 16,
-            right: 16,
-            bottom: "calc(84px + env(safe-area-inset-bottom))",
-            maxWidth: 448,
-            margin: "0 auto",
-            padding: "12px 16px",
-            borderRadius: 4,
-            background: toast.ok ? ink : "#b42318",
-            color: "#fff",
-            fontSize: 15,
-            boxShadow: "0 10px 30px rgba(15,23,42,.25)",
-          }}
-        >
+        <div role="status" className={css.toast} style={{ background: toast.ok ? ink : "#b42318" }}>
           {toast.text}
         </div>
       )}
 
-      <nav
-        style={{
-          position: "fixed",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: "rgba(255,255,255,.94)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          borderTop: "1px solid #DBDEDB",
-          paddingBottom: "env(safe-area-inset-bottom)",
-        }}
-      >
-        <div style={{ maxWidth: 480, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+      <nav className={css.nav}>
+        <div className={css.navInner}>
           {(
             [
               ["home", t.home, ICONS.home],
               ["requests", t.requests, ICONS.list],
             ] as const
           ).map(([id, label, ic]) => (
-            <button
-              key={id}
-              onClick={() => setTab(id)}
-              aria-current={tab === id ? "page" : undefined}
-              style={{ border: 0, background: "none", padding: "10px 0 12px", display: "grid", justifyItems: "center", gap: 2, color: tab === id ? green : muted, font: "inherit", fontSize: 12, fontWeight: tab === id ? 700 : 500, cursor: "pointer" }}
-            >
+            <button key={id} onClick={() => setTab(id)} aria-current={tab === id ? "page" : undefined} className={`${css.navBtn} ${tab === id ? css.navOn : ""}`}>
               {ic}
               {label}
+              {id === "requests" && open > 0 && <span className={css.badge}>{open}</span>}
             </button>
           ))}
         </div>
