@@ -154,7 +154,8 @@ button { cursor: pointer; }
 .btn.ghost { background: transparent; }
 
 /* Toolbar */
-.toolbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; margin-inline: -8px; padding: 10px; border: 1px solid var(--line); border-radius: 16px; display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; box-shadow: var(--lift); }
+html { scroll-padding-top: var(--app-nav-h, 0px); }
+.toolbar { position: sticky; top: calc(env(safe-area-inset-top, 0px) + var(--app-nav-h, 0px)); z-index: 6; margin-inline: -8px; padding: 10px; border: 1px solid var(--line); border-radius: 16px; display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; box-shadow: var(--lift); }
 .seg-tabs { display: flex; gap: 3px; background: var(--surface-2); padding: 4px; border-radius: 12px; }
 .seg-tabs button { border: 0; background: transparent; padding: 0 14px; min-height: 40px; border-radius: 9px; font-weight: 700; white-space: nowrap; }
 .seg-tabs button[aria-pressed="true"] { background: var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,.14); }
