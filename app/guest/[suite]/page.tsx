@@ -77,7 +77,7 @@ export default async function GuestPage({
           <div style={{ display: "grid", gap: 10 }}>
             <a
               id="btn-guest-call-desk"
-              href="tel:+18325550199"
+              href="tel:+12819873900"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -92,7 +92,7 @@ export default async function GuestPage({
                 textDecoration: "none",
               }}
             >
-              📞 {lang === "es" ? "Llamar a Recepción (Ext. 0)" : "Call Front Desk (Ext. 0)"}
+              📞 {lang === "es" ? "Llamar a Recepción" : "Call Front Desk"}
             </a>
           </div>
         </div>
