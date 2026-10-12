@@ -7,6 +7,7 @@ import { LoginForm } from "@/components/LoginForm";
 const TEXT = {
   en: {
     signIn: "Sign in",
+    mockup: "Concept mock-up. Not an official Extended Stay America or J&P Asset Management site. ©",
     role: "Role",
     pin: "Staff PIN",
     error: "That PIN didn't match. Try again.",
@@ -20,6 +21,7 @@ const TEXT = {
   },
   es: {
     signIn: "Iniciar sesión",
+    mockup: "Prototipo conceptual. No es un sitio oficial de Extended Stay America ni de J&P Asset Management. ©",
     role: "Puesto",
     pin: "PIN del personal",
     error: "Ese PIN no coincide. Inténtalo de nuevo.",
@@ -111,6 +113,9 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
         <div style={{ marginTop: 20, paddingTop: 14, borderTop: "1px solid #EBE5DB", textAlign: "center", fontSize: 12, color: "#827263" }}>
           Extended Stay America Suites Operations
         </div>
+        <p style={{ margin: "12px 0 0", fontSize: 11, lineHeight: 1.45, textAlign: "center", color: "#8a7a6b" }}>
+          {t.mockup} <a href="https://theroyeffect.com" style={{ color: "inherit" }}>theroyeffect.com</a>
+        </p>
       </main>
     </div>
   );
