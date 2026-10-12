@@ -50,6 +50,12 @@ describe("changesFrom", () => {
     const { attendant: _a, ...without } = base;
     expect(changesFrom(base, base, without).changes).toEqual({ attendant: null });
   });
+  it("clears notes the board emptied, keeping only guest lines added meanwhile", () => {
+    const withNotes = { ...base, notes: "Extra towels" };
+    expect(changesFrom(withNotes, withNotes, { ...withNotes, notes: "" }).changes).toEqual({ notes: "" });
+    const current = { ...withNotes, notes: "Guest: more coffee\nExtra towels" };
+    expect(changesFrom(current, withNotes, { ...withNotes, notes: "" }).changes).toEqual({ notes: "Guest: more coffee" });
+  });
 });
 
 describe("guestRequestUnseen", () => {

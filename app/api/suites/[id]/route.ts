@@ -267,8 +267,10 @@ async function update(id: string, role: Role, body: Body, board: { base: Doc | n
       delete changes.attendant;
     }
 
-    // The 3-day DND welfare check is a supervisor's job (Mandatory DND Policy).
-    if (changes.welfareDone && changes.welfareDone !== (room as unknown as Doc).welfareDone && !supervisor) {
+    // The 3-day DND welfare check is a supervisor's job (Mandatory DND Policy): only a supervisor
+    // may tick or untick it. Lifting DND itself clears it too, which anyone may do.
+    const liftingDnd = changes.welfareDone === null && "dndSince" in changes && changes.dndSince === null;
+    if ("welfareDone" in changes && changes.welfareDone !== ((room as unknown as Doc).welfareDone ?? null) && !supervisor && !liftingDnd) {
       rejected.push({ field: "welfareDone", reason: "welfare" });
       delete changes.welfareDone;
     }
