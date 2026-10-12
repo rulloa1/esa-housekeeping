@@ -16,12 +16,16 @@ const TEXT = {
   },
 };
 
-// Full-screen photo of the hotel front behind the sign-in card.
-// public/login-bg.jpg is the front entrance (upscaled from a small photo, softly blurred); the gradient shows while it loads.
-const BACKGROUND =
-  "linear-gradient(rgba(10, 20, 35, 0.35), rgba(10, 20, 35, 0.55)), " +
-  "url(/login-bg.jpg) center / cover no-repeat, " +
-  "linear-gradient(160deg, #1d3c5e 0%, #3f6f93 55%, #c9d8e4 100%)";
+// Full-screen photo of the hotel front behind the sign-in card (Rory's exterior photo, 2026-10-12).
+// Landscape screens get the 16:9 crop; portrait iPads and phones get the crop centred on the entrance and sign.
+// The gradient shows while the photo loads.
+const SHADE = "linear-gradient(rgba(10, 20, 35, 0.30), rgba(10, 20, 35, 0.50))";
+const FALLBACK = "linear-gradient(160deg, #1d3c5e 0%, #3f6f93 55%, #c9d8e4 100%)";
+const BACKGROUND_CSS = `
+.login-bg { background: ${SHADE}, url(/login-bg.jpg) center / cover no-repeat, ${FALLBACK}; }
+@media (orientation: portrait) {
+  .login-bg { background: ${SHADE}, url(/login-bg-portrait.jpg) center / cover no-repeat, ${FALLBACK}; }
+}`;
 
 const field = { padding: 12, fontSize: 16, borderRadius: 0, border: "1px solid #DBDEDB", background: "#fff", color: "#483729", fontFamily: "inherit" };
 
@@ -31,10 +35,10 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
   const t = TEXT[lang];
   return (
     <div
+      className="login-bg"
       style={{
         position: "fixed",
         inset: 0,
-        background: BACKGROUND,
         display: "grid",
         placeItems: "center",
         padding: 16,
@@ -42,6 +46,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
         overflowY: "auto",
       }}
     >
+      <style>{BACKGROUND_CSS}</style>
       <LangToggle lang={lang} style={{ position: "fixed", top: 16, right: 16 }} />
       <main
         lang={lang}
