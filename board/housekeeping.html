@@ -705,6 +705,7 @@ fieldset .check:has(input:checked) { background: color-mix(in srgb, var(--st-cle
 .suite { min-width: 0; }
 .suite .st { max-width: calc(100% - 2px); overflow: hidden; text-overflow: ellipsis; }
 html[lang="es"] .suite .st { letter-spacing: 0; font-size: .52rem; padding-inline: 4px; }
+.save-err { color: var(--st-fail); font-weight: 700; }
 </style>
 
 <div class="wrap">
@@ -860,7 +861,7 @@ html[lang="es"] .suite .st { letter-spacing: 0; font-size: .52rem; padding-inlin
     "weekly full ·": "servicio completo semanal ·", "mid-week refresh ·": "repaso de media semana ·",
     "Housekeeping mode: each tap in a suite saves straight away": "Modo limpieza: cada toque en una suite se guarda al instante",
     "Front desk mode: changes save when you press Save": "Modo recepción: los cambios se guardan al pulsar Guardar",
-    "Changes save as you tap": "Los cambios se guardan al tocar", "Saved · front desk can see it": "Guardado · recepción ya lo ve",
+    "Changes save as you tap": "Los cambios se guardan al tocar", "Saved · front desk can see it": "Guardado · recepción ya lo ve", "Not saved: only a supervisor can do that": "No se guardó: solo un supervisor puede hacerlo", "Not saved: the server refused this change": "No se guardó: el servidor rechazó el cambio", "A supervisor marks suites Inspected.": "Un supervisor marca las suites como inspeccionadas.",
     "Example data.": "Datos de ejemplo.", "Clear example statuses": "Borrar estados de ejemplo", "Keep them": "Conservarlos", "Example status": "Estado de ejemplo",
     "No suites logged yet. Tap any suite to record its status, DND and kitchenette audit.": "Aún no hay suites registradas. Toca una suite para registrar su estado, DND y auditoría de cocineta.",
     "Shared saving isn't available here, so changes stay on this device.": "El guardado compartido no está disponible aquí; los cambios se quedan en este dispositivo.",
@@ -2273,7 +2274,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
   // ---------- Sheet ----------
   function openSuite(s) {
     if (state.open !== s) state.autoStarted = null;
-    state.open = s; state.dirtyDraft = false;
+    state.open = s; state.dirtyDraft = false; if (state.saveErr?.s !== s) state.saveErr = null;
     state.draft = state.docs[s] ? clone(state.docs[s]) : { status: "dirty", occ: "occupied", audit: {} };
     document.documentElement.style.overflow = "hidden";
     renderDrawer(true);
@@ -2306,7 +2307,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
         <div class="hrow">
           <div><div class="eyebrow">Floor ${s[0]} · ${side}</div><h2 id="dTitle" style="font-size:1.8rem">Suite ${s}</h2>
           <div class="hpills"><span class="spill">${ICONS[vst(d)] || ""}${saved || state.dirtyDraft ? STATUS_LABEL[vst(d)] : "Not logged"}</span>${svc.code ? `<span class="tag svc">${esc(svc.label)}</span>` : ""}${(() => { const tp = taskProgress(d); return tp ? `<span class="tprog">${ring([[tp.n / tp.total, "var(--st-prog)"]], 26, "")}${tp.n}/${tp.total} tasks</span>` : ""; })()}</div>
-          <div class="muted small">${saved?.updatedAt ? "Updated " + esc(ago(saved.updatedAt)) + (who(saved.updatedBy) ? " by " + who(saved.updatedBy) : "") : saved ? "Example status" : "Not logged yet"}${state.dirtyDraft ? ' · <span class="dirty-dot">Unsaved changes</span>' : state.role === "housekeeping" && state.savedLive && Date.now() - state.savedLive < 4000 ? ' · <span class="saved-live">Saved · front desk can see it</span>' : ""}</div></div>
+          <div class="muted small">${saved?.updatedAt ? "Updated " + esc(ago(saved.updatedAt)) + (who(saved.updatedBy) ? " by " + who(saved.updatedBy) : "") : saved ? "Example status" : "Not logged yet"}${state.saveErr?.s === s ? ` · <span class="save-err" role="alert">${esc(state.saveErr.msg)}</span>` : state.dirtyDraft ? ' · <span class="dirty-dot">Unsaved changes</span>' : state.role === "housekeeping" && state.savedLive && Date.now() - state.savedLive < 4000 ? ' · <span class="saved-live">Saved · front desk can see it</span>' : ""}</div></div>
           <div class="nav">
             <button class="iconbtn" id="dPrev" aria-label="Previous suite">‹</button>
             <button class="iconbtn" id="dNext" aria-label="Next suite">›</button>
@@ -2324,8 +2325,9 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
           ${(() => { const tp = taskProgress(d); return tp && tp.n === tp.total && vst(d) === "in_progress" && !auditOpen(d) && state.canWrite ? `<button type="button" class="btn primary" id="dMarkClean" style="justify-self:start;margin-top:6px">All tasks done · Mark clean</button>` : ""; })()}` : ""}
           ${state.autoStarted === s ? `<span class="small" style="color:var(--st-prog);font-weight:700">Set to In progress when the first task was ticked</span>` : ""}</div>
         <fieldset><legend>Room status</legend><div class="statusgrid">
-          ${STATUSES.filter(([k]) => PICK.includes(k) || k === vst(d)).map(([k, l]) => `<label style="--sc:var(--st-${stVar(k)});--sb:var(--st-${stVar(k)}-bg)"><input type="radio" name="status" value="${k}" ${vst(d) === k ? "checked" : ""} ${ro}>${ICONS[k]}${l}</label>`).join("")}
+          ${STATUSES.filter(([k]) => (PICK.includes(k) && !(k === "inspected" && state.role === "housekeeping")) || k === vst(d)).map(([k, l]) => `<label style="--sc:var(--st-${stVar(k)});--sb:var(--st-${stVar(k)}-bg)"><input type="radio" name="status" value="${k}" ${vst(d) === k ? "checked" : ""} ${ro || (k === "inspected" && state.role === "housekeeping" ? "disabled" : "")}>${ICONS[k]}${l}</label>`).join("")}
         </div>
+        ${state.role === "housekeeping" && state.canWrite ? `<div class="small muted">A supervisor marks suites Inspected.</div>` : ""}
         ${auditOpen(d) && isDone(d) ? `<div class="small" style="color:var(--dnd)">Turnover audit is incomplete. Finish all 5 checks before releasing this suite.</div>` : ""}
         </fieldset>
         <fieldset><legend>Occupancy</legend><div class="seg">
@@ -2495,8 +2497,16 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       try {
         if (body) await db.collection("suites").doc(s).set(body);
         else await db.collection("suites").doc(s).delete();
+        if (state.saveErr?.s === s) { state.saveErr = null; if (state.open === s) renderDrawer(); }
         return true;
       } catch (err) {
+        if (err && (err.code === "permission_denied" || err.code === "invalid")) {
+          // The server refused this change (e.g. Inspected from a housekeeping login): say so in the suite header and drop the refused edit
+          state.saveErr = { s, msg: err.code === "permission_denied" ? "Not saved: only a supervisor can do that" : "Not saved: the server refused this change" };
+          state.savedLive = 0;
+          if (state.open === s) { state.dirtyDraft = false; state.draft = state.docs[s] ? clone(state.docs[s]) : state.draft; renderDrawer(); }
+          return false;
+        }
         if (err && err.code === "invalid_argument") { state.canWrite = false; render(); toast("You don't have permission to change suites"); }
         else if (!quiet) toast("Couldn't save. Check your connection and try again.");
         return false;
