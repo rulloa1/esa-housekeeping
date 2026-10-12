@@ -5,6 +5,7 @@ import { getRole } from "@/lib/auth";
 import { SUITES, guestKey } from "@/lib/guest";
 import BrandLogo from "@/components/BrandLogo";
 import { NavigationHeader } from "@/components/NavigationHeader";
+import PageBanner, { BANNERS } from "@/components/PageBanner";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Guest QR cards" };
@@ -32,11 +33,13 @@ export default async function GuestLinks() {
       <main style={{ maxWidth: 1000, margin: "0 auto", padding: "24px 16px", color: "#483729" }}>
         <style>{`@media print { .no-print { display: none } main { padding: 0 } } .card { break-inside: avoid }`}</style>
         <div className="no-print">
-        <h1 style={{ margin: "0 0 6px" }}>Guest QR cards</h1>
-        <p style={{ margin: "0 0 20px", color: "#7a6a5d" }}>
-          Print this page and place each card in its suite. Guests scan it to request cleaning, towels or amenities, or to
-          turn on Do Not Disturb, and the request shows on the housekeeping board.
-        </p>
+        <PageBanner
+          image={BANNERS.suiteKing}
+          focus="50%"
+          eyebrow="Houston IAH Airport"
+          title="Guest QR cards"
+          subtitle="Print this page and place each card in its suite. Guests scan it to ask for cleaning, towels or amenities, or to turn on Do Not Disturb."
+        />
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
         {cards.map((c) => (

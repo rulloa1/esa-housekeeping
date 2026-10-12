@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { RoomDoc } from "@/lib/models";
 import { STAFF_ATTENDANTS } from "@/lib/models";
 
@@ -30,6 +30,9 @@ export function WorkloadDistribution({
   activeAttendantFilter,
   onSelectAttendant,
 }: WorkloadDistributionProps) {
+  // Collapsed by default so the dashboard stays uncluttered; opens itself
+  // while a housekeeper filter is active.
+  const [open, setOpen] = useState(false);
   const attendantsData = useMemo(() => {
     const list = [...STAFF_ATTENDANTS, "Unassigned"];
 
@@ -96,6 +99,11 @@ export function WorkloadDistribution({
     return null;
   }, [attendantsData]);
 
+  const isOpen = open || !!activeAttendantFilter;
+  const staffOnShift = attendantsData.filter((a) => !a.isUnassigned && a.total > 0).length;
+  // Same rule as the dashboard's "Unassigned" filter: suites that still need cleaning with no housekeeper.
+  const unassignedCount = rooms.filter((r) => !r.attendant && (r.status === "dirty" || r.status === "assigned")).length;
+
   return (
     <div
       style={{
@@ -114,27 +122,39 @@ export function WorkloadDistribution({
           alignItems: "center",
           flexWrap: "wrap",
           gap: 10,
-          marginBottom: 12,
+          marginBottom: isOpen ? 12 : 0,
         }}
       >
-        <div>
-          <h2
-            style={{
-              margin: 0,
-              fontSize: 15,
-              fontWeight: 700,
-              color: "var(--text-main)",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <span>👥</span> Staff Workload & Assignment Distribution
-          </h2>
-          <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--text-muted)" }}>
-            Real-time workload calculation based on room type, service requirements, and completion progress.
-          </p>
-        </div>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={isOpen}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            flex: 1,
+            minWidth: 0,
+            background: "none",
+            border: "none",
+            padding: 0,
+            cursor: "pointer",
+            textAlign: "left",
+          }}
+        >
+          <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "var(--text-main)" }}>Staff workload</h2>
+          <span style={{ fontSize: 12, color: "var(--text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {staffOnShift} on shift · {unassignedCount} to clean with no housekeeper
+          </span>
+          {imbalanceAlert && (
+            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, backgroundColor: "#FEF3C7", color: "#92400E", whiteSpace: "nowrap" }}>
+              Uneven
+            </span>
+          )}
+          <span aria-hidden style={{ marginLeft: "auto", fontSize: 13, color: "var(--text-muted)", transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s ease" }}>
+            ▾
+          </span>
+        </button>
 
         {activeAttendantFilter && (
           <button
@@ -157,7 +177,7 @@ export function WorkloadDistribution({
       </div>
 
       {/* Imbalance Alert Warning */}
-      {imbalanceAlert && (
+      {isOpen && imbalanceAlert && (
         <div
           style={{
             padding: "10px 14px",
@@ -183,6 +203,7 @@ export function WorkloadDistribution({
       )}
 
       {/* Attendants Grid */}
+      {isOpen && (
       <div
         style={{
           display: "grid",
@@ -276,6 +297,7 @@ export function WorkloadDistribution({
           );
         })}
       </div>
+      )}
     </div>
   );
 }

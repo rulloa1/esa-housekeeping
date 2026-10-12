@@ -5,6 +5,7 @@ import { toRoom, toRooms } from "@/lib/roomView";
 import type { RoomDoc, RoomStatus, Role } from "@/lib/models";
 import { STAFF_ATTENDANTS, DEFAULT_CHECKLIST_TEMPLATE } from "@/lib/models";
 import { NavigationHeader } from "./NavigationHeader";
+import PageBanner, { BANNERS } from "./PageBanner";
 import { ChecklistModal } from "./ChecklistModal";
 import { MaintenanceModal } from "./MaintenanceModal";
 import { SupplyModal } from "./SupplyModal";
@@ -146,6 +147,8 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
         return { label: "Maintenance", bg: "var(--st-maint-bg)", color: "var(--st-maint)", border: "var(--st-maint-border)" };
       case "ooo":
         return { label: "Out of Service", bg: "var(--st-ooo-bg)", color: "var(--st-ooo)", border: "var(--st-ooo-border)" };
+      case "not_logged":
+        return { label: "Not logged", bg: "#F3F4F6", color: "#6B7280", border: "#E5E7EB" };
       default:
         return { label: status, bg: "#F3F4F6", color: "#374151", border: "#E5E7EB" };
     }
@@ -167,6 +170,18 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
         }
       `}</style>
       <NavigationHeader currentRole={currentRole} activeTab="housekeeper" />
+
+      {/* Photo banner */}
+      <div style={{ maxWidth: 840, width: "100%", margin: "0 auto", padding: "16px 16px 0" }}>
+        <PageBanner
+          compact
+          image={BANNERS.kitchen}
+          focus="55%"
+          eyebrow="Houston IAH Airport"
+          title={`${selectedAttendant}'s suites`}
+          subtitle={`${stats.completed} of ${stats.total} done today`}
+        />
+      </div>
 
       {/* Housekeeper Hero / Shift Bar */}
       <div style={{ backgroundColor: "#FFFFFF", borderBottom: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)" }}>

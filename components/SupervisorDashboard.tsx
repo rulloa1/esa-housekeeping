@@ -237,6 +237,8 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
           return room.status === "maintenance" || (room.maintenanceIssues && room.maintenanceIssues.length > 0);
         case "OUT OF SERVICE":
           return room.status === "ooo";
+        case "NOT LOGGED":
+          return room.status === "not_logged";
         case "OVERDUE":
           return (room.status === "dirty" || room.status === "in_progress") && room.priority === "urgent";
         default:
@@ -327,6 +329,8 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
         return { label: "Maintenance", bg: "var(--st-maint-bg)", color: "var(--st-maint)", border: "var(--st-maint-border)" };
       case "ooo":
         return { label: "Out of Service", bg: "var(--st-ooo-bg)", color: "var(--st-ooo)", border: "var(--st-ooo-border)" };
+      case "not_logged":
+        return { label: "Not logged", bg: "#F3F4F6", color: "#6B7280", border: "#E5E7EB" };
       default:
         return { label: status, bg: "#F3F4F6", color: "#374151", border: "#E5E7EB" };
     }
@@ -353,6 +357,55 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
           grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
           gap: 10px;
           margin-bottom: 20px;
+        }
+        /* Tablets: 8 tiles as two even rows of 4, no orphan tile. */
+        @media (min-width: 641px) {
+          .dash-kpi-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        /* Wide screens: all 8 tiles on one row. */
+        @media (min-width: 1280px) {
+          .dash-kpi-grid { grid-template-columns: repeat(8, 1fr); }
+        }
+        /* Hotel photo banner behind the title and actions. */
+        .dash-hero {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          gap: 16px;
+          min-height: 210px;
+          margin-bottom: 18px;
+          padding: 22px 22px 18px;
+          border-radius: 16px;
+          overflow: hidden;
+          color: #FFFFFF;
+          background-color: #145E00;
+          background-image:
+            linear-gradient(100deg, rgba(20, 60, 8, 0.92) 0%, rgba(20, 60, 8, 0.72) 42%, rgba(20, 60, 8, 0.15) 75%, rgba(20, 60, 8, 0) 100%),
+            linear-gradient(0deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 45%),
+            url("/banners/exterior.jpg");
+          background-size: cover;
+          background-position: center 22%;
+          box-shadow: var(--shadow-md);
+        }
+        .dash-hero-title { max-width: 560px; }
+        .dash-hero-eyebrow {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 1.2px;
+          text-transform: uppercase;
+          color: #A6E07F;
+          margin-bottom: 4px;
+        }
+        .dash-hero-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        @media (max-width: 640px) {
+          .dash-hero { min-height: 180px; padding: 16px 14px 14px; border-radius: 12px; }
+          .dash-hero h1 { font-size: 21px !important; }
         }
         .dash-filters-scroll {
           display: flex;
@@ -392,6 +445,9 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
         .pulse-live {
           animation: pulseDot 2s infinite ease-in-out;
         }
+        @media (max-width: 900px) {
+          .dash-col-insp { display: none; }
+        }
         @media (max-width: 640px) {
           .dash-kpi-grid {
             grid-template-columns: repeat(2, 1fr) !important;
@@ -408,16 +464,17 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
 
       <main style={{ maxWidth: 1320, width: "100%", margin: "0 auto", padding: "16px 12px 60px" }}>
         {/* Title & Property Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "var(--text-main)", letterSpacing: -0.5 }}>
+        <div className="dash-hero">
+          <div className="dash-hero-title">
+            <div className="dash-hero-eyebrow">Houston IAH Airport</div>
+            <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#FFFFFF", letterSpacing: -0.5 }}>
               Supervisor Operations Dashboard
             </h1>
-            <p style={{ margin: "2px 0 0", fontSize: 13, color: "var(--text-muted)" }}>
-              Extended Stay America Suites · Houston IAH Airport (96 Total Suites across 3 Floors)
+            <p style={{ margin: "4px 0 0", fontSize: 13, color: "rgba(255,255,255,0.85)" }}>
+              {allRooms.length} suites · 3 floors · updates live
             </p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <div className="dash-hero-actions">
             <button
               type="button"
               onClick={handleExportCsv}
@@ -507,7 +564,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
             </button>
 
             <div style={{ display: "flex", alignItems: "center", gap: 6, paddingLeft: 4 }}>
-              <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Live Sync: Active (v{version})</span>
+              <span style={{ fontSize: 12, color: "#FFFFFF", fontWeight: 600 }}>Live Sync: Active (v{version})</span>
               <span className="pulse-live" style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--st-clean)", display: "inline-block" }}></span>
               <button
                 type="button"
@@ -520,7 +577,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                   cursor: "pointer",
                   fontSize: 13,
                   padding: "2px 4px",
-                  color: "var(--text-muted)",
+                  color: "#FFFFFF",
                 }}
               >
                 {isSyncing ? "⏳" : "⚡"}
@@ -551,7 +608,8 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                   padding: "10px 12px",
                   borderRadius: 12,
                   border: isSelected ? `2px solid ${card.color}` : "1px solid var(--border-subtle)",
-                  backgroundColor: card.bg,
+                  borderTop: `4px solid ${card.color}`,
+                  backgroundColor: "#FFFFFF",
                   textAlign: "left",
                   cursor: "pointer",
                   boxShadow: isSelected ? "var(--shadow-md)" : "var(--shadow-xs)",
@@ -594,20 +652,15 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
         >
           {/* Quick Filters */}
           <div className="dash-filters-scroll">
-            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", marginRight: 4, whiteSpace: "nowrap" }}>
-              FILTER:
+            {/* The tiles above are the main filters; these are the extra ones they don't cover. */}
+            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginRight: 4, whiteSpace: "nowrap" }}>
+              More filters
             </span>
             {[
-              { key: "ALL", label: "ALL", count: metrics.total },
-              { key: "DIRTY", label: "DIRTY", count: metrics.dirty },
-              { key: "UNASSIGNED", label: "UNASSIGNED", count: allRooms.filter((r) => !r.attendant && (r.status === "dirty" || r.status === "assigned")).length },
-              { key: "ASSIGNED", label: "ASSIGNED", count: metrics.assigned },
-              { key: "IN PROGRESS", label: "IN PROGRESS", count: metrics.inProgress },
-              { key: "AWAITING INSPECTION", label: "AWAITING INSP.", count: metrics.awaitingInspection },
-              { key: "INSPECTION FAILED", label: "FAILED", count: metrics.inspectionFailed },
-              { key: "CLEAN AND INSPECTED", label: "CLEAN & READY", count: metrics.clean },
-              { key: "MAINTENANCE REQUIRED", label: "MAINTENANCE", count: metrics.maintenance },
-              { key: "OUT OF SERVICE", label: "OUT OF SERVICE", count: metrics.ooo },
+              { key: "UNASSIGNED", label: "Unassigned", count: allRooms.filter((r) => !r.attendant && (r.status === "dirty" || r.status === "assigned")).length },
+              { key: "INSPECTION FAILED", label: "Failed inspection", count: metrics.inspectionFailed },
+              { key: "OUT OF SERVICE", label: "Out of service", count: metrics.ooo },
+              { key: "NOT LOGGED", label: "Not logged", count: allRooms.filter((r) => r.status === "not_logged").length },
             ].map((f) => (
               <button
                 key={f.key}
@@ -717,18 +770,15 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
         <div style={{ marginBottom: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
             <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "var(--text-main)" }}>
-              Floor Readiness & Turnaround Progress
+              Floors ready
             </h3>
-            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
-              Click a floor card to quick-filter
-            </span>
           </div>
 
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              gap: 12,
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: 10,
             }}
           >
             {floorMetrics.map((fl) => {
@@ -753,7 +803,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                         Floor {fl.floor}
                       </span>
                       <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                        ({fl.total} Suites)
+                        {fl.total} suites
                       </span>
                       {isActive && (
                         <span
@@ -777,7 +827,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                         color: fl.percentage >= 80 ? "var(--esa-green-dark)" : fl.percentage >= 50 ? "#D97706" : "var(--st-dirty)",
                       }}
                     >
-                      {fl.percentage}% Clean ({fl.clean}/{fl.total})
+                      {fl.percentage}%
                     </span>
                   </div>
 
@@ -805,9 +855,9 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
 
                   {/* Status counts breakdown */}
                   <div style={{ display: "flex", gap: 10, fontSize: 11, color: "var(--text-secondary)", flexWrap: "wrap" }}>
-                    <span>🔴 {fl.dirty} Dirty</span>
-                    <span>🟡 {fl.inProgress} Cleaning</span>
-                    <span>🟣 {fl.awaitingInspection} Awaiting Insp.</span>
+                    <span>{fl.dirty} dirty</span>
+                    <span>{fl.inProgress} cleaning</span>
+                    <span>{fl.awaitingInspection} to inspect</span>
                   </div>
                 </div>
               );
@@ -856,15 +906,14 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                       style={{ padding: "12px 14px", fontWeight: 700, color: "var(--esa-brown)", cursor: "pointer" }}
                       onClick={() => { setSortField("id"); setSortAsc(!sortAsc); }}
                     >
-                      Room # {sortField === "id" && (sortAsc ? "↑" : "↓")}
+                      Suite {sortField === "id" && (sortAsc ? "↑" : "↓")}
                     </th>
-                    <th style={{ padding: "12px 14px", fontWeight: 700, color: "var(--esa-brown)" }}>Room Type</th>
-                    <th style={{ padding: "12px 14px", fontWeight: 700, color: "var(--esa-brown)" }}>Assigned Housekeeper</th>
+                    <th style={{ padding: "12px 14px", fontWeight: 700, color: "var(--esa-brown)" }}>Housekeeper</th>
                     <th
                       style={{ padding: "12px 14px", fontWeight: 700, color: "var(--esa-brown)", cursor: "pointer" }}
                       onClick={() => { setSortField("status"); setSortAsc(!sortAsc); }}
                     >
-                      Cleaning Status {sortField === "status" && (sortAsc ? "↑" : "↓")}
+                      Status {sortField === "status" && (sortAsc ? "↑" : "↓")}
                     </th>
                     <th
                       style={{ padding: "12px 14px", fontWeight: 700, color: "var(--esa-brown)", cursor: "pointer" }}
@@ -872,15 +921,14 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                     >
                       Priority {sortField === "priority" && (sortAsc ? "↑" : "↓")}
                     </th>
-                    <th style={{ padding: "12px 14px", fontWeight: 700, color: "var(--esa-brown)" }}>Service</th>
-                    <th style={{ padding: "12px 14px", fontWeight: 700, color: "var(--esa-brown)" }}>Inspection QA</th>
+                    <th className="dash-col-insp" style={{ padding: "12px 14px", fontWeight: 700, color: "var(--esa-brown)" }}>Inspection</th>
                     <th style={{ padding: "12px 14px", fontWeight: 700, color: "var(--esa-brown)", textAlign: "right" }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredRooms.length === 0 ? (
                     <tr>
-                      <td colSpan={9} style={{ padding: "36px 16px", textAlign: "center", color: "var(--text-muted)" }}>
+                      <td colSpan={7} style={{ padding: "36px 16px", textAlign: "center", color: "var(--text-muted)" }}>
                         No suites match the selected filter criteria.
                       </td>
                     </tr>
@@ -921,12 +969,10 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                                 <span title="Open Maintenance Issue" style={{ color: "#DC2626", fontSize: 13 }}>⚠️</span>
                               )}
                             </div>
-                          </td>
-
-                          {/* Room Type */}
-                          <td style={{ padding: "12px 14px", color: "var(--text-secondary)" }}>
-                            <div>{room.type}</div>
-                            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Floor {room.floor}</div>
+                            {/* Room type and service folded under the number to keep the table narrow */}
+                            <div style={{ fontSize: 11, fontWeight: 500, color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                              {room.status === "not_logged" ? `Floor ${room.floor}` : `${room.type} · ${room.serviceType === "turnover" ? "Turnover" : "Stayover"}`}
+                            </div>
                           </td>
 
                           {/* Attendant */}
@@ -950,6 +996,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                                 color: st.color,
                                 border: `1px solid ${st.border}`,
                                 display: "inline-block",
+                                whiteSpace: "nowrap",
                               }}
                             >
                               {st.label}
@@ -958,47 +1005,46 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
 
                           {/* Priority */}
                           <td style={{ padding: "12px 14px" }}>
-                            <span
-                              style={{
-                                padding: "3px 8px",
-                                borderRadius: 4,
-                                fontSize: 11,
-                                fontWeight: 700,
-                                backgroundColor: pr.bg,
-                                color: pr.color,
-                              }}
-                            >
-                              {pr.label}
-                            </span>
+                            {pr.label === "Standard" ? (
+                              <span style={{ color: "var(--text-muted)", fontSize: 12 }}>—</span>
+                            ) : (
+                              <span
+                                style={{
+                                  padding: "3px 8px",
+                                  borderRadius: 4,
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  backgroundColor: pr.bg,
+                                  color: pr.color,
+                                }}
+                              >
+                                {pr.label}
+                              </span>
+                            )}
                           </td>
 
-                          {/* Service Type */}
-                          <td style={{ padding: "12px 14px", color: "var(--text-secondary)", fontSize: 12 }}>
-                            {room.serviceType === "turnover" ? "Turnover" : "Stayover"}
-                          </td>
-
-                          {/* Inspection QA */}
-                          <td style={{ padding: "12px 14px" }}>
+                          {/* Inspection QA (hidden on narrow screens; the status pill already says it) */}
+                          <td className="dash-col-insp" style={{ padding: "12px 14px" }}>
                             {room.status === "awaiting_inspection" ? (
                               <span style={{ color: "var(--st-awaiting-insp)", fontWeight: 700, fontSize: 12 }}>
-                                ⏱️ Ready for Insp.
+                                Ready
                               </span>
                             ) : room.status === "inspection_failed" ? (
                               <span style={{ color: "var(--st-insp-fail)", fontWeight: 700, fontSize: 12 }}>
-                                ✕ Needs Re-clean
+                                Re-clean
                               </span>
                             ) : room.status === "clean" ? (
                               <span style={{ color: "var(--st-clean)", fontWeight: 600, fontSize: 12 }}>
                                 ✓ Passed
                               </span>
                             ) : (
-                              <span style={{ color: "var(--text-muted)", fontSize: 12 }}>Pending Clean</span>
+                              <span style={{ color: "var(--text-muted)", fontSize: 12 }}>—</span>
                             )}
                           </td>
 
                           {/* Actions */}
                           <td style={{ padding: "12px 14px", textAlign: "right" }}>
-                            <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
+                            <div style={{ display: "flex", justifyContent: "flex-end", gap: 6, whiteSpace: "nowrap" }}>
                               {/* Inspect button if awaiting inspection or failed */}
                               {(room.status === "awaiting_inspection" || room.status === "inspection_failed" || room.status === "in_progress") && (
                                 <button

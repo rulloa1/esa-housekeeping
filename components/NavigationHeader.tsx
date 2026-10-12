@@ -45,6 +45,17 @@ export function NavigationHeader({ currentRole }: HeaderProps) {
         .nav-pills-scroll {
           display: none;
         }
+        /* iPad landscape (901-1279px): drop the emoji and tighten the links so
+           the five tabs stay on one line next to the role badge. */
+        @media (min-width: 901px) and (max-width: 1279px) {
+          .nav-desktop-links a {
+            padding: 7px 9px !important;
+            font-size: 12.5px !important;
+          }
+          .nav-link-icon {
+            display: none;
+          }
+        }
         @media (max-width: 900px) {
           .nav-desktop-links {
             display: none;
@@ -116,12 +127,13 @@ export function NavigationHeader({ currentRole }: HeaderProps) {
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
+                  whiteSpace: "nowrap",
                   background: isActive ? "var(--esa-green)" : "transparent",
                   color: isActive ? "#FFFFFF" : "var(--text-secondary)",
                   transition: "all 0.15s ease",
                 }}
               >
-                <span>{link.icon}</span> {link.label}
+                <span className="nav-link-icon">{link.icon}</span> {link.label}
               </Link>
             );
           })}
