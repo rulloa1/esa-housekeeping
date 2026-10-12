@@ -374,46 +374,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
         @media (min-width: 1280px) {
           .dash-kpi-grid { grid-template-columns: repeat(8, 1fr); }
         }
-        /* Hotel photo banner behind the title and actions. */
-        .dash-hero {
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-end;
-          gap: 16px;
-          min-height: 210px;
-          margin-bottom: 18px;
-          padding: 22px 22px 18px;
-          border-radius: 16px;
-          overflow: hidden;
-          color: #FFFFFF;
-          background-color: #145E00;
-          background-image:
-            linear-gradient(100deg, rgba(20, 60, 8, 0.92) 0%, rgba(20, 60, 8, 0.72) 42%, rgba(20, 60, 8, 0.15) 75%, rgba(20, 60, 8, 0) 100%),
-            linear-gradient(0deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 45%),
-            url("/banners/exterior.jpg");
-          background-size: cover;
-          background-position: center 22%;
-          box-shadow: var(--shadow-md);
-        }
-        .dash-hero-title { max-width: 560px; }
-        .dash-hero-eyebrow {
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 1.2px;
-          text-transform: uppercase;
-          color: #A6E07F;
-          margin-bottom: 4px;
-        }
-        .dash-hero-actions {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
         @media (max-width: 640px) {
-          .dash-hero { min-height: 180px; padding: 16px 14px 14px; border-radius: 12px; }
-          .dash-hero h1 { font-size: 21px !important; }
         }
         .dash-filters-scroll {
           display: flex;
@@ -477,39 +438,6 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
       <NavigationHeader currentRole={currentRole} activeTab="supervisor" />
 
       <main style={{ maxWidth: 1320, width: "100%", margin: "0 auto", padding: "16px 12px 60px" }}>
-        {/* Title & Property Header */}
-        <div className="dash-hero">
-          <div className="dash-hero-title">
-            <div className="dash-hero-eyebrow">Houston IAH Airport</div>
-            <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#FFFFFF", letterSpacing: -0.5 }}>
-              Supervisor Operations Dashboard
-            </h1>
-            <p style={{ margin: "4px 0 0", fontSize: 13, color: "rgba(255,255,255,0.85)" }}>
-              {allRooms.length} suites · 3 floors · updates live
-            </p>
-          </div>
-          <div className="dash-hero-actions">
-            <button
-              type="button"
-              onClick={handleExportCsv}
-              title="Download shift roster as CSV"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "7px 12px",
-                borderRadius: 8,
-                backgroundColor: "#FFFFFF",
-                border: "1px solid var(--border-default)",
-                color: "var(--text-main)",
-                fontSize: 12,
-                fontWeight: 700,
-                cursor: "pointer",
-                boxShadow: "var(--shadow-xs)",
-              }}
-            >
-              <span>📥</span> Export CSV
-            </button>
         {/* Signature Hotel Property Hero Banner */}
         <section
           style={{
@@ -602,9 +530,6 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                 <span>📈</span> Operations Report
               </button>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 6, paddingLeft: 4 }}>
-              <span style={{ fontSize: 12, color: "#FFFFFF", fontWeight: 600 }}>Live Sync: Active (v{version})</span>
-              <span className="pulse-live" style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--st-clean)", display: "inline-block" }}></span>
               <button
                 type="button"
                 className="glass-btn"
@@ -622,9 +547,6 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                   fontSize: 12,
                   fontWeight: 700,
                   cursor: "pointer",
-                  fontSize: 13,
-                  padding: "2px 4px",
-                  color: "#FFFFFF",
                 }}
               >
                 <span>🔔</span> Activity & Alerts
