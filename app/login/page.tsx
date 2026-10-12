@@ -1,7 +1,7 @@
 import { ROLES } from "@/lib/auth";
 
 // Full-screen photo of the hotel front behind the sign-in card.
-// Drop the photo at public/login-bg.jpg; until it exists the gradient shows instead.
+// public/login-bg.jpg is the front entrance (upscaled from a small photo, softly blurred); the gradient shows while it loads.
 const BACKGROUND =
   "linear-gradient(rgba(10, 20, 35, 0.35), rgba(10, 20, 35, 0.55)), " +
   "url(/login-bg.jpg) center / cover no-repeat, " +
