@@ -142,6 +142,19 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-page)", display: "flex", flexDirection: "column" }}>
+      <style>{`
+        .hk-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 8px;
+          margin-bottom: 12px;
+        }
+        @media (max-width: 480px) {
+          .hk-stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+        }
+      `}</style>
       <NavigationHeader currentRole={currentRole} activeTab="housekeeper" />
 
       {/* Housekeeper Hero / Shift Bar */}
@@ -181,7 +194,7 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
           </div>
 
           {/* Shift Metrics Grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 12 }}>
+          <div className="hk-stats-grid">
             <div style={{ padding: "10px", borderRadius: 10, background: "var(--bg-muted)", textAlign: "center" }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase" }}>Assigned</div>
               <div style={{ fontSize: 22, fontWeight: 800, color: "var(--esa-brown)" }}>{stats.total}</div>

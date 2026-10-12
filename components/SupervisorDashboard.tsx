@@ -240,13 +240,62 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-page)", display: "flex", flexDirection: "column" }}>
+      <style>{`
+        .dash-kpi-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+          gap: 10px;
+          margin-bottom: 20px;
+        }
+        .dash-filters-scroll {
+          display: flex;
+          gap: 6px;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          align-items: center;
+          padding-bottom: 4px;
+        }
+        .dash-filters-scroll::-webkit-scrollbar {
+          display: none;
+        }
+        .dash-batch-bar {
+          position: fixed;
+          bottom: 24px;
+          left: 50%;
+          transform: translateX(-50%);
+          background-color: var(--esa-brown);
+          color: #FFFFFF;
+          border-radius: 14px;
+          padding: 12px 20px;
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+          z-index: 900;
+          max-width: 960px;
+          width: calc(100% - 32px);
+          flex-wrap: wrap;
+        }
+        @media (max-width: 640px) {
+          .dash-kpi-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 8px !important;
+          }
+          .dash-batch-bar {
+            bottom: 12px;
+            padding: 10px 14px;
+            gap: 10px;
+          }
+        }
+      `}</style>
       <NavigationHeader currentRole={currentRole} activeTab="supervisor" />
 
-      <main style={{ maxWidth: 1320, width: "100%", margin: "0 auto", padding: "20px 16px 60px" }}>
+      <main style={{ maxWidth: 1320, width: "100%", margin: "0 auto", padding: "16px 12px 60px" }}>
         {/* Title & Property Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: "var(--text-main)", letterSpacing: -0.5 }}>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "var(--text-main)", letterSpacing: -0.5 }}>
               Supervisor Operations Dashboard
             </h1>
             <p style={{ margin: "2px 0 0", fontSize: 13, color: "var(--text-muted)" }}>
@@ -304,14 +353,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
         </div>
 
         {/* Operational Summary Cards (Phase 4) */}
-        <section
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-            gap: 10,
-            marginBottom: 20,
-          }}
-        >
+        <section className="dash-kpi-grid">
           {[
             { key: "ALL", label: "Total Rooms", count: metrics.total, color: "var(--esa-brown)", bg: "#FFFFFF" },
             { key: "DIRTY", label: "Dirty Rooms", count: metrics.dirty, color: "var(--st-dirty)", bg: "#FEF2F2" },
@@ -329,7 +371,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                 type="button"
                 onClick={() => setActiveFilter(card.key)}
                 style={{
-                  padding: "12px 14px",
+                  padding: "10px 12px",
                   borderRadius: 12,
                   border: isSelected ? `2px solid ${card.color}` : "1px solid var(--border-subtle)",
                   backgroundColor: card.bg,
@@ -344,7 +386,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                 <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase" }}>
                   {card.label}
                 </div>
-                <div style={{ fontSize: 24, fontWeight: 800, color: card.color, lineHeight: 1.1 }}>
+                <div style={{ fontSize: 22, fontWeight: 800, color: card.color, lineHeight: 1.1 }}>
                   {card.count}
                 </div>
               </button>
@@ -374,8 +416,8 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
           }}
         >
           {/* Quick Filters */}
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", marginRight: 4 }}>
+          <div className="dash-filters-scroll">
+            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", marginRight: 4, whiteSpace: "nowrap" }}>
               FILTER:
             </span>
             {[
@@ -923,6 +965,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
         {/* Floating Batch Assignment Bar (Phase 10) */}
         {selectedRoomIds.length > 0 && (
           <div
+            className="dash-batch-bar"
             style={{
               position: "fixed",
               bottom: 24,

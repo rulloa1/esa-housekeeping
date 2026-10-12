@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Role } from "@/lib/models";
@@ -9,8 +10,17 @@ interface HeaderProps {
   activeTab?: "supervisor" | "housekeeper" | "building3d";
 }
 
-export function NavigationHeader({ currentRole, activeTab }: HeaderProps) {
+export function NavigationHeader({ currentRole }: HeaderProps) {
   const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const navLinks = [
+    { href: "/dashboard", label: "Supervisor Dashboard", icon: "📊" },
+    { href: "/housekeeper", label: "Housekeeper View", icon: "📱" },
+    { href: "/housekeeping", label: "3D Building Board", icon: "🏢" },
+    { href: "/guest-links", label: "Guest QR Cards", icon: "🖨️" },
+    { href: "/staff", label: "Staff Portal", icon: "🏠" },
+  ];
 
   return (
     <header
@@ -23,6 +33,42 @@ export function NavigationHeader({ currentRole, activeTab }: HeaderProps) {
         boxShadow: "var(--shadow-xs)",
       }}
     >
+      <style>{`
+        .nav-desktop-links {
+          display: flex;
+          align-items: center;
+          gap: 6;
+        }
+        .nav-mobile-toggle {
+          display: none;
+        }
+        .nav-pills-scroll {
+          display: none;
+        }
+        @media (max-width: 900px) {
+          .nav-desktop-links {
+            display: none;
+          }
+          .nav-mobile-toggle {
+            display: flex;
+          }
+          .nav-pills-scroll {
+            display: flex;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            gap: 8px;
+            padding: 8px 16px;
+            border-top: 1px solid var(--border-subtle);
+            background: #FAFAFA;
+          }
+          .nav-pills-scroll::-webkit-scrollbar {
+            display: none;
+          }
+        }
+      `}</style>
+
+      {/* Main Top Header Bar */}
       <div
         style={{
           maxWidth: 1320,
@@ -31,167 +77,190 @@ export function NavigationHeader({ currentRole, activeTab }: HeaderProps) {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          flexWrap: "wrap",
           gap: 12,
         }}
       >
         {/* Brand / Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <Link href="/dashboard" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+          <Link href="/dashboard" style={{ display: "flex", alignItems: "center", textDecoration: "none", flexShrink: 0 }}>
             <img
               src="/esa-logo.png"
               alt="Extended Stay America"
-              style={{ height: 38, objectFit: "contain", display: "block" }}
+              style={{ height: 34, objectFit: "contain", display: "block" }}
             />
           </Link>
-          <div style={{ borderLeft: "1px solid var(--border-default)", paddingLeft: 12 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: "var(--esa-brown)" }}>
-              Houston IAH Airport
+          <div style={{ borderLeft: "1px solid var(--border-default)", paddingLeft: 10, minWidth: 0 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: "var(--esa-brown)", whiteSpace: "nowrap" }}>
+              Houston IAH
             </div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-main)" }}>
-              Housekeeping Operations
+            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-main)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              Housekeeping
             </div>
           </div>
         </div>
 
-        {/* View Switchers */}
-        <nav style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-          <Link
-            href="/dashboard"
-            style={{
-              padding: "7px 14px",
-              borderRadius: "var(--radius-sm)",
-              fontSize: 13,
-              fontWeight: 600,
-              textDecoration: "none",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              background: pathname === "/dashboard" ? "var(--esa-green)" : "transparent",
-              color: pathname === "/dashboard" ? "#FFFFFF" : "var(--text-secondary)",
-              transition: "all 0.15s ease",
-            }}
-          >
-            <span>📊</span> Supervisor Dashboard
-          </Link>
-
-          <Link
-            href="/housekeeper"
-            style={{
-              padding: "7px 14px",
-              borderRadius: "var(--radius-sm)",
-              fontSize: 13,
-              fontWeight: 600,
-              textDecoration: "none",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              background: pathname === "/housekeeper" ? "var(--esa-green)" : "transparent",
-              color: pathname === "/housekeeper" ? "#FFFFFF" : "var(--text-secondary)",
-              transition: "all 0.15s ease",
-            }}
-          >
-            <span>📱</span> Housekeeper View
-          </Link>
-
-          <Link
-            href="/housekeeping"
-            style={{
-              padding: "7px 14px",
-              borderRadius: "var(--radius-sm)",
-              fontSize: 13,
-              fontWeight: 600,
-              textDecoration: "none",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              background: pathname === "/housekeeping" ? "var(--esa-green)" : "transparent",
-              color: pathname === "/housekeeping" ? "#FFFFFF" : "var(--text-secondary)",
-              transition: "all 0.15s ease",
-            }}
-          >
-            <span>🏢</span> 3D Building Board
-          </Link>
-
-          <Link
-            href="/guest-links"
-            style={{
-              padding: "7px 14px",
-              borderRadius: "var(--radius-sm)",
-              fontSize: 13,
-              fontWeight: 600,
-              textDecoration: "none",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              background: pathname === "/guest-links" ? "var(--esa-green)" : "transparent",
-              color: pathname === "/guest-links" ? "#FFFFFF" : "var(--text-secondary)",
-              transition: "all 0.15s ease",
-            }}
-          >
-            <span>🖨️</span> Guest QR Cards
-          </Link>
-
-          <Link
-            href="/staff"
-            style={{
-              padding: "7px 14px",
-              borderRadius: "var(--radius-sm)",
-              fontSize: 13,
-              fontWeight: 600,
-              textDecoration: "none",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              background: pathname === "/staff" ? "var(--esa-green)" : "transparent",
-              color: pathname === "/staff" ? "#FFFFFF" : "var(--text-secondary)",
-              transition: "all 0.15s ease",
-            }}
-          >
-            <span>🏠</span> Staff Portal
-          </Link>
+        {/* Desktop View Switchers */}
+        <nav className="nav-desktop-links" aria-label="Main Navigation">
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                style={{
+                  padding: "7px 12px",
+                  borderRadius: "var(--radius-sm)",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  background: isActive ? "var(--esa-green)" : "transparent",
+                  color: isActive ? "#FFFFFF" : "var(--text-secondary)",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <span>{link.icon}</span> {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
-        {/* User Info & Logout */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        {/* Right Section: Role Badge + Mobile Toggle & Sign out */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
           <div
             style={{
-              padding: "4px 10px",
+              padding: "4px 8px",
               borderRadius: "var(--radius-pill)",
               background: "var(--esa-brown-soft)",
               color: "var(--esa-brown)",
-              fontSize: 12,
-              fontWeight: 600,
+              fontSize: 11,
+              fontWeight: 700,
               display: "flex",
               alignItems: "center",
-              gap: 6,
+              gap: 5,
             }}
           >
-            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--esa-green)", display: "inline-block" }}></span>
-            Role: {currentRole ? (currentRole === "housekeeper" || currentRole === "housekeeping" ? "Housekeeper" : "Supervisor") : "Staff"}
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--esa-green)", display: "inline-block" }}></span>
+            {currentRole ? (currentRole === "housekeeper" || currentRole === "housekeeping" ? "Housekeeper" : "Supervisor") : "Staff"}
           </div>
 
           <form method="post" action="/api/logout" style={{ margin: 0 }}>
             <button
               type="submit"
               style={{
-                padding: "6px 12px",
+                padding: "6px 10px",
                 borderRadius: "var(--radius-sm)",
                 border: "1px solid var(--border-default)",
                 background: "#FFFFFF",
                 color: "var(--text-secondary)",
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: 600,
                 cursor: "pointer",
-                transition: "background 0.15s ease",
               }}
-              title="Sign out of current shift"
+              title="Sign out of shift"
             >
               Sign out
             </button>
           </form>
+
+          {/* Mobile Menu Hamburger Button */}
+          <button
+            type="button"
+            className="nav-mobile-toggle"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            style={{
+              padding: "6px 10px",
+              borderRadius: "var(--radius-sm)",
+              border: "1px solid var(--border-default)",
+              backgroundColor: mobileMenuOpen ? "var(--esa-brown-soft)" : "#FFFFFF",
+              color: "var(--text-main)",
+              fontSize: 16,
+              cursor: "pointer",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? "✕" : "☰"}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Horizontal Quick-Pill Navigation */}
+      <nav className="nav-pills-scroll" aria-label="Mobile Quick Navigation">
+        {navLinks.map((link) => {
+          const isActive = pathname === link.href;
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              style={{
+                padding: "6px 12px",
+                borderRadius: 20,
+                fontSize: 12,
+                fontWeight: 700,
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+                whiteSpace: "nowrap",
+                background: isActive ? "var(--esa-green)" : "#FFFFFF",
+                color: isActive ? "#FFFFFF" : "var(--text-secondary)",
+                border: isActive ? "1px solid var(--esa-green)" : "1px solid var(--border-default)",
+                boxShadow: "var(--shadow-xs)",
+              }}
+            >
+              <span>{link.icon}</span> {link.label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Mobile Drawer Dropdown Menu */}
+      {mobileMenuOpen && (
+        <div
+          style={{
+            backgroundColor: "#FFFFFF",
+            borderTop: "1px solid var(--border-default)",
+            padding: "12px 16px 16px",
+            display: "grid",
+            gap: 8,
+            boxShadow: "var(--shadow-md)",
+          }}
+        >
+          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 4 }}>
+            Hotel Station Views
+          </div>
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  padding: "12px 14px",
+                  borderRadius: 10,
+                  fontSize: 14,
+                  fontWeight: 700,
+                  textDecoration: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  background: isActive ? "var(--esa-green)" : "var(--bg-muted)",
+                  color: isActive ? "#FFFFFF" : "var(--text-main)",
+                }}
+              >
+                <span style={{ fontSize: 18 }}>{link.icon}</span>
+                <span>{link.label}</span>
+                {isActive && <span style={{ marginLeft: "auto", fontSize: 12 }}>● Active</span>}
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </header>
   );
 }
