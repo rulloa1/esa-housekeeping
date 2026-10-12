@@ -1,0 +1,40 @@
+/* Shared brand tokens for the dashboard, landing page and marketing pieces.
+   ESA Houston IAH Airport. Light by default; dark is optional. */
+:root {
+  --esa-green: #338802;
+  --esa-green-deep: #145E00;
+  --esa-green-soft: #e9f3df;
+  --esa-brown: #483729;
+  --esa-brown-soft: #6b4f3a;
+  --sand: #f6efe3;
+  --paper: #ffffff;
+  --line: #e6dfd3;
+  --muted: #7a6a5c;
+
+  /* housekeeping status colours used app-wide */
+  --st-needs: #e5484d;
+  --st-progress: #f2b01e;
+  --st-clean: #30a46c;
+  --st-inspected: #3b82f6;
+  --st-attention: #d6409f;
+
+  --bg: var(--paper);
+  --text: var(--esa-brown);
+  --card: rgba(255,255,255,.78);
+  --card-border: rgba(72,55,41,.10);
+  --shadow: 0 1px 2px rgba(72,55,41,.06), 0 12px 32px -12px rgba(72,55,41,.28);
+  --radius: 18px;
+  --font: Arial, "Helvetica Neue", Helvetica, "Liberation Sans", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17120e; --text: #f3ece2; --card: rgba(34,27,21,.72);
+    --card-border: rgba(255,255,255,.08); --line: #3a2f26; --muted: #b9a993;
+    --esa-green-soft: #1f2c14;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17120e; --text: #f3ece2; --card: rgba(34,27,21,.72);
+  --card-border: rgba(255,255,255,.08); --line: #3a2f26; --muted: #b9a993;
+  --esa-green-soft: #1f2c14;
+}
