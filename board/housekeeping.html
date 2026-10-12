@@ -547,7 +547,11 @@ fieldset .check:has(input:checked) { background: color-mix(in srgb, var(--st-cle
   .summary { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 }
 @media (min-width: 1100px) {
-  .hero-left { grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr); grid-template-areas: "greet greet" "kpis donut" "tasks shift"; }
+  .hero-left { grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr); grid-template-areas: "greet greet" "kpis donut" "tasks donut" "tasks shift"; grid-template-rows: auto auto auto 1fr; }
+  .summary { align-self: start; }
+  .hero-left > .ptasks { grid-template-rows: auto 1fr; }
+  .hero-left > .ptasks > .empty { display: grid; place-items: center; }
+  .hero-left > .ptasks > .ptl { align-content: start; }
   .shiftcard { align-content: start; align-self: start; }
 }
 @media (min-width: 641px) {
