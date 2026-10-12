@@ -16,6 +16,7 @@
   --st-ooo: #6b7480; --st-ooo-bg: #eef0f3;
   --st-await: #0e9488; --st-await-bg: #e1f5f2;
   --st-fail: #b42318; --st-fail-bg: #fde3e0;
+  --ink-dirty: #a3261f; --ink-prog: #7a5600; --ink-clean: #1e6e37; --ink-insp: #1d55a6; --ink-await: #0a6359; --ink-fail: #8f1b12; --ink-ooo: #464e58;
   --st-none: #b4bdc8; --st-none-bg: #fbfcfd;
   --unlogged-bg: #e3e7ec; --unlogged-line: #cdd3da; --unlogged-fg: #8b96a2;
   --dnd: #b8287f; --dnd-bg: #fbe8f3;
@@ -38,6 +39,7 @@
   --st-ooo: #a3adb8; --st-ooo-bg: #29313a;
   --st-await: #4fd1c1; --st-await-bg: #10332f;
   --st-fail: #ff8a7a; --st-fail-bg: #3f1612;
+  --ink-dirty: var(--st-dirty); --ink-prog: var(--st-prog); --ink-clean: var(--st-clean); --ink-insp: var(--st-insp); --ink-await: var(--st-await); --ink-fail: var(--st-fail); --ink-ooo: var(--st-ooo);
   --st-none: #4f5d6c; --st-none-bg: #17212c;
   --unlogged-bg: #1d2630; --unlogged-line: #2c3743; --unlogged-fg: #66727f;
   --dnd: #f08ac8; --dnd-bg: #3d1830;
@@ -706,6 +708,23 @@ fieldset .check:has(input:checked) { background: color-mix(in srgb, var(--st-cle
 .suite .st { max-width: calc(100% - 2px); overflow: hidden; text-overflow: ellipsis; }
 html[lang="es"] .suite .st { letter-spacing: 0; font-size: .52rem; padding-inline: 4px; }
 .save-err { color: var(--st-fail); font-weight: 700; }
+
+/* v25 contrast: status words use a darkened ink (AA 4.5:1 on the tinted pill); the status colour stays on the tile edge and fill */
+.s-dirty, .s-assigned { --si: var(--ink-dirty); } .s-in_progress { --si: var(--ink-prog); } .s-clean { --si: var(--ink-clean); } .s-inspected { --si: var(--ink-insp); }
+.s-awaiting_inspection { --si: var(--ink-await); } .s-inspection_failed { --si: var(--ink-fail); } .s-ooo, .s-maintenance { --si: var(--ink-ooo); }
+.suite .st, .pill { color: var(--si, var(--fg)); }
+.statusgrid label { --si: var(--sc); }
+.statusgrid label:has(input[value="dirty"]) { --si: var(--ink-dirty); } .statusgrid label:has(input[value="in_progress"]) { --si: var(--ink-prog); } .statusgrid label:has(input[value="clean"]) { --si: var(--ink-clean); }
+.statusgrid label:has(input[value="inspected"]) { --si: var(--ink-insp); } .statusgrid label:has(input[value="ooo"]), .statusgrid label:has(input[value="maintenance"]) { --si: var(--ink-ooo); }
+.statusgrid label:has(input[value="awaiting_inspection"]) { --si: var(--ink-await); } .statusgrid label:has(input[value="inspection_failed"]) { --si: var(--ink-fail); }
+.statusgrid label:has(input:checked) { background: var(--si); border-color: var(--si); }
+:root[data-mode="night"] .statusgrid label:has(input:checked) { color: #0b1118; }
+:root[data-mode="night"] .statusgrid label:has(input:checked) .ico { color: #0b1118; }
+.guestbox .greq { display: flex; align-items: center; gap: 10px; }
+.guestbox .greq small { margin-left: auto; }
+.guestbox .gdone { min-height: 40px; padding: 0 14px; display: inline-flex; align-items: center; gap: 6px; border-color: color-mix(in srgb, var(--st-clean) 45%, var(--line)); font-weight: 700; }
+.guestbox .gdone .ico { width: 16px; height: 16px; color: var(--st-clean); }
+.suite .gq b { font: 800 .7rem/1 var(--f-body); }
 </style>
 
 <div class="wrap">
@@ -861,7 +880,7 @@ html[lang="es"] .suite .st { letter-spacing: 0; font-size: .52rem; padding-inlin
     "weekly full ·": "servicio completo semanal ·", "mid-week refresh ·": "repaso de media semana ·",
     "Housekeeping mode: each tap in a suite saves straight away": "Modo limpieza: cada toque en una suite se guarda al instante",
     "Front desk mode: changes save when you press Save": "Modo recepción: los cambios se guardan al pulsar Guardar",
-    "Changes save as you tap": "Los cambios se guardan al tocar", "Saved · front desk can see it": "Guardado · recepción ya lo ve", "Not saved: only a supervisor can do that": "No se guardó: solo un supervisor puede hacerlo", "Not saved: the server refused this change": "No se guardó: el servidor rechazó el cambio", "A supervisor marks suites Inspected.": "Un supervisor marca las suites como inspeccionadas.",
+    "Changes save as you tap": "Los cambios se guardan al tocar", "Saved · front desk can see it": "Guardado · recepción ya lo ve", "Done": "Listo", "Guest requests": "Solicitudes del huésped", "Tap Done when each one is handled.": "Toca Listo cuando se atienda cada una.", "Guest request done": "Solicitud del huésped atendida", "Couldn't mark it done. Try again.": "No se pudo marcar como lista. Inténtalo de nuevo.", "Not saved: you need to sign in again": "No se guardó: vuelve a iniciar sesión", "Back to today": "Volver a hoy", "Not saved: only a supervisor can do that": "No se guardó: solo un supervisor puede hacerlo", "Not saved: the server refused this change": "No se guardó: el servidor rechazó el cambio", "A supervisor marks suites Inspected.": "Un supervisor marca las suites como inspeccionadas.",
     "Example data.": "Datos de ejemplo.", "Clear example statuses": "Borrar estados de ejemplo", "Keep them": "Conservarlos", "Example status": "Estado de ejemplo",
     "No suites logged yet. Tap any suite to record its status, DND and kitchenette audit.": "Aún no hay suites registradas. Toca una suite para registrar su estado, DND y auditoría de cocineta.",
     "Shared saving isn't available here, so changes stay on this device.": "El guardado compartido no está disponible aquí; los cambios se quedan en este dispositivo.",
@@ -940,6 +959,7 @@ html[lang="es"] .suite .st { letter-spacing: 0; font-size: .52rem; padding-inlin
     [/^as of (.+)\.$/, (m) => `al ${m[1]}.`],
     [/^Extended Stay America · Houston IAH Airport · (.+)$/, (m) => `Extended Stay America · Aeropuerto Houston IAH · ${tr(m[1])}`],
     [/^Houston IAH Airport · (.+)$/, (m) => `Aeropuerto Houston IAH · ${tr(m[1])}`],
+    [/^Viewing (.+)\. Changes are saved for today\.$/, (m) => `Viendo ${m[1]}. Los cambios se guardan para hoy.`],
     [/^1500 N Sam Houston Pkwy E, Houston, TX 77032 · 96 suites on 3 floors$/, () => "1500 N Sam Houston Pkwy E, Houston, TX 77032 · 96 suites en 3 pisos"],
     [/^Suite (\d+) · (.+)$/, (m) => `Suite ${m[1]} · ${list(m[2], " · ")}`],
     [/^· (.+)$/, (m) => `· ${tr(m[1])}`],
@@ -1067,7 +1087,9 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const pad = (n) => String(n).padStart(2, "0");
-  const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+  // The hotel's date (America/Chicago), same rule as hotelToday() in the app. Writes are stamped with it whatever date the picker shows.
+  const hotelToday = () => { try { return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date()); } catch { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; } };
+  const todayISO = hotelToday;
   const dayNum = (iso) => { const [y, m, d] = iso.split("-").map(Number); return Date.UTC(y, m - 1, d) / 864e5; };
   const shift = () => $("shiftDate").value || todayISO();
   const clone = (o) => JSON.parse(JSON.stringify(o || {}));
@@ -2071,7 +2093,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     return `<button class="${cls}" data-suite="${s}" aria-label="${esc(label)}">
       ${needsWelfare(d) || auditOpen(d) ? '<span class="flag" aria-hidden="true"></span>' : ""}
       ${d?.notes ? `<span class="note" aria-hidden="true">${ICONS.note}</span>` : ""}
-      ${guestOpen(d) ? `<span class="gq" aria-hidden="true">${ICONS.guest}</span>` : ""}
+      ${guestOpen(d) ? `<span class="gq" aria-hidden="true">${openReqs(d).length > 1 ? `<b>${openReqs(d).length}</b>` : ICONS.guest}</span>` : ""}
       ${vst(d) === "inspection_failed" ? `<span class="xb" aria-hidden="true">✗</span>` : ""}
       <span class="num">${s}</span>
       <span class="st">${d ? STATUS_SHORT[vst(d)] : "Not logged"}</span>
@@ -2227,9 +2249,13 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
   const WHO = { housekeeping: "Housekeeping", frontdesk: "Front desk", guest: "Guest" };
   const who = (u) => WHO[u] || "";
   // A guest request stays open until staff next save the suite (which sets updatedBy back to a staff role)
-  const guestOpen = (d) => d?.updatedBy === "guest" && Array.isArray(d.guestRequests) && d.guestRequests.length > 0;
+  // Cleaning, towels and amenities stay open until staff tap Done (doneAt); other notices (e.g. DND on/off) clear on the next staff save
+  const GUEST_TASKS = ["cleaning", "towels", "amenities"];
+  const isGuestTask = (t) => GUEST_TASKS.includes(String(t || "").toLowerCase());
+  const openReqs = (d) => (Array.isArray(d?.guestRequests) ? d.guestRequests : []).filter((r) => r && !r.doneAt && (isGuestTask(r.type) || d.updatedBy === "guest"));
+  const guestOpen = (d) => openReqs(d).length > 0;
   const reqLabel = (t) => { const x = String(t || "request").replace(/[_-]+/g, " ").trim(); return x.charAt(0).toUpperCase() + x.slice(1); };
-  const guestSummary = (d) => [...new Set((d.guestRequests || []).map((r) => reqLabel(r.type)))].join(", ");
+  const guestSummary = (d) => [...new Set(openReqs(d).map((r) => reqLabel(r.type)))].join(", ");
   ICONS.guest = ic('<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>');
   const ago = (iso) => {
     const m = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
@@ -2258,6 +2284,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     let html = "";
     if (state.mode === "local") html = `<span>Shared saving isn't available here, so changes stay on this device.</span>`;
     else if (state.mode === "loading") html = `<span>Loading suite statuses…</span>`;
+    else if (state.canWrite && shift() !== hotelToday()) html = `<span>Viewing ${esc(new Date(shift() + "T12:00:00").toLocaleDateString(LOC(), { weekday: "short", month: "short", day: "numeric" }))}. Changes are saved for today.</span><button class="btn" id="backToday">Back to today</button>`;
     else if (!state.canWrite) html = `<span>You can view this board but not change it. Ask the owner for Contributor access to update suites.</span>`;
     else if (ex && state.confirmClear) html = `<span>Clear the sample status from ${ex} suites? Suites you've saved yourself stay.</span><span style="display:flex;gap:8px"><button class="btn" id="keepEx">Keep them</button><button class="btn danger" id="doClearEx">Clear ${ex} suites</button></span>`;
     else if (ex) html = `<span><strong>Example data.</strong> ${ex} suites carry sample statuses. Suites you save replace them.</span><button class="btn danger" id="clearEx">Clear example statuses</button>`;
@@ -2316,7 +2343,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
         </div>
       </header>
       <div class="body">
-        ${guestOpen(saved) ? `<div class="guestbox"><strong>${ICONS.guest}Guest request</strong>${saved.guestRequests.map((r) => `<span>${esc(reqLabel(r.type))}<small class="muted">${r.at ? esc(ago(r.at)) : ""}</small></span>`).join("")}<small class="muted">Clears when you save this suite.</small></div>` : ""}
+        ${guestOpen(saved) ? `<div class="guestbox"><strong>${ICONS.guest}Guest requests</strong>${openReqs(saved).map((r) => `<span class="greq">${esc(reqLabel(r.type))}<small class="muted">${r.at ? esc(ago(r.at)) : ""}</small>${isGuestTask(r.type) && state.canWrite && r.at ? `<button type="button" class="btn gdone" data-gdone="${esc(r.at)}">${ICONS.clean}Done</button>` : ""}</span>`).join("")}<small class="muted">${openReqs(saved).some((r) => isGuestTask(r.type)) ? "Tap Done when each one is handled." : "Clears when you save this suite."}</small></div>` : ""}
         ${vst(saved) === "inspection_failed" ? `<div class="failbox"><strong>${ICONS.inspection_failed}Inspection failed</strong>${(() => { const r = saved.inspectionFailReasons; const L = Array.isArray(r) ? r : r ? [r] : []; return L.length ? `<ul>${L.map((x) => `<li data-noi18n>${esc(typeof x === "string" ? x : x?.label || x?.reason || JSON.stringify(x))}</li>`).join("")}</ul>` : `<span class="muted small">No reason recorded.</span>`; })()}<small class="muted">Re-clean, then mark it clean for another inspection.</small></div>` : ""}
         <div class="svcbox"><span class="eyebrow">Today's service</span><strong style="font-size:1.1rem">${svc.label}</strong><span class="muted small">${svc.detail}</span>
           ${svc.code ? `<div class="tasks">${TASKS[svc.code].map((k) => k === AUDIT_TASK
@@ -2333,11 +2360,11 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
         <fieldset><legend>Occupancy</legend><div class="seg">
           ${OCC.map(([k, l]) => `<label><input type="radio" name="occ" value="${k}" ${d.occ === k ? "checked" : ""} ${ro}>${l}</label>`).join("")}
         </div>
-        ${d.occ === "occupied" ? `<label class="field">Last Weekly Full Service<input type="date" id="dLastFull" value="${esc(d.lastFull || "")}" max="${shift()}" ${ro}></label>` : ""}
+        ${d.occ === "occupied" ? `<label class="field">Last Weekly Full Service<input type="date" id="dLastFull" value="${esc(d.lastFull || "")}" max="${hotelToday()}" ${ro}></label>` : ""}
         </fieldset>
         <fieldset><legend>Do Not Disturb</legend>
           <label class="toggle"><span>DND sign is out</span><input type="checkbox" role="switch" id="dDnd" ${d.dndSince ? "checked" : ""} ${ro}></label>
-          ${d.dndSince ? `<label class="field">First seen on<input type="date" id="dDndSince" value="${esc(d.dndSince)}" max="${shift()}" ${ro}></label>
+          ${d.dndSince ? `<label class="field">First seen on<input type="date" id="dDndSince" value="${esc(d.dndSince)}" max="${hotelToday()}" ${ro}></label>
             <div class="small">Consecutive day <strong>${days}</strong> as of ${shift()}${days < 3 ? ". Welfare check required from day 3." : "."}</div>` : ""}
           ${days >= 3 ? `<div class="welfare"><strong>Day ${days}: supervisor welfare and property inspection required now.</strong>
             <label class="check" style="border:0"><input type="checkbox" id="dWelfare" ${d.welfareDone === d.dndSince ? "checked" : ""} ${ro}>Supervisor completed the welfare check</label></div>` : ""}
@@ -2370,11 +2397,11 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     if (t.name === "occ") d.occ = t.value;
     else if (t.name === "status") { const o = state.docs[state.open]; d.status = o && t.value === vst(o) ? o.status : t.value; }
     else if (t.id === "dLastFull") d.lastFull = t.value || null;
-    else if (t.id === "dDnd") { d.dndSince = t.checked ? shift() : null; if (!t.checked) d.welfareDone = null; }
-    else if (t.id === "dDndSince") d.dndSince = t.value || shift();
+    else if (t.id === "dDnd") { d.dndSince = t.checked ? hotelToday() : null; if (!t.checked) d.welfareDone = null; }
+    else if (t.id === "dDndSince") d.dndSince = t.value || hotelToday();
     else if (t.id === "dWelfare") d.welfareDone = t.checked ? d.dndSince : null;
     else if (t.dataset.audit) { d.audit = { ...(d.audit || {}), [t.dataset.audit]: t.checked }; if (t.checked) autoStart(d); }
-    else if (t.dataset.task) { d.tasks = { date: shift(), done: { ...tasksToday(d), [t.dataset.task]: t.checked } }; if (t.checked) autoStart(d); }
+    else if (t.dataset.task) { d.tasks = { date: hotelToday(), done: { ...(d.tasks?.date === hotelToday() ? d.tasks.done || {} : {}), [t.dataset.task]: t.checked } }; if (t.checked) autoStart(d); }
     else if (t.id === "dNotes" || t.id === "dAtt") { if (state.role === "housekeeping") autoSave(); return; }
     else return;
     touch(); renderDrawer();
@@ -2397,14 +2424,30 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     const body = { ...state.draft, example: false, updatedAt: new Date().toISOString() };
     if (!body.attendant) delete body.attendant;
     const prev = state.docs[s] ? clone(state.docs[s]) : null;
-    if (isDone(body) && !isDone(prev) && service(prev || body).code === "W") body.lastFull = shift();
+    if (isDone(body) && !isDone(prev) && service(prev || body).code === "W") body.lastFull = hotelToday();
     state.dirtyDraft = false;
     const ok = await write(s, body, quiet);
     if (ok && !quiet) toast(`Suite ${s} saved`, () => write(s, prev));
     return ok;
   }
 
+  // Close one guest request. In the app this is a server action (PUT { action: "guest_request_done" }), not a doc write;
+  // where there's no API (the standalone artifact) it falls back to marking the entry done in the suite doc.
+  async function guestDone(s, at) {
+    const doc = state.docs[s]; if (!doc) return;
+    const mark = () => { const d = clone(state.docs[s] || doc); d.guestRequests = (d.guestRequests || []).map((r) => (r.at === at && !r.doneAt ? { ...r, doneAt: new Date().toISOString(), doneBy: who(state.role) } : r)); return d; };
+    let res = null;
+    try { res = await fetch(`/api/suites/${encodeURIComponent(s)}`, { method: "PUT", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "guest_request_done", requestAt: at, userName: who(state.role) }) }); } catch { res = null; }
+    // Only trust a JSON answer from the app's API (a static host may answer 200 with a page)
+    if (res && res.ok && !/json/i.test(res.headers.get("content-type") || "")) res = { ok: false, status: 404 };
+    if (res && res.ok) { state.docs[s] = mark(); if (state.open === s && !state.dirtyDraft) state.draft = clone(state.docs[s]); render(); renderDrawer(); toast("Guest request done"); return; }
+    if (res && (res.status === 401 || res.status === 403)) { toast("Not saved: you need to sign in again"); return; }
+    if (res && res.status !== 404 && res.status !== 405) { toast("Couldn't mark it done. Try again."); return; }
+    const body = mark(); delete body.updatedBy;
+    if (await write(s, { ...body, updatedAt: new Date().toISOString() }, true)) { if (state.open === s && !state.dirtyDraft) state.draft = clone(state.docs[s] || body); render(); renderDrawer(); toast("Guest request done"); }
+  }
   $("drawer").addEventListener("click", async (e) => {
+    const gd = e.target.closest("[data-gdone]"); if (gd) { gd.disabled = true; await guestDone(state.open, gd.dataset.gdone); return; }
     const id = e.target.closest("button")?.id;
     if (id === "dClose" || id === "dCancel") closeDrawer();
     else if (id === "dPrev" || id === "dNext") { if (state.dirtyDraft && state.canWrite) await saveDraft(); openSuite(neighbor(id === "dNext" ? 1 : -1)); }
@@ -2435,7 +2478,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     if (!nx) return;
     const prev = clone(d);
     const body = { ...clone(d), status: nx[0], example: false, updatedAt: new Date().toISOString() };
-    if (nx[0] === "clean" && service(d).code === "W") body.lastFull = shift();
+    if (nx[0] === "clean" && service(d).code === "W") body.lastFull = hotelToday();
     if (await write(s, body)) toast(`Suite ${s} · ${STATUS_LABEL[nx[0]]}`, () => write(s, prev));
   }
 
@@ -2463,6 +2506,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     }
   });
   $("shiftDate").addEventListener("change", render);
+  $("modeBanner").addEventListener("click", (e) => { if (e.target.closest("#backToday")) { $("shiftDate").value = hotelToday(); render(); } });
   $("attFilter").addEventListener("change", (e) => { state.att = e.target.value; savePrefs(); render(); });
   $("jump").addEventListener("keydown", (e) => {
     if (e.key !== "Enter") return;
