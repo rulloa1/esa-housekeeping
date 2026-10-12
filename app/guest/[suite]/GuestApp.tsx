@@ -1,15 +1,72 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LangToggle from "@/components/LangToggle";
 
 type Req = { type: string; at: string };
+type Lang = "en" | "es";
 
-const LABEL: Record<string, string> = {
-  cleaning: "Cleaning requested",
-  towels: "Fresh towels requested",
-  amenities: "Amenities refill requested",
-  dnd_on: "Do Not Disturb turned on",
-  dnd_off: "Do Not Disturb turned off",
+const TEXT = {
+  en: {
+    suite: "Suite",
+    hello: ["Good morning", "Good afternoon", "Good evening"],
+    welcome: "Welcome",
+    intro: "We're here to make your stay comfortable.",
+    dndOnBadge: "Do Not Disturb is on",
+    services: "Housekeeping Services",
+    help: "How can we help you today?",
+    sending: "Sending…",
+    cleaning: ["Request Cleaning", "Full suite service", "Housekeeping has your cleaning request."],
+    towels: ["Towel Refresh", "Fresh towels", "Fresh towels are on the way."],
+    amenities: ["Amenities Refill", "Toiletries & more", "We'll bring an amenities refill."],
+    dndOn: ["Do Not Disturb", "Privacy please", "Do Not Disturb is on. We won't knock."],
+    dndOff: ["Do Not Disturb", "On · tap to turn off", "Do Not Disturb is off. Housekeeping may stop by."],
+    elseTitle: "Need something else?",
+    elseBody: "Stop by or call the front desk anytime.",
+    yourRequests: "Your requests",
+    none: "Nothing yet. Requests you send from Home show up here.",
+    failed: "That didn't go through. Please try again or call the front desk.",
+    home: "Home",
+    requests: "Requests",
+    labels: {
+      cleaning: "Cleaning requested",
+      towels: "Fresh towels requested",
+      amenities: "Amenities refill requested",
+      dnd_on: "Do Not Disturb turned on",
+      dnd_off: "Do Not Disturb turned off",
+    } as Record<string, string>,
+    locale: "en-US",
+  },
+  es: {
+    suite: "Suite",
+    hello: ["Buenos días", "Buenas tardes", "Buenas noches"],
+    welcome: "Bienvenido",
+    intro: "Estamos aquí para que tu estancia sea cómoda.",
+    dndOnBadge: "No molestar está activado",
+    services: "Servicios de limpieza",
+    help: "¿Cómo podemos ayudarte hoy?",
+    sending: "Enviando…",
+    cleaning: ["Solicitar limpieza", "Limpieza completa", "Limpieza recibió tu solicitud."],
+    towels: ["Cambio de toallas", "Toallas limpias", "Tus toallas limpias van en camino."],
+    amenities: ["Reponer amenidades", "Artículos de aseo y más", "Te llevaremos más amenidades."],
+    dndOn: ["No molestar", "Privacidad, por favor", "No molestar está activado. No tocaremos la puerta."],
+    dndOff: ["No molestar", "Activado · toca para quitar", "No molestar está desactivado. Limpieza puede pasar."],
+    elseTitle: "¿Necesitas algo más?",
+    elseBody: "Pasa o llama a recepción cuando quieras.",
+    yourRequests: "Tus solicitudes",
+    none: "Aún no hay nada. Las solicitudes que envíes desde Inicio aparecen aquí.",
+    failed: "No se pudo enviar. Inténtalo de nuevo o llama a recepción.",
+    home: "Inicio",
+    requests: "Solicitudes",
+    labels: {
+      cleaning: "Limpieza solicitada",
+      towels: "Toallas solicitadas",
+      amenities: "Amenidades solicitadas",
+      dnd_on: "No molestar activado",
+      dnd_off: "No molestar desactivado",
+    } as Record<string, string>,
+    locale: "es-US",
+  },
 };
 
 const ink = "#0f172a";
@@ -31,24 +88,26 @@ const ICONS = {
   leaf: icon('<path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14"/><path d="M5 19c3-4 6-6 9-7"/>'),
 };
 
-function greeting(): string {
+function greeting(lang: Lang): string {
   const h = Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", hourCycle: "h23" }).format(new Date()));
-  return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+  const [m, a, e] = TEXT[lang].hello;
+  return h < 12 ? m : h < 17 ? a : e;
 }
 
-function when(iso: string): string {
-  return new Date(iso).toLocaleString("en-US", { timeZone: "America/Chicago", weekday: "short", hour: "numeric", minute: "2-digit" });
+function when(iso: string, lang: Lang): string {
+  return new Date(iso).toLocaleString(TEXT[lang].locale, { timeZone: "America/Chicago", weekday: "short", hour: "numeric", minute: "2-digit" });
 }
 
-export default function GuestApp({ suite, k, dnd: initialDnd, initialRequests }: { suite: string; k: string; dnd: boolean; initialRequests: Req[] }) {
+export default function GuestApp({ lang, suite, k, dnd: initialDnd, initialRequests }: { lang: Lang; suite: string; k: string; dnd: boolean; initialRequests: Req[] }) {
+  const t = TEXT[lang];
   const [tab, setTab] = useState<"home" | "requests">("home");
   const [dnd, setDnd] = useState(initialDnd);
   const [requests, setRequests] = useState<Req[]>(initialRequests);
   const [busy, setBusy] = useState<string | null>(null);
   const [toast, setToast] = useState<{ text: string; ok: boolean } | null>(null);
-  const [hello, setHello] = useState("Welcome");
+  const [hello, setHello] = useState(t.welcome);
 
-  useEffect(() => setHello(greeting()), []);
+  useEffect(() => setHello(greeting(lang)), [lang]);
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(null), 3200);
@@ -70,27 +129,31 @@ export default function GuestApp({ suite, k, dnd: initialDnd, initialRequests }:
       if (type === "dnd_off") setDnd(false);
       setToast({ text: done, ok: true });
     } catch {
-      setToast({ text: "That didn't go through. Please try again or call the front desk.", ok: false });
+      setToast({ text: t.failed, ok: false });
     } finally {
       setBusy(null);
     }
   }
 
+  const tile = (type: string, [title, sub, done]: string[], bg: string, ic: React.ReactNode) => ({ type, title, sub, done, bg, ic });
   const tiles = [
-    { type: "cleaning", title: "Request Cleaning", sub: "Full suite service", bg: "linear-gradient(150deg, #2c4fa3, #1d3577)", ic: ICONS.cleaning, done: "Housekeeping has your cleaning request." },
-    { type: "towels", title: "Towel Refresh", sub: "Fresh towels", bg: "linear-gradient(150deg, #4a9a7a, #2f7558)", ic: ICONS.towels, done: "Fresh towels are on the way." },
-    { type: "amenities", title: "Amenities Refill", sub: "Toiletries & more", bg: "linear-gradient(150deg, #6c5bd0, #4c3da6)", ic: ICONS.amenities, done: "We'll bring an amenities refill." },
+    tile("cleaning", t.cleaning, "linear-gradient(150deg, #2c4fa3, #1d3577)", ICONS.cleaning),
+    tile("towels", t.towels, "linear-gradient(150deg, #4a9a7a, #2f7558)", ICONS.towels),
+    tile("amenities", t.amenities, "linear-gradient(150deg, #6c5bd0, #4c3da6)", ICONS.amenities),
     dnd
-      ? { type: "dnd_off", title: "Do Not Disturb", sub: "On · tap to turn off", bg: "linear-gradient(150deg, #c2410c, #9a3412)", ic: ICONS.dnd, done: "Do Not Disturb is off. Housekeeping may stop by." }
-      : { type: "dnd_on", title: "Do Not Disturb", sub: "Privacy please", bg: "linear-gradient(150deg, #f2a043, #e07d1f)", ic: ICONS.dnd, done: "Do Not Disturb is on. We won't knock." },
+      ? tile("dnd_off", t.dndOff, "linear-gradient(150deg, #c2410c, #9a3412)", ICONS.dnd)
+      : tile("dnd_on", t.dndOn, "linear-gradient(150deg, #f2a043, #e07d1f)", ICONS.dnd),
   ];
 
   return (
-    <div style={{ minHeight: "100dvh", background: "#f6f7fb", color: ink, fontFamily: "ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif" }}>
+    <div lang={lang} style={{ minHeight: "100dvh", background: "#f6f7fb", color: ink, fontFamily: "ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif" }}>
       <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 16px calc(96px + env(safe-area-inset-bottom))" }}>
         <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 2px 10px" }}>
-          <span style={{ fontSize: 12, letterSpacing: 1.1, textTransform: "uppercase", color: muted, fontWeight: 600 }}>Extended Stay America</span>
-          <span style={{ fontWeight: 700, fontSize: 17 }}>Suite {suite}</span>
+          <span style={{ display: "grid", gap: 2 }}>
+            <span style={{ fontSize: 11, letterSpacing: 1.1, textTransform: "uppercase", color: muted, fontWeight: 600 }}>Extended Stay America</span>
+            <span style={{ fontWeight: 700, fontSize: 17 }}>{t.suite} {suite}</span>
+          </span>
+          <LangToggle lang={lang} />
         </header>
 
         {tab === "home" ? (
@@ -106,22 +169,22 @@ export default function GuestApp({ suite, k, dnd: initialDnd, initialRequests }:
               <h1 style={{ margin: 0, fontSize: 30, lineHeight: 1.15, letterSpacing: -0.4 }}>
                 {hello} <span aria-hidden="true">👋</span>
               </h1>
-              <p style={{ margin: "10px 0 0", fontSize: 16, color: muted, maxWidth: 260 }}>We&apos;re here to make your stay comfortable.</p>
+              <p style={{ margin: "10px 0 0", fontSize: 16, color: muted, maxWidth: 260 }}>{t.intro}</p>
               {dnd && (
                 <p style={{ margin: "14px 0 0", display: "inline-block", padding: "6px 12px", borderRadius: 999, background: "#fff1e6", color: "#9a3412", fontSize: 13, fontWeight: 600 }}>
-                  Do Not Disturb is on
+                  {t.dndOnBadge}
                 </p>
               )}
             </section>
 
-            <h2 style={{ margin: "26px 2px 2px", fontSize: 21 }}>Housekeeping Services</h2>
-            <p style={{ margin: "0 2px 14px", color: muted }}>How can we help you today?</p>
+            <h2 style={{ margin: "26px 2px 2px", fontSize: 21 }}>{t.services}</h2>
+            <p style={{ margin: "0 2px 14px", color: muted }}>{t.help}</p>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              {tiles.map((t) => (
+              {tiles.map((tl) => (
                 <button
-                  key={t.type}
-                  onClick={() => send(t.type, t.done)}
+                  key={tl.type}
+                  onClick={() => send(tl.type, tl.done)}
                   disabled={busy !== null}
                   style={{
                     position: "relative",
@@ -131,20 +194,20 @@ export default function GuestApp({ suite, k, dnd: initialDnd, initialRequests }:
                     padding: "16px 14px 14px",
                     minHeight: 150,
                     color: "#fff",
-                    background: t.bg,
+                    background: tl.bg,
                     boxShadow: "0 8px 20px rgba(15,23,42,.14)",
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "space-between",
                     cursor: "pointer",
-                    opacity: busy && busy !== t.type ? 0.6 : 1,
+                    opacity: busy && busy !== tl.type ? 0.6 : 1,
                     font: "inherit",
                   }}
                 >
-                  {t.ic}
+                  {tl.ic}
                   <span>
-                    <span style={{ display: "block", fontSize: 18, fontWeight: 700, lineHeight: 1.2, paddingRight: 30 }}>{t.title}</span>
-                    <span style={{ display: "block", fontSize: 13, opacity: 0.9, marginTop: 4 }}>{busy === t.type ? "Sending…" : t.sub}</span>
+                    <span style={{ display: "block", fontSize: 18, fontWeight: 700, lineHeight: 1.2, paddingRight: 30 }}>{tl.title}</span>
+                    <span style={{ display: "block", fontSize: 13, opacity: 0.9, marginTop: 4, paddingRight: 30 }}>{busy === tl.type ? t.sending : tl.sub}</span>
                   </span>
                   <span
                     aria-hidden="true"
@@ -159,22 +222,22 @@ export default function GuestApp({ suite, k, dnd: initialDnd, initialRequests }:
             <div style={{ marginTop: 16, display: "flex", gap: 14, alignItems: "center", padding: "16px", borderRadius: 16, background: "#fff", boxShadow: "0 1px 2px rgba(15,23,42,.05)" }}>
               <span style={{ width: 40, height: 40, borderRadius: 20, background: "#e8f4ec", color: "#2f7558", display: "grid", placeItems: "center", flexShrink: 0 }}>{ICONS.leaf}</span>
               <span>
-                <b style={{ display: "block", fontSize: 15 }}>Need something else?</b>
-                <span style={{ color: muted, fontSize: 14 }}>Stop by or call the front desk anytime.</span>
+                <b style={{ display: "block", fontSize: 15 }}>{t.elseTitle}</b>
+                <span style={{ color: muted, fontSize: 14 }}>{t.elseBody}</span>
               </span>
             </div>
           </>
         ) : (
           <section>
-            <h1 style={{ margin: "8px 2px 14px", fontSize: 26 }}>Your requests</h1>
+            <h1 style={{ margin: "8px 2px 14px", fontSize: 26 }}>{t.yourRequests}</h1>
             {requests.length === 0 ? (
-              <p style={{ color: muted, margin: "0 2px" }}>Nothing yet. Requests you send from Home show up here.</p>
+              <p style={{ color: muted, margin: "0 2px" }}>{t.none}</p>
             ) : (
               <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 10 }}>
                 {requests.map((r) => (
                   <li key={r.at + r.type} style={{ background: "#fff", borderRadius: 14, padding: "14px 16px", boxShadow: "0 1px 2px rgba(15,23,42,.05)", display: "flex", justifyContent: "space-between", gap: 12 }}>
-                    <b style={{ fontWeight: 600 }}>{LABEL[r.type] ?? r.type}</b>
-                    <span style={{ color: muted, fontSize: 14, whiteSpace: "nowrap" }}>{when(r.at)}</span>
+                    <b style={{ fontWeight: 600 }}>{t.labels[r.type] ?? r.type}</b>
+                    <span style={{ color: muted, fontSize: 14, whiteSpace: "nowrap" }}>{when(r.at, lang)}</span>
                   </li>
                 ))}
               </ul>
@@ -221,8 +284,8 @@ export default function GuestApp({ suite, k, dnd: initialDnd, initialRequests }:
         <div style={{ maxWidth: 480, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr" }}>
           {(
             [
-              ["home", "Home", ICONS.home],
-              ["requests", "Requests", ICONS.list],
+              ["home", t.home, ICONS.home],
+              ["requests", t.requests, ICONS.list],
             ] as const
           ).map(([id, label, ic]) => (
             <button

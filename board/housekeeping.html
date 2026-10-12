@@ -280,7 +280,22 @@ button { cursor: pointer; }
 .scene .maplegend { position: absolute; left: 50%; bottom: 12px; translate: -50% 0; z-index: 3; display: flex; gap: 14px; padding: 8px 14px; border-radius: 12px; font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; pointer-events: none; }
 .scene .maplegend span { display: flex; align-items: center; gap: 6px; }
 .scene .maplegend i { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 0 2px rgba(255,255,255,.18), 0 0 10px currentColor; }
-.scene .floorbadge { top: 74px; bottom: auto; left: 12px; }
+.scene .floorbadge { display: none; }
+.scene .hud { pointer-events: auto; min-width: 230px; display: grid; gap: 5px; padding: 10px 10px 10px; }
+.scene .hud .ht { margin: 0 2px 2px; }
+.scene .hud .hrow { display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 0; border-radius: 8px; padding: 6px 10px; min-height: 34px; color: #fff; font: 800 .82rem/1 var(--f-body); letter-spacing: .04em; text-transform: uppercase; background: color-mix(in srgb, var(--c) 78%, #1b222b); box-shadow: inset 0 1px 0 rgba(255,255,255,.18); text-align: left; }
+.scene .hud .hrow.total { --c: #5b6b7f; }
+.scene .hud .hrow b { font-size: 1rem; font-variant-numeric: tabular-nums; }
+.scene .hud .hrow[aria-pressed="true"] { outline: 2px solid #fff; outline-offset: -2px; }
+.scene .hud .hfloors { display: flex; align-items: center; gap: 4px; margin-top: 3px; font-size: .74rem; font-weight: 700; }
+.scene .hud .hfloors span { opacity: .7; margin: 0 4px 0 2px; }
+.scene .hud .hfloors button { border: 0; background: rgba(255,255,255,.12); color: #fff; border-radius: 7px; min-height: 30px; padding: 0 10px; font: 700 .78rem/1 var(--f-body); }
+.scene .hud .hfloors button[aria-pressed="true"] { background: #fff; color: #16202b; }
+.scene .mapchips { position: absolute; top: 12px; left: 50%; translate: -50% 0; z-index: 3; display: flex; gap: 6px; padding: 5px; border-radius: 12px; background: rgba(22,28,36,.55); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.scene .mapchips button { border: 0; border-radius: 9px; min-height: 36px; padding: 0 14px; font: 800 .82rem/1 var(--f-body); color: #fff; background: color-mix(in srgb, var(--c) 72%, #1b222b); opacity: .8; }
+.scene .mapchips button[aria-pressed="true"] { opacity: 1; background: var(--c); box-shadow: 0 0 0 2px #fff inset, 0 4px 14px color-mix(in srgb, var(--c) 50%, transparent); }
+@media (max-width: 1060px) { .scene .mapchips { top: auto; bottom: 56px; } }
+@media (max-width: 760px) { .scene .hud { min-width: 0; } .scene .hud .hrow { min-height: 28px; font-size: .7rem; padding: 4px 8px; } .scene .mapchips button { padding: 0 9px; font-size: .72rem; } }
 .scene .callouts { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
 .scene .callout { position: absolute; left: 0; top: 0; pointer-events: auto; display: flex; align-items: center; gap: 6px; border: 1.5px solid rgba(232,193,94,.75); border-radius: 9px; padding: 6px 10px; font: 700 .74rem/1 var(--f-body); letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; margin: 0; translate: -50% calc(-100% - 9px); }
 .scene .callout::after { content: ""; position: absolute; left: 50%; bottom: -7px; width: 11px; height: 11px; translate: -50% 0; rotate: 45deg; background: inherit; border: inherit; border-top: 0; border-left: 0; border-radius: 0 0 2px 0; }
@@ -290,7 +305,7 @@ button { cursor: pointer; }
 .scene .callout .ico { width: 14px; height: 14px; fill: none; stroke: color-mix(in srgb, var(--sc) 50%, #fff); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .scene .callout.open { border-color: #fff; }
 .scene .callout[hidden] { display: none; }
-@media (max-width: 760px) { .scene .maplegend { gap: 9px; padding: 7px 10px; font-size: .62rem; } .scene .hud .ht span { display: none; } }
+@media (max-width: 760px) { .scene .hud .ht { display: none; } .scene .maplegend { gap: 9px; padding: 7px 10px; font-size: .62rem; } .scene .hud .ht span { display: none; } }
 @media (max-width: 520px) { .scene .maplegend { display: none; } .scene .callout { font-size: .66rem; padding: 5px 8px; } .scene .compass { width: 48px; height: 48px; } }
 
 /* Portrait iPad and phone: hallway runs top to bottom */
@@ -759,7 +774,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     // Accessible stalls just west of the entrance
     rect(ENTRY_X - 13, ENTRY_X - 6.5, HALF_D + 2.6, HALF_D + 7.9, M(0x2f6fb3, { roughness: .8 }), .035);
     curb(W0, CX1 + 2, 49, 49.1); curb(W0, E0, -38, -38.1); curb(W0, W0 + .1, -38, 49);
-    const carColors = [0xf2f2f2, 0x2d3540, 0xa8b0ba, 0x8c1d1d, 0x1f4e8c, 0x3b3f45, 0xd9d4c7, 0x4a5d3a];
+    const carColors = [0xf4f4f4, 0x2d3540, 0xb7bec7, 0xd23a32, 0x2f74d6, 0xe9b631, 0x3fa7c9, 0x5aa04a, 0xf4f4f4, 0x9aa3ad];
     const carGlass = M(0x26313d, { roughness: .15, metalness: .5 }), tyre = M(0x1d1f22, { roughness: .9 });
     const car = (x, z, color, ry = 0) => {
       const c = M(color ?? carColors[Math.floor(rnd() * carColors.length)], { roughness: .4, metalness: .35 });
@@ -826,7 +841,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
         }
       }
     }
-    [FLOOR_H, 2 * FLOOR_H].forEach((y, i) => tag(i + 1, box(LEN + 2.5, .28, HALF_D * 2 + .5, trim, 0, y, 0)));
+    [FLOOR_H, 2 * FLOOR_H].forEach((y, i) => { tag(i + 1, box(LEN + 2.5, .28, HALF_D * 2 + .5, trim, 0, y, 0)).userData.band = true; });
     tag(4, box(LEN + 2.6, 1.1, HALF_D * 2 + .6, M(0xf3f1ec), 0, H + .55, 0));
     // White membrane roof with rooftop units, as in the photos
     tag(4, box(LEN + 1.2, .1, HALF_D * 2 - .6, M(0xe7e7e3, { roughness: .9 }), 0, H + .9, 0, { cast: false }));
@@ -908,8 +923,8 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       const s = w.userData.suite, side = sideOf(s), f = Number(s[0]), dir = side === "n" ? -1 : 1, x = suiteX(s);
       const gap = Math.min(...SLOTS[side].filter((v) => v !== x).map((v) => Math.abs(v - x)));
       const g = new T.Mesh(glowGeo, new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .34, depthWrite: false, toneMapped: false }));
-      g.scale.set(Math.min(4.8, gap) - .45, FLOOR_H - .5, 1.4);
-      g.position.set(x, (f - .5) * FLOOR_H + .08, dir * (HALF_D + .72));
+      g.scale.set(Math.min(4.8, gap) - .45, FLOOR_H - .5, HALF_D - .3);
+      g.position.set(x, (f - .5) * FLOOR_H + .08, dir * (1.1 + (HALF_D - .3) / 2));
       g.renderOrder = 2; g.visible = false;
       g.userData = { suite: s, glow: true, win: w };
       const e = new T.LineSegments(glowEdgeGeo, new T.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: .95, toneMapped: false }));
@@ -1090,7 +1105,8 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     // a status legend (bottom) and floating callouts over the open suite and the latest changes
     const hud = document.createElement("div"); hud.className = "hud";
     const tools = document.createElement("div"); tools.className = "maptools";
-    tools.innerHTML = `<button type="button" class="mt layers" title="Switch between the drawn model and the aerial photo" aria-label="Map layers" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg></button>
+    tools.innerHTML = `<button type="button" class="mt snap" title="Save a picture of this view" aria-label="Save a picture of this view"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg></button>
+      <button type="button" class="mt layers" title="Switch between the drawn model and the aerial photo" aria-label="Map layers" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg></button>
       <button type="button" class="compass" title="Back to the front view" aria-label="Compass. Tap for the front view"><span class="cring"><b class="n">N</b><b class="e">E</b><b class="s">S</b><b class="w">W</b></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></svg></button>
       <div class="zoom"><button type="button" class="mt" data-z=".75" aria-label="Zoom in">+</button><button type="button" class="mt" data-z="1.33" aria-label="Zoom out">&minus;</button></div>`;
     const legend3d = document.createElement("div"); legend3d.className = "maplegend";
@@ -1111,9 +1127,44 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     let calls = [];
     const renderHud = () => {
       const n = (k) => suites.filter((s) => state.docs[s]?.status === k).length;
+      const logged = suites.filter((s) => state.docs[s]).length;
+      const fsel = state.filter ? "" : String(state.floor);
+      const row = (key, label, v, c) => `<button type="button" class="hrow" data-mf="${key}" aria-pressed="${state.filter === key}" style="--c:${c}"><span>${label}</span><b>${v}</b></button>`;
       hud.innerHTML = `<div class="ht"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21v-6h6v6"/></svg>Housekeeping <span>· ESA Houston IAH</span></div>
-        <div class="hn"><span style="--c:var(--st-clean)">Clean <b>${n("clean") + n("inspected")}</b></span><span style="--c:var(--st-dirty)">Needs service <b>${n("dirty")}</b></span><span style="--c:var(--st-prog)">In progress <b>${n("in_progress")}</b></span></div>`;
+        <div class="hrow total"><span>Suites logged</span><b>${logged} / 96</b></div>
+        ${row("ready", "Clean", n("clean") + n("inspected"), "var(--st-clean)")}${row("in_progress", "In progress", n("in_progress"), "var(--st-prog)")}${row("dirty", "Needs service", n("dirty"), "var(--st-dirty)")}
+        <div class="hfloors" role="group" aria-label="Floor"><span>Floor</span>${[["1", "1st"], ["2", "2nd"], ["3", "3rd"], ["all", "All"]].map(([f, l]) => `<button type="button" data-mfloor="${f}" aria-pressed="${fsel === f}">${l}</button>`).join("")}</div>`;
+      chips.querySelectorAll("[data-mf]").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.mf || null) === (state.filter || null) || (!b.dataset.mf && !state.filter))));
     };
+    hud.addEventListener("click", (e) => {
+      const f = e.target.closest("[data-mfloor]");
+      if (f) { state.floor = f.dataset.mfloor; state.filter = null; savePrefs(); return render(); }
+      const r = e.target.closest("[data-mf]");
+      if (r) { state.filter = state.filter === r.dataset.mf ? null : r.dataset.mf; render(); }
+    });
+    const chips = document.createElement("div"); chips.className = "mapchips"; chips.setAttribute("role", "group"); chips.setAttribute("aria-label", "Show suites");
+    chips.innerHTML = [["", "All", "var(--fg-chip, #5b6b7f)"], ["dirty", "Needs service", "var(--st-dirty)"], ["in_progress", "In progress", "var(--st-prog)"], ["ready", "Ready", "var(--st-clean)"]].map(([k, l, c]) => `<button type="button" data-mf="${k}" style="--c:${c}" aria-pressed="false">${l}</button>`).join("");
+    chips.addEventListener("click", (e) => { const b = e.target.closest("[data-mf]"); if (!b) return; state.filter = b.dataset.mf || null; render(); });
+    host.append(chips);
+    // Snapshot: save the current 3D view as a picture
+    tools.querySelector(".snap").addEventListener("click", () => {
+      renderer.render(scene, camera);
+      renderer.domElement.toBlob(async (blob) => {
+        if (!blob) return;
+        const filename = `iah-housekeeping-${shift()}.png`;
+        // Inside claude.ai the viewer confirms the save; the standalone app falls back to a plain download
+        let dl = null;
+        try { dl = window.claude?.use ? await window.claude.use("downloads") : null; } catch {}
+        if (dl) {
+          try { await dl.save({ filename, data: blob }); toast("Saved a picture of the map"); }
+          catch (err) { if (err?.code === "rate_limited") toast("A save is already open"); else if (err?.code !== "declined") toast("Couldn't save the picture here"); }
+          return;
+        }
+        const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+        a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      }, "image/png");
+    });
     const renderCallouts = (sel) => {
       const shown = (s) => matches(s) && (!sel || Number(s[0]) === sel) && state.docs[s];
       const recent = suites.filter((s) => shown(s) && state.docs[s].updatedAt).sort((a, b) => String(state.docs[b].updatedAt).localeCompare(String(state.docs[a].updatedAt)));
@@ -1184,13 +1235,17 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
           m.emissiveIntensity = isNight ? .05 : 0;
         }
       }
+      // Floor focus is a cutaway: storeys above the chosen floor are lifted off, its own shell turns see-through so
+      // the glowing rooms read as whole rooms, and the storeys below fade back
       for (const f of [1, 2, 3, 4]) {
-        const dim = !!sel && f !== sel;
+        const dim = !!sel && f !== sel, above = !!sel && f > sel;
         for (const m of byFloor[f]) {
-          ghost(m, dim, m.userData.glass || 1);
-          if (m.userData.wall) { m.material.emissive.set(0xc8963a); m.material.emissiveIntensity = sel === f ? .1 : 0; m.userData.edges.visible = dim; }
+          m.visible = !above && !(m.userData.band && sel === f);
+          ghost(m, dim, m.userData.wall && sel === f ? .12 : m.userData.glass || 1);
+          if (m.userData.wall) { m.material.emissive.set(0xc8963a); m.material.emissiveIntensity = 0; m.userData.edges.visible = dim && !above; }
         }
       }
+      for (const w of windows) w.visible = !(sel && Number(w.userData.suite[0]) > sel);
       if (sel !== lastSel) {
         const ty = sel ? (sel - .5) * FLOOR_H + .6 : 3;
         if (lastSel !== undefined) {
@@ -1202,7 +1257,8 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       badge.hidden = !sel;
       if (sel) badge.firstChild.textContent = `Floor ${sel} in focus`;
       renderHud(); renderCallouts(sel); placeCallouts();
-      rings.forEach((r, i) => { r.visible = !!sel; if (sel) r.position.y = i ? sel * FLOOR_H : sel === 1 ? .95 : (sel - 1) * FLOOR_H; });
+      rings.forEach((r, i) => { r.visible = !!sel && !i; // the top ring would cap the cutaway
+        if (sel) r.position.y = i ? sel * FLOOR_H : sel === 1 ? .95 : (sel - 1) * FLOOR_H; });
       floorTags.forEach((t, i) => { t.material.opacity = !sel || sel === i + 1 ? 1 : .35; });
       wake();
     }
