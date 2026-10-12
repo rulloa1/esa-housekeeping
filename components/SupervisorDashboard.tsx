@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { toRoom, toRooms } from "@/lib/roomView";
 import type { RoomDoc, RoomStatus, Role } from "@/lib/models";
 import { STAFF_ATTENDANTS } from "@/lib/models";
 import { NavigationHeader } from "./NavigationHeader";
@@ -68,7 +69,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
     return () => clearTimeout(timer);
   }, [version]);
 
-  const allRooms = useMemo(() => Object.values(docs), [docs]);
+  const allRooms = useMemo(() => Object.values(toRooms(docs)), [docs]);
 
   // Operational metrics
   const metrics = useMemo(() => {
@@ -1104,7 +1105,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
 
       {viewingHistoryRoom && (
         <RoomHistoryDrawer
-          room={docs[viewingHistoryRoom.id] ?? viewingHistoryRoom}
+          room={docs[viewingHistoryRoom.id] ? toRoom(viewingHistoryRoom.id, docs[viewingHistoryRoom.id]) : viewingHistoryRoom}
           onClose={() => setViewingHistoryRoom(null)}
           canManage={["supervisor", "frontdesk", "admin"].includes(currentRole)}
           userName={"Supervisor Sarah J."}
