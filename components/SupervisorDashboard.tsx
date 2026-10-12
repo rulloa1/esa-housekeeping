@@ -1104,8 +1104,11 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
 
       {viewingHistoryRoom && (
         <RoomHistoryDrawer
-          room={viewingHistoryRoom}
+          room={docs[viewingHistoryRoom.id] ?? viewingHistoryRoom}
           onClose={() => setViewingHistoryRoom(null)}
+          canManage={["supervisor", "frontdesk", "admin"].includes(currentRole)}
+          userName={"Supervisor Sarah J."}
+          onUpdated={handleRoomUpdated}
         />
       )}
 

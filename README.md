@@ -12,6 +12,8 @@ The board (`board/housekeeping.html`) reads and writes suites through `window.cl
 - `GET /api/suites?since=<version>` returns `{ version, docs }`, or `{ version, unchanged: true }` if nothing changed
 - `PATCH /api/suites/:id` with `{ base, next }` saves the board's changes to one suite (101–332): `base` is the copy the board was editing from, so the server applies only what the board changed and keeps changes others saved meanwhile (guest requests, other iPads, the operations dashboard). The server sets `updatedBy` from the signed-in role and enforces the role rules (only supervisors pass inspections, record welfare checks or clear a suite)
 - `PUT /api/suites/:id` runs a dashboard action (`{ action: "start_cleaning", … }`) or applies a partial update
+  - Close-out actions: `resolve_maintenance { issueId }` and `fulfill_supplies { requestId }` (supervisors only; resolving the last open issue on a suite in `maintenance` sets it to `dirty`), and `guest_request_done { requestAt }` (any staff role) for cleaning, towel and amenities requests
+- `POST /api/guest/:suite` refuses requests (409) while the suite's occupancy is Vacant or Checkout, since the card's link never changes and the request would come from a past guest, and allows 10 requests per suite per hour (429)
 - `DELETE /api/suites/:id` clears a suite (supervisors only)
 
 Every save to a suite runs under a short per-suite lock, so two saves landing together can't overwrite each other. If the board can't reach the server, `hk-db.js` keeps the save queued (also across a reload), keeps showing it, shows "Not saved yet · Retrying…" and sends it once the connection is back.

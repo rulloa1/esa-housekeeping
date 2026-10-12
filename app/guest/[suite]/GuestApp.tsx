@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import LangToggle from "@/components/LangToggle";
 import BrandLogo from "@/components/BrandLogo";
 
-type Req = { type: string; at: string };
+type Req = { type: string; at: string; doneAt?: string };
 type Lang = "en" | "es";
 
 const TEXT = {
@@ -27,6 +27,9 @@ const TEXT = {
     yourRequests: "Your requests",
     none: "Nothing yet. Requests you send from Home show up here.",
     failed: "That didn't go through. Please try again or call the front desk.",
+    noGuest: "This suite isn't checked in right now. Please call the front desk.",
+    limit: "We've received several requests from this suite. Please call the front desk.",
+    done: "Done",
     home: "Home",
     requests: "Requests",
     labels: {
@@ -57,6 +60,9 @@ const TEXT = {
     yourRequests: "Tus solicitudes",
     none: "Aún no hay nada. Las solicitudes que envíes desde Inicio aparecen aquí.",
     failed: "No se pudo enviar. Inténtalo de nuevo o llama a recepción.",
+    noGuest: "Esta suite no tiene huésped registrado ahora. Llama a recepción, por favor.",
+    limit: "Recibimos varias solicitudes de esta suite. Llama a recepción, por favor.",
+    done: "Listo",
     home: "Inicio",
     requests: "Solicitudes",
     labels: {
@@ -124,6 +130,10 @@ export default function GuestApp({ lang, suite, k, dnd: initialDnd, initialReque
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ k, type }),
       });
+      if (res.status === 409 || res.status === 429) {
+        setToast({ text: res.status === 409 ? t.noGuest : t.limit, ok: false });
+        return;
+      }
       if (!res.ok) throw new Error(String(res.status));
       const json = await res.json();
       setRequests(json.requests ?? []);
@@ -240,7 +250,10 @@ export default function GuestApp({ lang, suite, k, dnd: initialDnd, initialReque
                 {requests.map((r) => (
                   <li key={r.at + r.type} style={{ background: "#fff", borderRadius: 4, padding: "14px 16px", border: "1px solid #DBDEDB", display: "flex", justifyContent: "space-between", gap: 12 }}>
                     <b style={{ fontWeight: 600 }}>{t.labels[r.type] ?? r.type}</b>
-                    <span style={{ color: muted, fontSize: 14, whiteSpace: "nowrap" }}>{when(r.at, lang)}</span>
+                    <span style={{ color: muted, fontSize: 14, whiteSpace: "nowrap" }}>
+                      {r.doneAt ? <b style={{ color: green, fontWeight: 600 }}>{t.done} · </b> : null}
+                      {when(r.at, lang)}
+                    </span>
                   </li>
                 ))}
               </ul>

@@ -34,6 +34,8 @@ export interface MaintenanceIssue {
   status: "open" | "assigned" | "in_progress" | "resolved";
   photoUrl?: string;
   notes?: string;
+  resolvedBy?: string;
+  resolvedAt?: string;
 }
 
 export interface SupplyRequest {
@@ -47,6 +49,17 @@ export interface SupplyRequest {
   fulfilledBy?: string;
   fulfilledAt?: string;
 }
+
+// A request sent from the guest page (lib/guest.ts). It stays open until staff mark it done.
+export interface GuestRequestEntry {
+  type: string;
+  at: string;
+  doneAt?: string;
+  doneBy?: string;
+}
+
+// Requests someone has to act on. DND on/off just changes the suite's sign, so there's nothing to mark done.
+export const isGuestTask = (type: string) => type === "cleaning" || type === "towels" || type === "amenities";
 
 export interface AuditLogEntry {
   id: string;
@@ -89,6 +102,7 @@ export interface RoomDoc {
   checklistNotes: Record<string, string>;
   maintenanceIssues: MaintenanceIssue[];
   supplyRequests: SupplyRequest[];
+  guestRequests?: GuestRequestEntry[];
   history: AuditLogEntry[];
   updatedAt: string;
   updatedBy: string;

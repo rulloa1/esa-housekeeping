@@ -606,8 +606,11 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
 
       {historyRoom && (
         <RoomHistoryDrawer
-          room={historyRoom}
+          room={docs[historyRoom.id] ?? historyRoom}
           onClose={() => setHistoryRoom(null)}
+          canManage={["supervisor", "frontdesk", "admin"].includes(currentRole)}
+          userName={selectedAttendant}
+          onUpdated={handleRoomUpdated}
         />
       )}
     </div>

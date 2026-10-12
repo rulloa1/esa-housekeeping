@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getRole, isSupervisor } from "@/lib/auth";
 import { get, put, remove, withSuiteLock } from "@/lib/store";
-import type { Role, RoomDoc, AuditLogEntry, MaintenanceIssue, SupplyRequest } from "@/lib/models";
+import { isGuestTask, type Role, type RoomDoc, type AuditLogEntry, type MaintenanceIssue, type SupplyRequest } from "@/lib/models";
+import { REQUEST_LABEL, type GuestRequest } from "@/lib/guest";
 import { WRITABLE, changesFrom, describeChanges, guestRequestUnseen, tooLarge, validateChanges, type Doc } from "@/lib/suiteDoc";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +33,9 @@ type Body = Partial<RoomDoc> & {
   maintenanceIssue?: MaintenanceIssue;
   supplyRequest?: SupplyRequest;
   failReasons?: string[];
+  issueId?: string;
+  requestId?: string;
+  requestAt?: string;
   inspectionCategories?: Record<string, "pass" | "fail" | "na">;
 };
 
@@ -216,6 +220,56 @@ async function update(id: string, role: Role, body: Body, board: { base: Doc | n
         break;
       }
 
+      // Closing out what was reported. A suite blocked for maintenance goes back to
+      // "dirty" (it needs cleaning after the repair) once its last open issue is resolved.
+      case "resolve_maintenance": {
+        if (!isSupervisor(role)) {
+          return NextResponse.json({ error: "Only supervisors can resolve maintenance issues.", reason: "resolveMaintenance" }, { status: 403 });
+        }
+        const issue = (room.maintenanceIssues || []).find((m) => m.id === body.issueId);
+        if (!issue) return NextResponse.json({ error: "maintenance issue not found" }, { status: 404 });
+        if (issue.status !== "resolved") {
+          issue.status = "resolved";
+          issue.resolvedBy = userName;
+          issue.resolvedAt = now;
+          logEvent("Maintenance Resolved", `${issue.category}: ${issue.description}`);
+          const stillOpen = room.maintenanceIssues.some((m) => m.status !== "resolved");
+          if (room.status === "maintenance" && !stillOpen) {
+            room.status = "dirty";
+            logEvent("Status Changed", "Back in service after maintenance; needs cleaning.");
+          }
+        }
+        break;
+      }
+
+      case "fulfill_supplies": {
+        if (!isSupervisor(role)) {
+          return NextResponse.json({ error: "Only supervisors can mark supplies delivered.", reason: "fulfillSupplies" }, { status: 403 });
+        }
+        const request = (room.supplyRequests || []).find((r) => r.id === body.requestId);
+        if (!request) return NextResponse.json({ error: "supply request not found" }, { status: 404 });
+        if (request.status !== "fulfilled") {
+          request.status = "fulfilled";
+          request.fulfilledBy = userName;
+          request.fulfilledAt = now;
+          logEvent("Supply Delivered", `${request.quantity}x ${request.item}`);
+        }
+        break;
+      }
+
+      // Any staff member who handled a guest request (towels delivered, room serviced) marks it done.
+      case "guest_request_done": {
+        const requests = Array.isArray(room.guestRequests) ? room.guestRequests : [];
+        const request = requests.find((r) => r.at === body.requestAt && isGuestTask(r.type));
+        if (!request) return NextResponse.json({ error: "guest request not found" }, { status: 404 });
+        if (!request.doneAt) {
+          request.doneAt = now;
+          request.doneBy = userName;
+          logEvent("Guest Request Done", REQUEST_LABEL[request.type as GuestRequest] ?? request.type);
+        }
+        break;
+      }
+
       default:
         logEvent("Update", `Updated room details.`);
     }
@@ -286,8 +340,13 @@ async function update(id: string, role: Role, body: Body, board: { base: Doc | n
   room.history = history.slice(0, 50); // Keep last 50 audit entries
   if (tooLarge(room)) return NextResponse.json({ error: "suite record too large" }, { status: 400 });
   room.updatedAt = board && typeof body.updatedAt === "string" && body.updatedAt.length <= 40 ? body.updatedAt : now;
-  // A guest request the board hadn't seen yet stays open (the board reads updatedBy "guest" as open).
-  room.updatedBy = board && guestRequestUnseen(existing as Doc | null, board.base) ? "guest" : role;
+  // The board shows a suite's guest request as open while updatedBy is "guest". A board save
+  // acknowledges the requests that board had seen; anything else (a dashboard action, another
+  // device) leaves the flag up until every guest request is marked done.
+  const openGuestRequest = (room.guestRequests || []).some((r) => isGuestTask(r.type) && !r.doneAt);
+  room.updatedBy = board
+    ? guestRequestUnseen(existing as Doc | null, board.base) ? "guest" : role
+    : existing?.updatedBy === "guest" && openGuestRequest ? "guest" : role;
 
   const version = await put(id, room);
   return NextResponse.json({ version, room, conflicts, rejected });
