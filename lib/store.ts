@@ -301,11 +301,7 @@ export async function getAll(): Promise<{ version: number; docs: SuiteDocs }> {
 }
 
 export async function get(id: string): Promise<RoomDoc | null> {
-  if (!usingRedis) {
-    const raw = memory.__hkDocs?.get(id);
-    return raw ? JSON.parse(raw) : null;
-  }
-  const raw = (await redis("HGET", DOCS_KEY, id)) as string | null;
+  const raw = usingRedis ? ((await redis("HGET", DOCS_KEY, id)) as string | null) : memory.__hkDocs?.get(id);
   return raw ? JSON.parse(raw) : null;
 }
 

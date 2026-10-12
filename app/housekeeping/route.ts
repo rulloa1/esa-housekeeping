@@ -1,7 +1,9 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { getRole } from "@/lib/auth";
+import { LANG_COOKIE } from "@/lib/lang";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +14,17 @@ export async function GET(req: Request) {
   if (!role) return NextResponse.redirect(new URL("/login", req.url));
 
   const html = await readFile(path.join(process.cwd(), "board/housekeeping.html"), "utf8");
-  const inject = `<script>try{localStorage.setItem("iah-hk-role","${role}")}catch{}</script>\n<script src="/hk-db.js"></script>`;
+
+  // Language: the board keeps EN/ES in localStorage "iah-hk-lang"; sign-in and guest pages use the
+  // hk_lang cookie. Seed the board from the cookie, and mirror the board's own toggle back into it.
+  const saved = (await cookies()).get(LANG_COOKIE)?.value;
+  const lang = saved === "es" || saved === "en" ? saved : "";
+  const langSync =
+    `try{var K="iah-hk-lang";${lang ? `localStorage.setItem(K,"${lang}");` : ""}` +
+    `var S=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){S.apply(this,arguments);` +
+    `if(k===K&&(v==="en"||v==="es"))document.cookie="${LANG_COOKIE}="+v+"; path=/; max-age=31536000; samesite=lax"}}catch(e){}`;
+
+  const inject = `<script>try{localStorage.setItem("iah-hk-role","${role}")}catch{}${langSync}</script>\n<script src="/hk-db.js"></script>\n<link rel="icon" href="/icon.png" type="image/png"><link rel="apple-touch-icon" href="/apple-icon.png">`;
 
   const navBanner = `
 <div style="position:sticky;top:0;z-index:9999;background:#2F7A1E;color:#FFFFFF;padding:8px 16px;font-family:system-ui,-apple-system,sans-serif;font-size:13px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 6px rgba(0,0,0,0.2);">

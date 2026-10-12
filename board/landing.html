@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ESA Houston IAH Airport</title>
+<meta name="description" content="Extended Stay America Suites, Houston IAH Airport. Suites with in-suite kitchens, free grab-and-go breakfast, seasonal outdoor pool. 1500 N Sam Houston Pkwy E, Houston, TX 77032.">
+<link rel="stylesheet" href="/landing/brand.css">
+<link rel="icon" href="/icon.png" type="image/png"><link rel="apple-touch-icon" href="/apple-icon.png">
+<meta name="theme-color" content="#338802">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); }
+  a { color: inherit; }
+  img { max-width: 100%; display: block; }
+
+
+  /* hero */
+  .hero { position: relative; min-height: min(92vh, 860px); display: flex; align-items: flex-end;
+    background: #2b2119 url(/landing/hero-exterior-2752.jpg) 70% 40% / cover no-repeat; overflow: hidden; }
+  .hero::after { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(20,14,10,.15) 0%, rgba(20,14,10,0) 35%, rgba(20,14,10,.72) 100%); }
+  .hero-inner { position: relative; z-index: 1; width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 16px 56px; color: #fff; }
+  .logo-chip { display: inline-flex; background: rgba(255,255,255,.92); border-radius: 14px; padding: 10px 14px;
+    box-shadow: var(--shadow); margin-bottom: 22px; }
+  .logo-chip img { height: 46px; width: auto; }
+  h1 { font-size: clamp(34px, 6vw, 64px); line-height: 1.02; margin: 0 0 12px; letter-spacing: -.5px; max-width: 14ch; }
+  .lede { font-size: clamp(16px, 2vw, 20px); line-height: 1.45; margin: 0 0 26px; max-width: 46ch; opacity: .95; }
+  .ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 22px; border-radius: 0;
+    font-weight: bold; font-size: 17px; text-decoration: none; }
+  .btn-primary { background: var(--esa-green); color: #fff; box-shadow: 0 10px 24px -10px rgba(51,136,2,.8); }
+  .btn-glass { background: rgba(255,255,255,.16); color: #fff; border: 1px solid rgba(255,255,255,.5); backdrop-filter: blur(10px); }
+
+  /* glass fact bar overlapping hero */
+  .facts { position: relative; z-index: 2; max-width: 1180px; margin: -34px auto 0; padding: 0 16px; }
+  .facts-card { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--card); backdrop-filter: blur(18px);
+    border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--shadow); }
+  .fact { padding: 18px 20px; border-left: 1px solid var(--line); }
+  .fact:first-child { border-left: 0; }
+  .fact small { display: block; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+  .fact strong { font-size: 17px; }
+
+  section { max-width: 1180px; margin: 0 auto; padding: 72px 16px 0; }
+  h2 { font-size: clamp(26px, 3.4vw, 38px); margin: 0 0 10px; letter-spacing: -.3px; }
+  .sub { color: var(--muted); margin: 0 0 28px; font-size: 17px; line-height: 1.5; max-width: 60ch; }
+
+  .amenities { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .amenity { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 20px;
+    box-shadow: var(--shadow); }
+  .amenity svg { width: 34px; height: 34px; color: var(--esa-green); margin-bottom: 12px; }
+  .amenity b { display: block; font-size: 17px; margin-bottom: 4px; }
+  .amenity span { color: var(--muted); font-size: 14px; line-height: 1.4; }
+
+  .features { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .feature { position: relative; border-radius: 24px; overflow: hidden; background: var(--sand); box-shadow: var(--shadow);
+    transform: perspective(1200px) rotateX(0) rotateY(0); transition: transform .4s ease; }
+  .feature:hover { transform: perspective(1200px) rotateX(2deg) rotateY(-3deg) translateY(-4px); }
+  .feature img { width: 100%; aspect-ratio: 16/10; object-fit: cover; }
+  .feature .cap { padding: 20px 22px 24px; }
+  .feature .cap b { font-size: 21px; display: block; margin-bottom: 6px; }
+  .feature .cap span { color: var(--muted); line-height: 1.5; }
+  .tag { position: absolute; top: 14px; left: 14px; background: rgba(255,255,255,.9); color: var(--esa-brown);
+    font-size: 12px; padding: 5px 10px; border-radius: 999px; }
+
+  .visit { display: grid; grid-template-columns: 1.1fr .9fr; gap: 22px; align-items: stretch; }
+  .visit-photo { border-radius: 24px; min-height: 320px; background: url(/landing/hero-16x9-1920.jpg) 72% 50% / cover; box-shadow: var(--shadow); }
+  .visit-card { background: var(--esa-brown); color: #fff; border-radius: 24px; padding: 30px; display: flex; flex-direction: column; gap: 18px; }
+  .visit-card h3 { margin: 0; font-size: 24px; }
+  .visit-card p { margin: 0; line-height: 1.55; opacity: .92; }
+  .visit-card a.phone { font-size: 28px; font-weight: bold; text-decoration: none; color: #b8e08f; }
+
+  footer { max-width: 1180px; margin: 72px auto 0; padding: 26px 16px 40px; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: 13px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+  @media (max-width: 860px) {
+    .facts-card { grid-template-columns: 1fr 1fr; }
+    .fact:nth-child(3) { border-left: 0; }
+    .fact:nth-child(n+3) { border-top: 1px solid var(--line); }
+    .amenities { grid-template-columns: 1fr 1fr; }
+    .features, .visit { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 520px) { .hero { background-image: url(/landing/hero-portrait-1080x1350.jpg); background-position: 50% 30%; } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="logo-chip"><img src="/landing/esa-logo.png" alt="Extended Stay America Suites"></div>
+    <h1>Settle in, minutes from IAH.</h1>
+    <p class="lede">Spacious suites with in-suite kitchens, free grab-and-go breakfast and a seasonal outdoor pool, right on Beltway 8 north of Houston.</p>
+    <div class="ctas">
+      <a class="btn btn-primary" href="tel:+12819873900">Call 281-987-3900</a>
+      <a class="btn btn-glass" href="https://www.extendedstayamerica.com/hotels/tx/houston/iah-airport">Book online</a>
+    </div>
+  </div>
+</header>
+
+<div class="facts"><div class="facts-card">
+  <div class="fact"><small>Address</small><strong>1500 N Sam Houston Pkwy E</strong></div>
+  <div class="fact"><small>City</small><strong>Houston, TX 77032</strong></div>
+  <div class="fact"><small>Check-in</small><strong>3:00 PM</strong></div>
+  <div class="fact"><small>Check-out</small><strong>11:00 AM</strong></div>
+</div></div>
+
+<section>
+  <h2>Made for longer stays</h2>
+  <p class="sub">Everything you need to live comfortably for a night, a week or a month.</p>
+  <div class="amenities">
+    <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 10h16M8 6v1M8 13v3"/></svg><b>In-suite kitchens</b><span>A kitchen in every suite, so meals fit your schedule.</span></div>
+    <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 9h12v5a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5z"/><path d="M17 11h1.5a2 2 0 0 1 0 4H17M8 3v3M12 3v3"/></svg><b>Free breakfast</b><span>Grab-and-go breakfast every morning.</span></div>
+    <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 18c2 0 2-1.5 4-1.5S8 18 10 18s2-1.5 4-1.5 2 1.5 4 1.5 2-1.5 4-1.5M7 15V5a2 2 0 0 1 4 0M15 15V5a2 2 0 0 0-4 0M7 9h8"/></svg><b>Outdoor pool</b><span>Seasonal outdoor pool with loungers.</span></div>
+    <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1"/></svg><b>Free WiFi</b><span>Stay connected during your stay.</span></div>
+    <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="13" r="4.5"/><path d="M7 6.5h2"/></svg><b>Guest laundry</b><span>On-site washers and dryers.</span></div>
+    <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="6" cy="10" r="2"/><circle cx="18" cy="10" r="2"/><circle cx="9.5" cy="5.5" r="2"/><circle cx="14.5" cy="5.5" r="2"/><path d="M12 12c-3 0-5 4-5 6s2 2 5 2 5 0 5-2-2-6-5-6z"/></svg><b>Pet friendly</b><span>Pets allowed. Fees apply.</span></div>
+    <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></svg><b>Free parking</b><span>Self-parking on site.</span></div>
+    <div class="amenity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 16l20-6-2-3-7 2-4-5H7l2 6-5 1.5L2 9H1z"/><path d="M3 21h18"/></svg><b>Near IAH</b><span>A short drive to George Bush Intercontinental.</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Room to relax</h2>
+  <p class="sub">Unwind by the pool, then head back to a suite that feels like home.</p>
+  <div class="features">
+    <article class="feature">
+      <img src="/landing/pool-2400.jpg" alt="Outdoor pool with loungers and a shaded cabana">
+      <div class="cap"><b>Outdoor pool</b><span>A fenced pool deck with loungers and a shaded cabana. Open seasonally.</span></div>
+    </article>
+    <article class="feature">
+      <img src="/landing/suite-kitchenette-1982.jpg" alt="Guest suite with bed, kitchenette, desk and TV">
+      <div class="cap"><b>Suites with in-suite kitchens</b><span>A kitchen in every suite, so you can cook what you like and keep your routine on the road.</span></div>
+    </article>
+  </div>
+</section>
+
+
+<section>
+  <h2>A warm welcome</h2>
+  <p class="sub">Check in at the front desk and settle into the lobby.</p>
+  <div class="features">
+    <article class="feature"><img src="/landing/lobby-1982.jpg" alt="Hotel lobby with seating and front desk"><div class="cap"><b>Lobby and front desk</b><span>Comfortable seating and a front desk to get you settled.</span></div></article>
+    <article class="feature"><img src="/landing/suite-king-1982.jpg" alt="Guest suite with king bed and window"><div class="cap"><b>Rest easy</b><span>A comfortable bed and a quiet room to come back to after a day in Houston.</span></div></article>
+  </div>
+</section>
+
+<section>
+  <div class="visit">
+    <div class="visit-photo" role="img" aria-label="Hotel front entrance"></div>
+    <div class="visit-card">
+      <h3>Find us</h3>
+      <p>Extended Stay America Suites<br>Houston, IAH Airport<br>1500 N Sam Houston Pkwy E<br>Houston, TX 77032</p>
+      <a class="phone" href="tel:+12819873900">281-987-3900</a>
+      <div class="ctas">
+        <a class="btn btn-primary" href="https://maps.google.com/?q=1500+N+Sam+Houston+Pkwy+E,+Houston,+TX+77032">Directions</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© Extended Stay America. Amenities and hours may change; call the hotel to confirm.</span>
+  <span>Check-in 3:00 PM · Check-out 11:00 AM · <a href="/login">Staff sign in</a></span>
+</footer>
+</body>
+</html>
