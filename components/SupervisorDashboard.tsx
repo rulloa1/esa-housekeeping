@@ -350,7 +350,15 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
   };
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-page)", display: "flex", flexDirection: "column" }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#F7F5F0",
+        backgroundImage: "radial-gradient(ellipse at top left, rgba(47, 122, 30, 0.05) 0%, transparent 45%), radial-gradient(ellipse at top right, rgba(74, 55, 40, 0.06) 0%, transparent 45%)",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <style>{`
         .dash-kpi-grid {
           display: grid;
@@ -447,6 +455,12 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
         }
         @media (max-width: 900px) {
           .dash-col-insp { display: none; }
+        .glass-btn {
+          transition: all 0.15s ease;
+        }
+        .glass-btn:hover {
+          background-color: rgba(255, 255, 255, 0.28) !important;
+          transform: translateY(-1px);
         }
         @media (max-width: 640px) {
           .dash-kpi-grid {
@@ -496,107 +510,198 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
             >
               <span>📥</span> Export CSV
             </button>
+        {/* Signature Hotel Property Hero Banner */}
+        <section
+          style={{
+            position: "relative",
+            borderRadius: 16,
+            overflow: "hidden",
+            marginBottom: 20,
+            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.22), 0 8px 10px -6px rgba(0, 0, 0, 0.12)",
+            backgroundImage: "linear-gradient(135deg, rgba(20, 36, 18, 0.90) 0%, rgba(47, 122, 30, 0.82) 48%, rgba(45, 30, 20, 0.90) 100%), url('/landing/hero-exterior-2752.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center 35%",
+            color: "#FFFFFF",
+            padding: "24px 28px",
+          }}
+        >
+          {/* Subtle Decorative Ambient Lighting */}
+          <div
+            style={{
+              position: "absolute",
+              top: -60,
+              right: -60,
+              width: 240,
+              height: 240,
+              background: "radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%)",
+              pointerEvents: "none",
+            }}
+          />
 
-            <button
-              type="button"
-              onClick={() => setShowReportModal(true)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "7px 12px",
-                borderRadius: 8,
-                backgroundColor: "#FFFFFF",
-                border: "1px solid var(--border-default)",
-                color: "var(--text-main)",
-                fontSize: 12,
-                fontWeight: 700,
-                cursor: "pointer",
-                boxShadow: "var(--shadow-xs)",
-              }}
-            >
-              <span>📈</span> Operations Report
-            </button>
+          <div style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
+            <div>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 20, backgroundColor: "rgba(255, 255, 255, 0.16)", backdropFilter: "blur(6px)", fontSize: 11, fontWeight: 800, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 8 }}>
+                <span>★</span> Extended Stay America Suites · Houston IAH Airport
+              </div>
+              <h1 style={{ margin: "2px 0 6px", fontSize: 26, fontWeight: 800, letterSpacing: -0.5, color: "#FFFFFF", textShadow: "0 2px 4px rgba(0,0,0,0.3)" }}>
+                Supervisor Operations Dashboard
+              </h1>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", fontSize: 13, opacity: 0.94 }}>
+                <span>🏢 96 Total Suites across 3 Floors</span>
+                <span>•</span>
+                <span>🌤️ Morning Shift (7:00 AM – 3:30 PM)</span>
+                <span>•</span>
+                <span>📍 15615 John F Kennedy Blvd</span>
+              </div>
+            </div>
 
-            <button
-              type="button"
-              onClick={() => setShowNotifications(true)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "7px 12px",
-                borderRadius: 8,
-                backgroundColor: "#FFFFFF",
-                border: "1px solid var(--border-default)",
-                color: "var(--text-main)",
-                fontSize: 12,
-                fontWeight: 700,
-                cursor: "pointer",
-                boxShadow: "var(--shadow-xs)",
-              }}
-            >
-              <span>🔔</span> Activity & Alerts
-            </button>
+            {/* Action Buttons with Glassmorphic Styling */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <button
+                type="button"
+                className="glass-btn"
+                onClick={handleExportCsv}
+                title="Download shift roster as CSV"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  backgroundColor: "rgba(255, 255, 255, 0.18)",
+                  backdropFilter: "blur(6px)",
+                  border: "1px solid rgba(255, 255, 255, 0.35)",
+                  color: "#FFFFFF",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                <span>📥</span> Export CSV
+              </button>
 
-            <button
-              type="button"
-              onClick={handleResetBaseline}
-              disabled={isResetting}
-              title="Reset all 96 suites to morning baseline shift state"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "7px 12px",
-                borderRadius: 8,
-                backgroundColor: "#FFFFFF",
-                border: "1px solid #FCA5A5",
-                color: "#B91C1C",
-                fontSize: 12,
-                fontWeight: 700,
-                cursor: isResetting ? "not-allowed" : "pointer",
-                boxShadow: "var(--shadow-xs)",
-                opacity: isResetting ? 0.7 : 1,
-              }}
-            >
-              <span>🔄</span> {isResetting ? "Resetting..." : "Reset Demo Shift"}
-            </button>
+              <button
+                type="button"
+                className="glass-btn"
+                onClick={() => setShowReportModal(true)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  backgroundColor: "rgba(255, 255, 255, 0.18)",
+                  backdropFilter: "blur(6px)",
+                  border: "1px solid rgba(255, 255, 255, 0.35)",
+                  color: "#FFFFFF",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                <span>📈</span> Operations Report
+              </button>
 
             <div style={{ display: "flex", alignItems: "center", gap: 6, paddingLeft: 4 }}>
               <span style={{ fontSize: 12, color: "#FFFFFF", fontWeight: 600 }}>Live Sync: Active (v{version})</span>
               <span className="pulse-live" style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--st-clean)", display: "inline-block" }}></span>
               <button
                 type="button"
-                onClick={handleManualSync}
-                disabled={isSyncing}
-                title="Force refresh now"
+                className="glass-btn"
+                onClick={() => setShowNotifications(true)}
                 style={{
-                  background: "none",
-                  border: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  backgroundColor: "rgba(255, 255, 255, 0.18)",
+                  backdropFilter: "blur(6px)",
+                  border: "1px solid rgba(255, 255, 255, 0.35)",
+                  color: "#FFFFFF",
+                  fontSize: 12,
+                  fontWeight: 700,
                   cursor: "pointer",
                   fontSize: 13,
                   padding: "2px 4px",
                   color: "#FFFFFF",
                 }}
               >
-                {isSyncing ? "⏳" : "⚡"}
+                <span>🔔</span> Activity & Alerts
               </button>
+
+              <button
+                type="button"
+                className="glass-btn"
+                onClick={handleResetBaseline}
+                disabled={isResetting}
+                title="Reset all 96 suites to morning baseline shift state"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  backgroundColor: "rgba(239, 68, 68, 0.30)",
+                  backdropFilter: "blur(6px)",
+                  border: "1px solid rgba(254, 202, 202, 0.45)",
+                  color: "#FFFFFF",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: isResetting ? "not-allowed" : "pointer",
+                  opacity: isResetting ? 0.7 : 1,
+                }}
+              >
+                <span>🔄</span> {isResetting ? "Resetting..." : "Reset Demo Shift"}
+              </button>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "6px 12px",
+                  borderRadius: 20,
+                  backgroundColor: "rgba(0, 0, 0, 0.28)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  fontSize: 12,
+                  color: "#FFFFFF",
+                }}
+              >
+                <span>Live Sync v{version}</span>
+                <span className="pulse-live" style={{ width: 8, height: 8, borderRadius: "50%", background: "#4ADE80", display: "inline-block" }}></span>
+                <button
+                  type="button"
+                  onClick={handleManualSync}
+                  disabled={isSyncing}
+                  title="Force refresh now"
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 13,
+                    padding: "0 2px",
+                    color: "#FFFFFF",
+                  }}
+                >
+                  {isSyncing ? "⏳" : "⚡"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Operational Summary Cards (Phase 4) */}
         <section className="dash-kpi-grid">
           {[
-            { key: "ALL", label: "Total Rooms", count: metrics.total, color: "var(--esa-brown)", bg: "#FFFFFF" },
-            { key: "DIRTY", label: "Dirty Rooms", count: metrics.dirty, color: "var(--st-dirty)", bg: "#FEF2F2" },
-            { key: "ASSIGNED", label: "Assigned", count: metrics.assigned, color: "var(--st-assigned)", bg: "#EFF6FF" },
-            { key: "IN PROGRESS", label: "Cleaning", count: metrics.inProgress, color: "var(--st-in-prog)", bg: "#FFFBEB" },
-            { key: "AWAITING INSPECTION", label: "Awaiting Insp.", count: metrics.awaitingInspection, color: "var(--st-awaiting-insp)", bg: "#FAF5FF" },
-            { key: "CLEAN AND INSPECTED", label: "Clean & Ready", count: metrics.clean, color: "var(--st-clean)", bg: "#ECFDF5" },
-            { key: "MAINTENANCE REQUIRED", label: "Maintenance", count: metrics.maintenance, color: "#DC2626", bg: "#FEF2F2" },
-            { key: "OVERDUE", label: "Overdue / Urgent", count: metrics.overdue, color: "#B91C1C", bg: "#FEE2E2" },
+            { key: "ALL", icon: "🏢", label: "Total Rooms", count: metrics.total, color: "var(--esa-brown)", bg: "#FFFFFF" },
+            { key: "DIRTY", icon: "🧹", label: "Dirty Rooms", count: metrics.dirty, color: "var(--st-dirty)", bg: "#FEF2F2" },
+            { key: "ASSIGNED", icon: "📋", label: "Assigned", count: metrics.assigned, color: "var(--st-assigned)", bg: "#EFF6FF" },
+            { key: "IN PROGRESS", icon: "🧼", label: "Cleaning", count: metrics.inProgress, color: "var(--st-in-prog)", bg: "#FFFBEB" },
+            { key: "AWAITING INSPECTION", icon: "🔍", label: "Awaiting Insp.", count: metrics.awaitingInspection, color: "var(--st-awaiting-insp)", bg: "#FAF5FF" },
+            { key: "CLEAN AND INSPECTED", icon: "✨", label: "Clean & Ready", count: metrics.clean, color: "var(--st-clean)", bg: "#ECFDF5" },
+            { key: "MAINTENANCE REQUIRED", icon: "🔧", label: "Maintenance", count: metrics.maintenance, color: "#DC2626", bg: "#FEF2F2" },
+            { key: "OVERDUE", icon: "🚨", label: "Overdue / Urgent", count: metrics.overdue, color: "#B91C1C", bg: "#FEE2E2" },
           ].map((card) => {
             const isSelected = activeFilter === card.key;
             return (
@@ -605,23 +710,26 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                 type="button"
                 onClick={() => setActiveFilter(card.key)}
                 style={{
-                  padding: "10px 12px",
+                  padding: "12px 14px",
                   borderRadius: 12,
                   border: isSelected ? `2px solid ${card.color}` : "1px solid var(--border-subtle)",
                   borderTop: `4px solid ${card.color}`,
                   backgroundColor: "#FFFFFF",
                   textAlign: "left",
                   cursor: "pointer",
-                  boxShadow: isSelected ? "var(--shadow-md)" : "var(--shadow-xs)",
+                  boxShadow: isSelected ? "var(--shadow-md)" : "0 2px 6px rgba(0,0,0,0.03)",
                   transition: "transform 0.15s ease, box-shadow 0.15s ease",
                   display: "grid",
-                  gap: 2,
+                  gap: 3,
                 }}
               >
-                <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase" }}>
-                  {card.label}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase" }}>
+                    {card.label}
+                  </span>
+                  <span style={{ fontSize: 14 }}>{card.icon}</span>
                 </div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: card.color, lineHeight: 1.1 }}>
+                <div style={{ fontSize: 24, fontWeight: 800, color: card.color, lineHeight: 1.1 }}>
                   {card.count}
                 </div>
               </button>
