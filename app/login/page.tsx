@@ -1,26 +1,69 @@
 import { ROLES } from "@/lib/auth";
 
+// Full-screen photo of the hotel front behind the sign-in card.
+// Drop the photo at public/login-bg.jpg; until it exists the gradient shows instead.
+const BACKGROUND =
+  "linear-gradient(rgba(10, 20, 35, 0.35), rgba(10, 20, 35, 0.55)), " +
+  "url(/login-bg.jpg) center / cover no-repeat, " +
+  "linear-gradient(160deg, #1d3c5e 0%, #3f6f93 55%, #c9d8e4 100%)";
+
+const field = { padding: 12, fontSize: 16, borderRadius: 10, border: "1px solid #cbd5e1", background: "#fff" };
+
 export default async function Login({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;
   return (
-    <main style={{ maxWidth: 360, margin: "0 auto", padding: "64px 16px" }}>
-      <h1>Sign in</h1>
-      <form method="post" action="/api/login" style={{ display: "grid", gap: 12 }}>
-        <label style={{ display: "grid", gap: 4 }}>
-          Role
-          <select name="role" defaultValue="housekeeping" style={{ padding: 10, fontSize: 16 }}>
-            {Object.entries(ROLES).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
-        </label>
-        <label style={{ display: "grid", gap: 4 }}>
-          PIN
-          <input name="pin" type="password" inputMode="numeric" autoComplete="current-password" required style={{ padding: 10, fontSize: 16 }} />
-        </label>
-        {error && <p style={{ color: "#b42318", margin: 0 }}>That PIN didn&apos;t match. Try again.</p>}
-        <button type="submit" style={{ padding: 12, fontSize: 16 }}>Sign in</button>
-      </form>
-    </main>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: BACKGROUND,
+        display: "grid",
+        placeItems: "center",
+        padding: 16,
+        boxSizing: "border-box",
+        overflowY: "auto",
+      }}
+    >
+      <main
+        style={{
+          width: "100%",
+          maxWidth: 380,
+          boxSizing: "border-box",
+          padding: "28px 24px",
+          borderRadius: 18,
+          background: "rgba(255, 255, 255, 0.86)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.3)",
+          color: "#0f172a",
+        }}
+      >
+        <p style={{ margin: 0, fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase", color: "#475569" }}>
+          Extended Stay America · Houston IAH
+        </p>
+        <h1 style={{ margin: "6px 0 20px", fontSize: 28 }}>Sign in</h1>
+        <form method="post" action="/api/login" style={{ display: "grid", gap: 14 }}>
+          <label style={{ display: "grid", gap: 6, fontWeight: 600 }}>
+            Role
+            <select name="role" defaultValue="housekeeping" style={field}>
+              {Object.entries(ROLES).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+          </label>
+          <label style={{ display: "grid", gap: 6, fontWeight: 600 }}>
+            PIN
+            <input name="pin" type="password" inputMode="numeric" autoComplete="current-password" required style={field} />
+          </label>
+          {error && <p style={{ color: "#b42318", margin: 0 }}>That PIN didn&apos;t match. Try again.</p>}
+          <button
+            type="submit"
+            style={{ padding: 14, fontSize: 16, fontWeight: 600, borderRadius: 10, border: 0, background: "#1d4ed8", color: "#fff" }}
+          >
+            Sign in
+          </button>
+        </form>
+      </main>
+    </div>
   );
 }
