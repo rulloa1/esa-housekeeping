@@ -1,15 +1,26 @@
-import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getRole } from "@/lib/auth";
+import { getAll } from "@/lib/store";
+import { SupervisorDashboard } from "@/components/SupervisorDashboard";
+import { HousekeeperView } from "@/components/HousekeeperView";
+import type { RoomDoc } from "@/lib/models";
 
-export default function Home() {
-  return (
-    <main style={{ maxWidth: 640, margin: "0 auto", padding: "48px 16px" }}>
-      <h1>ESA Housekeeping</h1>
-      <p>
-        <Link href="/housekeeping">Open the housekeeping board</Link>
-      </p>
-      <form method="post" action="/api/logout">
-        <button type="submit">Sign out</button>
-      </form>
-    </main>
-  );
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const role = await getRole();
+  if (!role) {
+    redirect("/login");
+  }
+
+  const { docs, version } = await getAll();
+  const roomDocs = docs as Record<string, RoomDoc>;
+
+  // If user signed in specifically as Housekeeper, default to Housekeeper mobile view
+  if (role === "housekeeper" || role === "housekeeping") {
+    return <HousekeeperView initialDocs={roomDocs} initialVersion={version} currentRole={role} />;
+  }
+
+  // Otherwise render full Supervisor Operations Dashboard
+  return <SupervisorDashboard initialDocs={roomDocs} initialVersion={version} currentRole={role} />;
 }

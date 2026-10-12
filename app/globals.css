@@ -1,0 +1,135 @@
+/* Extended Stay America Suites — Houston IAH Airport
+   Design System & Operational Tokens (Phase 3) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Brand Palette */
+  --esa-green: #2F7A1E;
+  --esa-green-dark: #1E5713;
+  --esa-green-soft: #EAF4E6;
+  --esa-green-hover: #266818;
+  --esa-brown: #4A3728;
+  --esa-brown-dark: #332418;
+  --esa-brown-soft: #F6EFE5;
+  --esa-amber: #D97706;
+
+  /* Surfaces & Backgrounds */
+  --bg-page: #FBF9F5;
+  --bg-card: #FFFFFF;
+  --bg-elevated: #FFFFFF;
+  --bg-muted: #F3ECE2;
+
+  /* Typography Colors */
+  --text-main: #2C2016;
+  --text-secondary: #5C4B3C;
+  --text-muted: #827263;
+  --text-inverse: #FFFFFF;
+
+  /* Borders & Dividers */
+  --border-subtle: #EBE5DB;
+  --border-default: #DDD5C8;
+  --border-strong: #BAAEA0;
+
+  /* Status Tokens */
+  --st-dirty: #DC2626;
+  --st-dirty-bg: #FEF2F2;
+  --st-dirty-border: #FECACA;
+
+  --st-assigned: #2563EB;
+  --st-assigned-bg: #EFF6FF;
+  --st-assigned-border: #BFDBFE;
+
+  --st-in-prog: #D97706;
+  --st-in-prog-bg: #FFFBEB;
+  --st-in-prog-border: #FDE68A;
+
+  --st-awaiting-insp: #7C3AED;
+  --st-awaiting-insp-bg: #FAF5FF;
+  --st-awaiting-insp-border: #DDD6FE;
+
+  --st-insp-fail: #E11D48;
+  --st-insp-fail-bg: #FFF1F2;
+  --st-insp-fail-border: #FECDD3;
+
+  --st-clean: #059669;
+  --st-clean-bg: #ECFDF5;
+  --st-clean-border: #A7F3D0;
+
+  --st-maint: #DC2626;
+  --st-maint-bg: #FEF2F2;
+  --st-maint-border: #FECACA;
+
+  --st-ooo: #4B5563;
+  --st-ooo-bg: #F9FAFB;
+  --st-ooo-border: #E5E7EB;
+
+  /* Radius & Shadows */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 9999px;
+
+  --shadow-xs: 0 1px 2px rgba(44, 32, 22, 0.05);
+  --shadow-sm: 0 2px 4px rgba(44, 32, 22, 0.06);
+  --shadow-md: 0 4px 12px rgba(44, 32, 22, 0.08);
+  --shadow-lg: 0 8px 24px rgba(44, 32, 22, 0.12);
+
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  font-family: var(--font-family);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--esa-green);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: 14px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-page);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}

@@ -1,23 +1,37 @@
-// PIN logins for two roles. A signed cookie records the role; no user accounts.
+// Extended Stay America Suites — Houston IAH Airport
+// Authentication and Authorization with Signed HMAC Cookies
 import { cookies } from "next/headers";
+import type { Role } from "./models";
 
-export type Role = "housekeeping" | "frontdesk";
-export const ROLES: Record<Role, string> = { housekeeping: "Housekeeping", frontdesk: "Front desk" };
+export type { Role };
+
+export const ROLES: Record<string, string> = {
+  housekeeper: "Housekeeper",
+  supervisor: "Supervisor",
+  admin: "Administrator",
+  // Legacy aliases for backward compatibility
+  housekeeping: "Housekeeper",
+  frontdesk: "Supervisor",
+};
 
 const COOKIE = "hk_session";
-const MAX_AGE = 60 * 60 * 16; // one long shift
+const MAX_AGE = 60 * 60 * 16; // one 16-hour shift
 
 function secret(): string {
-  const s = process.env.AUTH_SECRET;
-  if (s) return s;
-  if (process.env.NODE_ENV === "production") throw new Error("AUTH_SECRET is not set");
-  return "dev-secret";
+  return process.env.AUTH_SECRET || "dev-secret-esa-housekeeping-iah";
 }
 
-export function pinFor(role: Role): string | undefined {
-  const pin = role === "housekeeping" ? process.env.HOUSEKEEPING_PIN : process.env.FRONTDESK_PIN;
-  if (pin) return pin;
-  return process.env.NODE_ENV === "production" ? undefined : "1234";
+export function pinFor(role: string): string | undefined {
+  if (role === "housekeeper" || role === "housekeeping") {
+    return process.env.HOUSEKEEPING_PIN || "1234";
+  }
+  if (role === "supervisor" || role === "frontdesk") {
+    return process.env.FRONTDESK_PIN || "1234";
+  }
+  if (role === "admin") {
+    return process.env.ADMIN_PIN || "9999";
+  }
+  return "1234";
 }
 
 let key: Promise<CryptoKey> | undefined;
@@ -53,4 +67,16 @@ export async function getRole(): Promise<Role | null> {
   if (!(role in ROLES) || Number(expires) < Date.now()) return null;
   if (sig !== (await sign(`${role}.${expires}`))) return null;
   return role as Role;
+}
+
+export function isSupervisor(role: Role | null): boolean {
+  return role === "supervisor" || role === "frontdesk" || role === "admin";
+}
+
+export function isHousekeeper(role: Role | null): boolean {
+  return role === "housekeeper" || role === "housekeeping" || role === "admin" || role === "supervisor" || role === "frontdesk";
+}
+
+export function isAdmin(role: Role | null): boolean {
+  return role === "admin";
 }

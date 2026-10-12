@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ESA Housekeeping",
-  description: "Housekeeping tools for Extended Stay America",
+  title: "Extended Stay America Suites — Housekeeping Operations",
+  description: "Hospitality Operations Platform for Extended Stay America Suites — Houston IAH Airport",
+  icons: {
+    icon: "/esa-logo.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body style={{ margin: 0, fontFamily: "system-ui, sans-serif" }}>{children}</body>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+      </head>
+      <body>{children}</body>
     </html>
   );
 }
