@@ -7,6 +7,8 @@ export default function LangToggle({ lang, style }: { lang: "en" | "es"; style?:
   const pick = (l: "en" | "es") => {
     if (l === lang) return;
     document.cookie = `hk_lang=${l}; path=/; max-age=31536000; samesite=lax`;
+    // Same choice for the board, which reads it from this key.
+    try { localStorage.setItem("iah-hk-lang", l); } catch {}
     location.reload();
   };
   const btn = (l: "en" | "es", label: string) => (

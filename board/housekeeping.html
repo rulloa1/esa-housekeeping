@@ -129,6 +129,10 @@ button { cursor: pointer; }
 .fchip span { font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .fchip[aria-pressed="true"] { border-color: var(--brass); background: var(--brass-soft); }
 .hint { font-size: .78rem; color: var(--muted); }
+.langsw { display: inline-flex; padding: 3px; gap: 2px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); }
+.langsw button { min-width: 40px; min-height: 36px; border: 0; border-radius: 9px; background: transparent; color: var(--muted, #667); font-weight: 800; font-size: 13px; letter-spacing: .04em; cursor: pointer; }
+.langsw button[aria-pressed="true"] { background: var(--ink, #1d2733); color: #fff; box-shadow: 0 2px 6px rgba(20,30,50,.18); }
+.greet .langsw.gl { flex: none; }
 .iconbtn { min-width: 44px; min-height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-weight: 700; padding: 0 12px; }
 
 /* Banners */
@@ -573,6 +577,7 @@ fieldset .check:has(input:checked) { background: color-mix(in srgb, var(--st-cle
 .pp.low { color: var(--st-clean); background: var(--st-clean-bg); }
 @media (max-width: 640px) {
   .greet .gclock { display: none; }
+  .greet .langsw button { min-width: 34px; min-height: 30px; font-size: 12px; }
   .greet .gwho { text-transform: none; letter-spacing: 0; font-size: .78rem; font-weight: 700; }
   .greet h1 { font-size: 1.9rem; max-width: 64%; }
   .greet p { max-width: 62%; font-size: .92rem; }
@@ -678,6 +683,211 @@ fieldset .check:has(input:checked) { background: color-mix(in srgb, var(--st-cle
 <aside id="drawer" class="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dTitle"></aside>
 <div id="toast" class="toast" hidden role="status"></div>
 
+<script>
+// English / Spanish. The board renders in English; when Spanish is on, a translator rewrites visible text and
+// labels as they appear (exact phrases first, then patterns with numbers). The choice is saved per device.
+(() => {
+  const KEY = "iah-hk-lang";
+  let lang = "en";
+  try { lang = localStorage.getItem(KEY) === "es" ? "es" : "en"; } catch {}
+  const ES = {
+    // Statuses and services
+    "Needs service": "Necesita servicio", "In progress": "En curso", "Clean": "Limpia", "Inspected": "Inspeccionada",
+    "Out of order": "Fuera de servicio", "Not logged": "Sin registrar", "Not logged yet": "Aún sin registrar",
+    "Dirty": "Sucia", "In prog": "En curso", "Insp": "Insp.", "OOO": "FDS", "Ready": "Listas", "Completed": "Completadas",
+    "Due for service": "Por limpiar", "High priority": "Prioridad alta", "high priority": "prioridad alta",
+    "Weekly Full Service": "Servicio completo semanal", "Weekly full service": "Servicio completo semanal", "weekly full service": "servicio completo semanal",
+    "Mid-Week Refresh": "Repaso de media semana", "Mid-week refresh": "Repaso de media semana", "mid-week refresh": "repaso de media semana",
+    "Turnover": "Salida", "turnover": "salida", "Turnover clean": "Limpieza de salida", "Turnover clean + audit": "Limpieza de salida + auditoría",
+    "Vacant": "Desocupada", "Skipped for DND": "Omitida por DND", "Service suite": "Atender suite", "On DND, check later": "En DND, revisar luego",
+    "Stayover": "Continúa", "Checkout": "Salida", "CO": "SAL", "VAC": "DES",
+    "Welfare check": "Revisión de bienestar", "Guest request": "Solicitud del huésped", "Guest requests": "Solicitudes de huéspedes",
+    "Towels": "Toallas", "Trash pickup": "Recoger basura", "Amenities": "Amenidades", "Cleaning": "Limpieza", "Request": "Solicitud",
+    "Toiletries": "Artículos de baño", "Extra towels": "Toallas extra", "Trash": "Basura", "Linens": "Ropa de cama", "Housekeeping visit": "Visita de limpieza",
+    "Clean or inspected": "Limpias o inspeccionadas", "clean or inspected": "limpias o inspeccionadas", "suites to clean": "suites por limpiar",
+    "being cleaned now": "en limpieza ahora", "Nothing urgent": "Nada urgente",
+    "Welfare checks due": "Revisiones de bienestar pendientes", "Turnover audits open": "Auditorías de salida abiertas", "On DND": "En DND",
+    "On Do Not Disturb": "En No Molestar", "Do Not Disturb": "No Molestar", "DND sign is out": "Letrero de DND puesto",
+    // Header, dashboard
+    "Good morning": "Buenos días", "Good afternoon": "Buenas tardes", "Good evening": "Buenas noches",
+    "Extended Stay America Suites · Housekeeping": "Extended Stay America Suites · Limpieza", "Houston – IAH Airport": "Houston – Aeropuerto IAH",
+    "IAH Airport Housekeeping Board": "Tablero de limpieza · Aeropuerto IAH",
+    "Shift progress": "Progreso del turno", "Room status": "Estado de las habitaciones", "Priority tasks": "Tareas prioritarias",
+    "View all →": "Ver todo →", "View suites →": "Ver suites →", "suites": "suites", "High": "Alta", "Medium": "Media", "Low": "Baja",
+    "Nothing waiting. Every logged suite is done.": "Nada pendiente. Todas las suites registradas están listas.",
+    "Housekeeping": "Limpieza", "Front desk": "Recepción", "Guest": "Huésped",
+    // Map
+    "Building view": "Vista del edificio", "Front": "Frente", "Rear": "Atrás", "Courtyard": "Patio", "Top": "Arriba", "Orbit": "Girar",
+    "Drag to orbit · pinch to zoom · tap a window to open a suite · tap a wall to focus that floor": "Arrastra para girar · pellizca para acercar · toca una ventana para abrir una suite · toca una pared para enfocar ese piso",
+    "Drag to turn · tap a floor": "Arrastra para girar · toca un piso",
+    "Suites logged": "Suites registradas", "All": "Todas", "1st": "1.º", "2nd": "2.º", "3rd": "3.º", "Floor": "Piso",
+    "Show all floors": "Ver todos los pisos", "Main entrance": "Entrada principal", "Pool & spa": "Piscina y spa", "East courtyard": "Patio este",
+    "Rear parking · North": "Estacionamiento trasero · Norte", "Front parking · South": "Estacionamiento delantero · Sur", "Retention pond": "Estanque",
+    "Saved a picture of the map": "Imagen del mapa guardada", "Couldn't save the picture here": "No se pudo guardar la imagen aquí", "A save is already open": "Ya hay un guardado abierto",
+    // Live bar, toolbar, board
+    "Live": "En vivo", "This iPad is": "Este iPad es de", "Floor plan": "Plano", "Work list": "Lista de trabajo", "All attendants": "Todas las camaristas",
+    "Night mode": "Modo noche", "Day mode": "Modo día", "Suite #": "Suite #",
+    "Room updates from housekeeping appear here the moment they're made.": "Los cambios de limpieza aparecen aquí al momento.",
+    "North · rear parking": "Norte · estacionamiento trasero", "South · front entrance": "Sur · entrada principal", "West end": "Extremo oeste",
+    "Central": "Pasillo", "hallway": "central", "Elevators": "Elevadores", "Stairs": "Escaleras", "POOL": "PISCINA", "Spa": "Spa", "BBQ": "Asador",
+    "Needs attention now": "Atención inmediata", "To service": "Por atender", "On Do Not Disturb ": "En No Molestar", "Ready for inspection": "Listas para inspección",
+    "Done or out of order": "Listas o fuera de servicio", "Start": "Empezar", "Mark clean": "Marcar limpia", "Inspect": "Inspeccionar", "Details": "Detalles",
+    "Finish audit": "Terminar auditoría", "Log welfare check": "Registrar revisión de bienestar", "Show all suites": "Ver todas las suites",
+    "Showing": "Mostrando", "on all floors.": "en todos los pisos.",
+    "No suites match.": "Ninguna suite coincide.", "Needs attention": "Necesita atención", "Legend": "Leyenda",
+    "Welfare check required now": "Revisión de bienestar requerida ahora",
+    "On Do Not Disturb 3 or more consecutive days. A supervisor must do a welfare and property inspection.": "En No Molestar 3 o más días seguidos. Un supervisor debe hacer una revisión de bienestar y de la propiedad.",
+    "Sent from the guest request page. Each one clears when staff next save that suite.": "Enviadas desde la página de solicitudes. Cada una se borra cuando el personal guarda esa suite.",
+    "Service policies": "Políticas de servicio", "Mandatory DND Policy": "Política obligatoria de DND", "Kitchenette Audit": "Auditoría de cocineta",
+    "Every 7 days: deep clean, bed linen change, full kitchenette scrub, vacuum and mop.": "Cada 7 días: limpieza profunda, cambio de ropa de cama, limpieza completa de la cocineta, aspirar y trapear.",
+    "Towel exchange and trash haul.": "Cambio de toallas y retiro de basura.", "Every turnover checks:": "Cada salida revisa:",
+    "Any suite on Do Not Disturb for 3 or more consecutive days requires an immediate supervisor welfare and property inspection.": "Toda suite en No Molestar 3 o más días seguidos requiere una revisión inmediata de bienestar y de la propiedad por un supervisor.",
+    "weekly full ·": "servicio completo semanal ·", "mid-week refresh ·": "repaso de media semana ·",
+    "Housekeeping mode: each tap in a suite saves straight away": "Modo limpieza: cada toque en una suite se guarda al instante",
+    "Front desk mode: changes save when you press Save": "Modo recepción: los cambios se guardan al pulsar Guardar",
+    "Changes save as you tap": "Los cambios se guardan al tocar", "Saved · front desk can see it": "Guardado · recepción ya lo ve",
+    "Example data.": "Datos de ejemplo.", "Clear example statuses": "Borrar estados de ejemplo", "Keep them": "Conservarlos", "Example status": "Estado de ejemplo",
+    "No suites logged yet. Tap any suite to record its status, DND and kitchenette audit.": "Aún no hay suites registradas. Toca una suite para registrar su estado, DND y auditoría de cocineta.",
+    "Shared saving isn't available here, so changes stay on this device.": "El guardado compartido no está disponible aquí; los cambios se quedan en este dispositivo.",
+    "You can view this board but not change it. Ask the owner for Contributor access to update suites.": "Puedes ver este tablero pero no cambiarlo. Pide al propietario acceso de colaborador para actualizar suites.",
+    // Suite panel
+    "Today's service": "Servicio de hoy", "Room status ": "Estado de la habitación", "Occupancy": "Ocupación", "Last Weekly Full Service": "Último servicio completo semanal",
+    "Notes": "Notas", "Attendant": "Camarista", "Save": "Guardar", "Save & next": "Guardar y siguiente", "Close": "Cerrar", "Undo": "Deshacer", "Done": "Listo",
+    "Unsaved changes": "Cambios sin guardar", "Clear this suite's record": "Borrar el registro de esta suite", "Clear all checks": "Quitar todas", "Check all 5": "Marcar las 5",
+    "Kitchenette audit": "Auditoría de cocineta", "Kitchenette audit · required": "Auditoría de cocineta · obligatoria", "Kitchenette audit (all 5 checks)": "Auditoría de cocineta (las 5 revisiones)",
+    "ticks itself when the audit below is complete": "se marca sola cuando la auditoría de abajo está completa",
+    "Deep clean": "Limpieza profunda", "Bed linen change": "Cambio de ropa de cama", "Full kitchenette scrub": "Limpieza completa de cocineta", "Vacuum and mop": "Aspirar y trapear",
+    "Towel exchange": "Cambio de toallas", "Trash haul": "Retiro de basura", "Full clean": "Limpieza completa",
+    "All tasks done · Mark clean": "Todas las tareas listas · Marcar limpia", "Set to In progress when the first task was ticked": "Pasó a En curso al marcar la primera tarea",
+    "Refrigerator / freezer": "Refrigerador / congelador", "Refrigerator and freezer": "Refrigerador y congelador", "Stovetop burners": "Quemadores de la estufa",
+    "Microwave": "Microondas", "Sink drainage": "Drenaje del fregadero", "4-piece cookware inventory": "Inventario de 4 utensilios de cocina",
+    "Consecutive day": "Día consecutivo", "First seen on": "Visto por primera vez el", "Supervisor completed the welfare check": "El supervisor completó la revisión de bienestar",
+    "Clears when you save this suite.": "Se borra al guardar esta suite.",
+    "No full service on record.": "Sin servicio completo registrado.", "No service scheduled.": "Sin servicio programado.",
+    "Full clean plus the mandatory kitchenette audit.": "Limpieza completa más la auditoría obligatoria de cocineta.",
+    "Guest has Do Not Disturb out. No service today.": "El huésped tiene No Molestar. Sin servicio hoy.", "Suite is out of service.": "La suite está fuera de servicio.",
+    "No status recorded for this suite yet.": "Esta suite aún no tiene estado registrado.",
+    "North side, faces rear parking": "Lado norte, da al estacionamiento trasero", "South side, faces front entrance": "Lado sur, da a la entrada principal",
+    "Change undone": "Cambio deshecho", "Couldn't save. Check your connection and try again.": "No se pudo guardar. Revisa la conexión e inténtalo de nuevo.",
+    "You don't have permission to change suites": "No tienes permiso para cambiar suites", "just now": "justo ahora",
+    // Tabs and labels
+    "Home": "Inicio", "Map": "Mapa", "Suites": "Suites", "Requests": "Solicitudes",
+    "Previous suite": "Suite anterior", "Next suite": "Suite siguiente", "Zoom in": "Acercar", "Zoom out": "Alejar", "Map layers": "Capas del mapa",
+    "Save a picture of this view": "Guardar una imagen de esta vista", "Back to the front view": "Volver a la vista de frente", "Compass. Tap for the front view": "Brújula. Toca para la vista de frente",
+    "Switch between the drawn model and the aerial photo": "Cambiar entre el modelo y la foto aérea", "Slowly circle the building": "Girar lentamente alrededor del edificio",
+    "Board controls": "Controles del tablero", "Camera": "Cámara", "Filter by attendant": "Filtrar por camarista", "Filter suites by status": "Filtrar suites por estado",
+    "Go to suite number": "Ir a la suite", "Shift date": "Fecha del turno", "Show suites": "Mostrar suites", "Sections": "Secciones", "View": "Vista",
+    "Who is assigned": "Quién está asignada", "Who is using this device": "Quién usa este dispositivo", "All floors": "Todos los pisos",
+    "3D view of the building": "Vista 3D del edificio", "3D model of the hotel. Drag to orbit, pinch to zoom, tap a window to open that suite.": "Modelo 3D del hotel. Arrastra para girar, pellizca para acercar, toca una ventana para abrir la suite.",
+    "Missing items, maintenance needs, guest requests": "Faltantes, mantenimiento, solicitudes de huéspedes", "Elevators, middle of the building": "Elevadores, a la mitad del edificio",
+    "East courtyard: fenced pool deck against the building with the pool, spa, cabana and pergola; a walk; then the lawn with two BBQ gazebos and a palm, fenced along the street": "Patio este: terraza cercada junto al edificio con piscina, spa, cabaña y pérgola; un andador; luego el jardín con dos kioscos de asador y una palmera, cercado a lo largo de la calle",
+    "West end stairs": "Escaleras del extremo oeste", "East end stairs": "Escaleras del extremo este", "Priority tasks ": "Tareas prioritarias",
+    "Language": "Idioma",
+  };
+  const S = { North: "Norte", South: "Sur" };
+  const tl = (x) => tr(x);
+  const list = (x, sep) => x.split(sep).map((p) => tr(p)).join(sep);
+  const RULES = [
+    [/^Suite (\d+): (.+)$/, (m) => `Suite ${m[1]}: ${list(m[2], ", ")}`],
+    [/^guest request: (.+)$/, (m) => `solicitud del huésped: ${tr(m[1])}`],
+    [/^Suite (\d+) is now (.+?)( \(housekeeping\))?$/, (m) => `La suite ${m[1]} ahora está ${tr(m[2]).toLowerCase()}${m[3] ? " (limpieza)" : ""}`],
+    [/^Guest request in suite (\d+): (.+)$/, (m) => `Solicitud del huésped en la suite ${m[1]}: ${list(m[2], ", ")}`],
+    [/^Guest: (.+)$/, (m) => `Huésped: ${list(m[1], ", ")}`],
+    [/^Finish (.+)$/, (m) => `Terminar ${tr(m[1])}`],
+    [/^(\d+) suites just updated$/, (m) => `${m[1]} suites se acaban de actualizar`],
+    [/^Suite (\d+) saved$/, (m) => `Suite ${m[1]} guardada`], [/^Suite (\d+) cleared$/, (m) => `Suite ${m[1]} borrada`],
+    [/^Cleared (\d+) example suites$/, (m) => `Se borraron ${m[1]} suites de ejemplo`],
+    [/^There's no suite (.+?)\. Suites run (.+)\.$/, (m) => `No existe la suite ${m[1] === "with that number" ? "con ese número" : m[1]}. Las suites van de ${m[2]}.`],
+    [/^Open suite (\d+)$/, (m) => `Abrir suite ${m[1]}`],
+    [/^Floor (\d) in focus$/, (m) => `Piso ${m[1]} en foco`],
+    [/^Floor (\d) (North|South)$/, (m) => `Piso ${m[1]} ${S[m[2]]}`],
+    [/^Floor (\d)$/, (m) => `Piso ${m[1]}`], [/^Fl (\d)$/, (m) => `P${m[1]}`],
+    [/^(\d+) of (\d+) services done$/, (m) => `${m[1]} de ${m[2]} servicios hechos`],
+    [/^of (\d+) services done(.*)$/, (m) => `de ${m[1]} servicios hechos${m[2]}`],
+    [/^(\d+) of (\d+) scheduled services finished$/, (m) => `${m[1]} de ${m[2]} servicios programados terminados`],
+    [/^(\d+) of (\d+) logged$/, (m) => `${m[1]} de ${m[2]} registradas`],
+    [/^(\d+) of (\d+) done$/, (m) => `${m[1]} de ${m[2]} hechos`],
+    [/^(\d+) of 5$/, (m) => `${m[1]} de 5`], [/^(\d+)\/(\d+) tasks$/, (m) => `${m[1]}/${m[2]} tareas`],
+    [/^(\d+) in progress$/, (m) => `${m[1]} en curso`], [/^(\d+) to go$/, (m) => `${m[1]} pendientes`], [/^(\d+) done$/, (m) => `${m[1]} hechos`],
+    [/^(\d+) welfare$/, (m) => `${m[1]} bienestar`], [/^(\d+) audit$/, (m) => `${m[1]} auditoría`], [/^(\d+) guest$/, (m) => `${m[1]} huésped`],
+    [/^(\d+) guest requests$/, (m) => `${m[1]} solicitudes de huéspedes`], [/^(\d+) suites$/, (m) => `${m[1]} suites`],
+    [/^DND day (\d+)$/, (m) => `DND día ${m[1]}`], [/^Audit (\d)\/5$/, (m) => `Auditoría ${m[1]}/5`],
+    [/^Day (\d+): supervisor welfare and property inspection required now\.$/, (m) => `Día ${m[1]}: revisión de bienestar y de la propiedad requerida ahora.`],
+    [/^(\d+) min ago$/, (m) => `hace ${m[1]} min`], [/^(\d+) h (\d+) min ago$/, (m) => `hace ${m[1]} h ${m[2]} min`],
+    [/^Updated (.+?) by (.+)$/, (m) => `Actualizado ${tr(m[1])} por ${tr(m[2]).toLowerCase()}`], [/^Updated (.+)$/, (m) => `Actualizado ${tr(m[1])}`],
+    [/^Here's what's happening with housekeeping today: (\d+) suites to service, (\d+) in progress\.$/, (m) => `Así va la limpieza hoy: ${m[1]} suites por atender y ${m[2]} en curso.`],
+    [/^(Odd|Even) suites (.+)$/, (m) => `Suites ${m[1] === "Odd" ? "impares" : "pares"} ${m[2]}`],
+    [/^Weekly Full Service due in (\d+) days?\.$/, (m) => `Servicio completo semanal en ${m[1]} día${m[1] === "1" ? "" : "s"}.`],
+    [/^Last full service (\d+) days ago\.$/, (m) => `Último servicio completo hace ${m[1]} días.`],
+    [/^as of (.+)\.$/, (m) => `al ${m[1]}.`],
+    [/^Extended Stay America · Houston IAH Airport · (.+)$/, (m) => `Extended Stay America · Aeropuerto Houston IAH · ${tr(m[1])}`],
+    [/^1500 N Sam Houston Pkwy E, Houston, TX 77032 · 96 suites on 3 floors$/, () => "1500 N Sam Houston Pkwy E, Houston, TX 77032 · 96 suites en 3 pisos"],
+    [/^Suite (\d+) · (.+)$/, (m) => `Suite ${m[1]} · ${list(m[2], " · ")}`],
+    [/^· (.+)$/, (m) => `· ${tr(m[1])}`],
+  ];
+  function tr(t) {
+    if (!t) return t;
+    const lead = t.match(/^\s*/)[0], tail = t.match(/\s*$/)[0], core = t.trim();
+    if (!core) return t;
+    let out = ES[core];
+    if (out === undefined) for (const [re, fn] of RULES) { const m = core.match(re); if (m) { out = fn(m); break; } }
+    if (out === undefined && core.includes(" · ")) { const parts = core.split(" · "); const tp = parts.map((p) => tr(p)); if (tp.some((x, i) => x !== parts[i])) out = tp.join(" · "); }
+    return out === undefined ? t : lead + out + tail;
+  }
+  const textRec = new WeakMap(), attrRec = new WeakMap();
+  const ATTRS = ["aria-label", "placeholder", "title"];
+  const skip = (el) => !el || el.closest("script,style,textarea,[data-noi18n]");
+  function doText(n) {
+    if (skip(n.parentElement)) return;
+    const r = textRec.get(n), cur = n.nodeValue;
+    const src = r && cur === r.out ? r.src : cur;
+    const out = lang === "es" ? tr(src) : src;
+    textRec.set(n, { src, out });
+    if (out !== cur) n.nodeValue = out;
+  }
+  function doAttrs(el) {
+    if (skip(el)) return;
+    let rec = attrRec.get(el); if (!rec) attrRec.set(el, (rec = {}));
+    for (const a of ATTRS) {
+      const cur = el.getAttribute(a); if (cur == null) continue;
+      const r = rec[a], src = r && cur === r.out ? r.src : cur, out = lang === "es" ? tr(src) : src;
+      rec[a] = { src, out };
+      if (out !== cur) el.setAttribute(a, out);
+    }
+  }
+  function walk(root) {
+    if (root.nodeType === 3) return doText(root);
+    if (root.nodeType !== 1) return;
+    doAttrs(root);
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+    let n; while ((n = w.nextNode())) n.nodeType === 3 ? doText(n) : doAttrs(n);
+  }
+  const mo = new MutationObserver((muts) => {
+    if (lang !== "es") return;
+    for (const m of muts) {
+      if (m.type === "characterData") doText(m.target);
+      else if (m.type === "attributes") doAttrs(m.target);
+      else m.addedNodes.forEach(walk);
+    }
+  });
+  mo.observe(document.documentElement, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ATTRS });
+  function setLang(l) {
+    lang = l === "es" ? "es" : "en";
+    try { localStorage.setItem(KEY, lang); } catch {}
+    document.documentElement.lang = lang;
+    if (document.body) walk(document.body);
+    document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+    dispatchEvent(new Event("iah-lang"));
+  }
+  window.iahLang = () => lang;
+  window.iahTr = (t) => (lang === "es" ? tr(t) : t);
+  window.iahSetLang = setLang;
+  document.addEventListener("click", (e) => { const b = e.target.closest("[data-lang]"); if (b) setLang(b.dataset.lang); });
+  document.documentElement.lang = lang;
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => setLang(lang)); else setLang(lang);
+})();
+
+</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/environments/RoomEnvironment.js"></script>
@@ -1189,12 +1399,17 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     const label = (text, x, y, z) => {
       const c = document.createElement("canvas"); c.width = 512; c.height = 112;
       const g = c.getContext("2d");
+      const draw = () => {
+      g.clearRect(0, 0, 512, 112);
       g.fillStyle = "rgba(255,255,255,.92)"; g.beginPath();
       if (g.roundRect) g.roundRect(4, 4, 504, 104, 52); else g.rect(4, 4, 504, 104);
       g.fill();
       g.fillStyle = "#0f1b2a"; g.font = "700 46px Figtree, -apple-system, system-ui, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
-      g.fillText(text, 256, 58);
+      g.fillText((window.iahTr || ((x) => x))(text), 256, 58);
+      };
+      draw();
       const tex = new T.CanvasTexture(c); tex.encoding = T.sRGBEncoding; tex.anisotropy = 4;
+      addEventListener("iah-lang", () => { draw(); tex.needsUpdate = true; });
       const sp = new T.Sprite(new T.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
       sp.scale.set(11, 2.4, 1); sp.position.set(x, y, z); sp.renderOrder = 10; scene.add(sp);
     };
@@ -1676,13 +1891,16 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
       ${list.length ? `<div class="ptl" role="list">${list.slice(0, 6).map((s) => { const [t, p, ico] = task(s), d = state.docs[s]; return `<button type="button" class="ptr s-${d.status}" role="listitem" data-suite="${s}"><span class="pti">${ico}</span><span class="ptt">${esc(t)}</span><span class="pts">${s}</span><span class="pto">${esc(OCCL[d.occ] || "")}</span><span class="pp ${p}">${p[0].toUpperCase() + p.slice(1)}</span></button>`; }).join("")}</div>` : `<div class="empty small">Nothing waiting. Every logged suite is done.</div>`}`;
   }
 
+  const LANG = () => (window.iahLang ? window.iahLang() : "en");
+  const LOC = () => (LANG() === "es" ? "es-US" : []);
   function renderGreet() {
     const h = new Date().getHours(), hi = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
     const n = (k) => suites.filter((s) => state.docs[s]?.status === k).length;
     const g = suites.filter((s) => guestOpen(state.docs[s])).length;
     const now = new Date();
     $("greet").innerHTML = `<div class="gtop"><span class="gwho">Extended Stay America · Houston IAH Airport · ${state.role === "housekeeping" ? "Housekeeping" : "Front desk"}</span>
-        <span class="gclock">${now.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })}<span class="gsep"></span>${now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
+        <span class="gclock">${now.toLocaleDateString(LOC(), { weekday: "short", month: "short", day: "numeric" })}<span class="gsep"></span>${now.toLocaleTimeString(LOC(), { hour: "numeric", minute: "2-digit" })}</span>
+        <span class="langsw gl" role="group" aria-label="Language" data-noi18n><button type="button" data-lang="en" aria-pressed="${LANG() === "en"}">EN</button><button type="button" data-lang="es" aria-pressed="${LANG() === "es"}">ES</button></span>
         <button type="button" class="gbell" data-filter="guest" aria-label="${g} guest requests">${ICONS.guest}${g ? `<i>${g}</i>` : ""}</button></div>
       <h1>${hi} <span aria-hidden="true">👋</span></h1>
       <p>Here's what's happening with housekeeping today: ${n("dirty")} suites to service, ${n("in_progress")} in progress.</p>
@@ -1859,11 +2077,11 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
   ICONS.guest = ic('<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>');
   const ago = (iso) => {
     const m = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
-    if (!(m >= 0)) return new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    if (!(m >= 0)) return new Date(iso).toLocaleString(LOC(), { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
     if (m < 1) return "just now";
     if (m < 60) return m + " min ago";
     if (m < 60 * 12) return Math.floor(m / 60) + " h " + (m % 60) + " min ago";
-    return new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    return new Date(iso).toLocaleString(LOC(), { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
   };
   function renderLive() {
     const bar = $("liveBar");
@@ -2145,6 +2363,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
   $("modeBtn").addEventListener("click", () => { night = !night; applyMode(night); try { localStorage.setItem("iah-hk-mode", night ? "night" : "day"); } catch {} });
 
   $("shiftDate").value = todayISO();
+  addEventListener("iah-lang", () => render());
   render(); fitScene();
 
   (async () => {
