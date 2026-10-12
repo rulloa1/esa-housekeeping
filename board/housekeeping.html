@@ -590,6 +590,79 @@ fieldset .check:has(input:checked) { background: color-mix(in srgb, var(--st-cle
   .ptr .pto { display: none; }
 }
 @media (max-width: 640px) { .greet .gtop { flex-wrap: wrap; row-gap: 4px; } .greet .glogo { height: 38px; margin-right: auto; } .greet .gwho { order: 5; flex: 0 0 100%; } }
+
+/* v21 floor plan: cleaner tiles, per-floor progress, one key instead of repeated mini-maps */
+.plegend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 10px 16px; font-size: .78rem; font-weight: 700; color: var(--muted); }
+.plegend span { display: inline-flex; align-items: center; gap: 6px; }
+.plegend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.plegend i.nl { background: transparent; border: 1.5px dashed var(--unlogged-line); }
+.plegend .sep { width: 1px; height: 18px; background: var(--line); }
+.plegend b { display: inline-grid; place-items: center; min-width: 18px; height: 18px; border-radius: 50%; font-size: .62rem; }
+.plegend b .ico { width: 11px; height: 11px; }
+.plegend .lg-g { background: var(--info); color: #fff; }
+.plegend .lg-f { width: 9px; min-width: 9px; height: 9px; background: var(--dnd); }
+.plegend .lg-n { color: var(--muted); border-radius: 4px; }
+.plegend .lg-s { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 5px; min-width: 20px; }
+.floor-head { display: grid; grid-template-columns: auto minmax(120px, 1fr) auto; align-items: center; gap: 10px 18px; }
+.fh-title { display: grid; gap: 2px; }
+.fh-bar { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,.08); }
+.fh-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--st-clean)); transition: width .4s ease; }
+.fh-chips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: end; }
+.fchip { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--c) 30%, var(--line)); background: color-mix(in srgb, var(--c) 9%, var(--surface)); font-weight: 800; font-size: .86rem; font-variant-numeric: tabular-nums; color: var(--fg); }
+.fchip i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); flex: none; }
+.fchip .ico { width: 14px; height: 14px; color: var(--c); }
+.fchip span { font-weight: 600; font-size: .76rem; color: var(--muted); white-space: nowrap; }
+.suite.unlogged .num { justify-self: center; text-align: center; width: 100%; }
+.suite .note { top: 3px; left: 3px; width: 11px; height: 11px; }
+.suite .note .ico { width: 11px; height: 11px; }
+.eastend .eicon { transform: none; }
+@media (min-width: 1001px) { .core { width: 52px; } }
+.eastend { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 6px; border-radius: 12px; background: color-mix(in srgb, var(--lawn) 40%, var(--surface)); border: 1px solid color-mix(in srgb, var(--st-clean) 22%, var(--line)); color: color-mix(in srgb, var(--accent-2) 80%, var(--muted)); }
+.eastend .eicon { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--pool); transform: rotate(90deg); }
+.eastend svg { width: 16px; height: 16px; stroke: #0b3b52; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+@media (min-width: 1001px) {
+.row { gap: 7px; }
+.suite { min-height: 78px; padding: 9px 3px 7px; gap: 4px; }
+.suite .num { font-size: 1.14rem; letter-spacing: -.01em; }
+}
+.suite .st { white-space: nowrap; font-size: .58rem; letter-spacing: .03em; padding: 2px 6px; }
+.suite .meta .tag { font-size: .6rem; line-height: 1.5; padding: 0 4px; }
+.suite.unlogged { background: transparent; border: 1.5px dashed var(--unlogged-line); box-shadow: none; align-content: center; }
+.suite.unlogged::before { display: none; }
+.suite.unlogged .st { display: none; }
+.suite.unlogged .num { color: var(--unlogged-fg); font-weight: 600; margin: 0; }
+.suite .gq { top: -7px; right: -7px; width: 22px; height: 22px; z-index: 2; border: 2px solid var(--surface); box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+.suite .flag { top: 5px; right: 5px; }
+@media (min-width: 1001px) and (max-width: 1260px) {
+  .floor-head { grid-template-columns: auto minmax(120px, 1fr); }
+  .fh-chips { grid-column: 1 / -1; justify-content: start; }
+  .plan { gap: 0 6px; grid-template-columns: auto minmax(0, 1fr) auto auto; }
+  .plan .westend { display: none; }
+  .core { width: 44px; }
+  .core .cx { font-size: 0; gap: 0; padding: 8px 2px; }
+  .row { gap: 5px; }
+  .suite { min-height: 64px; padding: 8px 2px 6px; }
+  .suite .st { display: none; }
+  .suite .num { font-size: 1rem; }
+  .row-cap { font-size: .7rem; }
+}
+@media (max-width: 1000px) {
+  .floor-head { grid-template-columns: 1fr; }
+  .fh-chips { justify-content: start; }
+  .eastend { writing-mode: horizontal-tb; transform: none; justify-content: center; padding: 8px 10px; }
+  .eastend .eicon { transform: none; }
+  .plan .eastend { display: flex; }
+  .suite { min-height: 56px; }
+  .suite.unlogged { align-content: initial; }
+  .suite.unlogged .num { justify-self: start; text-align: left; width: auto; }
+  .suite.unlogged { grid-template-areas: "num" ; }
+  .suite .gq { top: 50%; right: 8px; transform: translateY(-50%); }
+}
+@media (max-width: 640px) {
+  .plegend { gap: 6px 12px; padding: 10px 12px; font-size: .72rem; }
+  .plegend .sep { display: none; }
+  .fchip span { display: none; }
+}
 </style>
 
 <div class="wrap">
@@ -780,6 +853,7 @@ fieldset .check:has(input:checked) { background: color-mix(in srgb, var(--st-cle
     "Who is assigned": "Quién está asignada", "Who is using this device": "Quién usa este dispositivo", "All floors": "Todos los pisos",
     "3D view of the building": "Vista 3D del edificio", "3D model of the hotel. Drag to orbit, pinch to zoom, tap a window to open that suite.": "Modelo 3D del hotel. Arrastra para girar, pellizca para acercar, toca una ventana para abrir la suite.",
     "Missing items, maintenance needs, guest requests": "Faltantes, mantenimiento, solicitudes de huéspedes", "Elevators, middle of the building": "Elevadores, a la mitad del edificio",
+    "East end · courtyard & pool": "Extremo este · patio y piscina", "Floor plan key": "Clave del plano", "Welfare or audit due": "Bienestar o auditoría pendiente", "Note": "Nota", "Service due (T / W / R)": "Servicio pendiente (T / W / R)", "Guest request": "Solicitud del huésped",
     "East courtyard: fenced pool deck against the building with the pool, spa, cabana and pergola; a walk; then the lawn with two BBQ gazebos and a palm, fenced along the street": "Patio este: terraza cercada junto al edificio con piscina, spa, cabaña y pérgola; un andador; luego el jardín con dos kioscos de asador y una palmera, cercado a lo largo de la calle",
     "West end stairs": "Escaleras del extremo oeste", "East end stairs": "Escaleras del extremo este", "Priority tasks ": "Tareas prioritarias",
     "Language": "Idioma",
@@ -1950,6 +2024,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
   // Stairwells at each end of the central hallway; the elevators are midway along it
   const STAIR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h5v-5h5v-5h5V5h3"/><path d="M3 20V4"/></svg>';
   const LIFT_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 9.5l3-3 3 3M9 14.5l3 3 3-3"/></svg>';
+  const POOL_SVG = '<svg viewBox="0 0 24 24"><path d="M2 18c2 0 2-1.5 4-1.5s2 1.5 4 1.5 2-1.5 4-1.5 2 1.5 4 1.5 2-1.5 4-1.5"/><path d="M2 21.5c2 0 2-1.5 4-1.5s2 1.5 4 1.5 2-1.5 4-1.5 2 1.5 4 1.5 2-1.5 4-1.5"/><path d="M8 15V5a2 2 0 0 1 4 0M16 15V5a2 2 0 0 0-4 0M8 9h8M8 12.5h8"/></svg>';
   const core = (end) => `<div class="core" aria-label="${end} end stairs"><span class="cx">${STAIR_SVG}Stairs</span></div>`;
 
   // East courtyard mini-map, north up, measured from the aerials (1 unit = 1 m; the building's east end is the grey
@@ -1982,8 +2057,19 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     const odd = [], even = [];
     for (let i = 1; i <= 32; i++) (i % 2 ? odd : even).push(String(f * 100 + i));
     const st = floorStats(f);
+    const fl = suites.filter((s) => s[0] === String(f) && inScope(s)), D = (s) => state.docs[s];
+    const fs = { logged: fl.filter(D).length, dirty: fl.filter((s) => D(s)?.status === "dirty").length, in_progress: fl.filter((s) => D(s)?.status === "in_progress").length, done: fl.filter((s) => isDone(D(s))).length, guest: fl.filter((s) => guestOpen(D(s))).length };
     return `<section class="floor panel" aria-label="Floor ${f}">
-      <div class="floor-head"><h2>Floor ${f}</h2><span class="muted small">${st.done} of ${st.total} services done · ${suites.filter((s) => s[0] === String(f) && state.docs[s]).length} of 32 logged</span></div>
+      <div class="floor-head">
+        <div class="fh-title"><h2>Floor ${f}</h2><span class="muted small">${st.done} of ${st.total} services done · ${fs.logged} of 32 logged</span></div>
+        <div class="fh-bar" aria-hidden="true"><i style="width:${st.total ? st.done / st.total * 100 : 0}%"></i></div>
+        <div class="fh-chips">
+          <button type="button" class="fchip" data-filter="dirty" style="--c:var(--st-dirty)"><i></i>${fs.dirty}<span>Needs service</span></button>
+          <button type="button" class="fchip" data-filter="in_progress" style="--c:var(--st-prog)"><i></i>${fs.in_progress}<span>In progress</span></button>
+          <button type="button" class="fchip" data-filter="ready" style="--c:var(--st-clean)"><i></i>${fs.done}<span>Ready</span></button>
+          ${fs.guest ? `<button type="button" class="fchip" data-filter="guest" style="--c:var(--info)">${ICONS.guest}${fs.guest}<span>Guest requests</span></button>` : ""}
+        </div>
+      </div>
       <div class="plan">
         <div class="westend side-label">West end</div>
         ${core("West")}
@@ -1995,10 +2081,7 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
           <div class="row-cap s"><span>South · front entrance</span><span>Even suites ${f}02–${f}32</span></div>
         </div>
         ${core("East")}
-        <div class="courtyard">
-          <strong>East courtyard</strong>
-          ${COURT_SVG}
-        </div>
+        <div class="eastend side-label"><span class="eicon" aria-hidden="true">${POOL_SVG}</span>East end · courtyard &amp; pool</div>
       </div>
     </section>`;
   }
@@ -2061,9 +2144,18 @@ window.IAH_DRAPE = { ...{"X0": -85.79, "X1": 109.44, "Z0": -74.76, "Z1": 105.43}
     return html || `<div class="empty">No suites match. <button class="btn" data-clearall>Show all suites</button></div>`;
   }
 
+  const PLAN_LEGEND = () => `<div class="plegend panel" aria-label="Floor plan key">
+      ${STATUSES.map(([k, l]) => `<span><i style="background:var(--st-${stVar(k)})"></i>${l}</span>`).join("")}
+      <span><i class="nl"></i>Not logged</span>
+      <span class="sep"></span>
+      <span><b class="lg-g">${ICONS.guest}</b>Guest request</span>
+      <span><b class="lg-f"></b>Welfare or audit due</span>
+      <span><b class="lg-n">${ICONS.note}</b>Note</span>
+      <span><b class="lg-s">W</b>Service due (T / W / R)</span>
+    </div>`;
   function renderBoard() {
     const fl = state.filter || state.floor === "all" ? [1, 2, 3] : [Number(state.floor)];
-    if (state.view === "plan") $("board").innerHTML = fl.map(floorPlan).join("");
+    if (state.view === "plan") $("board").innerHTML = PLAN_LEGEND() + fl.map(floorPlan).join("");
     else $("board").innerHTML = `<div class="worklist">${workList(suites.filter((s) => fl.includes(Number(s[0])) && matches(s)))}</div>`;
   }
 
