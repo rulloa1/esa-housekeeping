@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getRole } from "@/lib/auth";
 import { getAll, getVersion } from "@/lib/store";
+import { toRoom } from "@/lib/roomView";
 
 export const dynamic = "force-dynamic";
 
@@ -60,8 +61,9 @@ export async function POST(req: Request) {
   for (const suiteId of body.suiteIds) {
     // Each suite under its own lock, so a board or housekeeper save at the same moment isn't lost.
     await withSuiteLock(suiteId, async () => {
-      const existing = await get(suiteId);
-      if (!existing) return;
+      // A suite nobody has saved yet still gets assigned (it starts from an empty suite).
+      if (!/^[1-3](0[1-9]|[12]\d|3[0-2])$/.test(suiteId)) return;
+      const existing = (await get(suiteId)) ?? toRoom(suiteId, {});
 
       const room = { ...existing };
       if (body.action === "batch_assign") {

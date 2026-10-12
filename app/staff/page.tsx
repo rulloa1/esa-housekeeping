@@ -5,6 +5,7 @@ import { getLang } from "@/lib/lang";
 import { BRAND } from "@/lib/brand";
 import BrandLogo from "@/components/BrandLogo";
 import LangToggle from "@/components/LangToggle";
+import PageBanner, { BANNERS } from "@/components/PageBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -101,14 +102,14 @@ export default async function Home() {
         </div>
       </header>
 
-      <main style={{ maxWidth: 640, margin: "0 auto", padding: "28px 16px 48px" }}>
-        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: BRAND.green }}>
-          {t.eyebrow}
-        </div>
-        <h1 style={{ margin: "6px 0 4px", fontSize: 28, color: BRAND.text }}>{t.title}</h1>
-        <p style={{ margin: "0 0 24px", color: BRAND.muted, fontSize: 14 }}>
-          {t.signedIn[role as keyof typeof t.signedIn] || role}
-        </p>
+      <main style={{ maxWidth: 640, margin: "0 auto", padding: "20px 16px 48px" }}>
+        <PageBanner
+          image={BANNERS.lobby}
+          focus="55%"
+          eyebrow={t.eyebrow}
+          title={t.title}
+          subtitle={t.signedIn[role as keyof typeof t.signedIn] || role}
+        />
 
         <div style={{ display: "grid", gap: 12 }}>
           {card("/dashboard", t.dashboard, true)}

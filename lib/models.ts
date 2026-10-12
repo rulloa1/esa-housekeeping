@@ -11,7 +11,9 @@ export type RoomStatus =
   | "inspection_failed"
   | "clean"
   | "maintenance"
-  | "ooo";
+  | "ooo"
+  // Display only: a suite with nothing saved yet (the board shows it as "Not logged"). Never stored.
+  | "not_logged";
 
 export type RoomPriority = "urgent" | "high" | "standard" | "low";
 

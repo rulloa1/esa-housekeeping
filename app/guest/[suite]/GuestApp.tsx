@@ -173,16 +173,21 @@ export default function GuestApp({ lang, suite, k, dnd: initialDnd, initialReque
             <section
               style={{
                 borderRadius: 4,
-                padding: "26px 22px 24px",
-                background: "linear-gradient(135deg, #ffffff 0%, #ffffff 55%, #eef6e8 100%)",
-                borderLeft: `4px solid ${green}`,
-                boxShadow: "0 1px 2px rgba(72,55,41,.08), 0 8px 24px rgba(72,55,41,.06)",
+                padding: "64px 22px 22px",
+                color: "#fff",
+                // Hotel pool photo under a green shade so the greeting stays readable.
+                backgroundColor: "#145e00",
+                backgroundImage:
+                  'linear-gradient(0deg, rgba(20,60,8,.88) 0%, rgba(20,60,8,.55) 55%, rgba(20,60,8,.1) 100%), url("/banners/pool.jpg")',
+                backgroundSize: "cover",
+                backgroundPosition: "center 55%",
+                boxShadow: "0 1px 2px rgba(72,55,41,.08), 0 8px 24px rgba(72,55,41,.12)",
               }}
             >
-              <h1 style={{ margin: 0, fontSize: 30, lineHeight: 1.15, letterSpacing: -0.4 }}>
+              <h1 style={{ margin: 0, fontSize: 30, lineHeight: 1.15, letterSpacing: -0.4, color: "#fff" }}>
                 {hello} <span aria-hidden="true">👋</span>
               </h1>
-              <p style={{ margin: "10px 0 0", fontSize: 16, color: muted, maxWidth: 260 }}>{t.intro}</p>
+              <p style={{ margin: "10px 0 0", fontSize: 16, color: "rgba(255,255,255,.9)", maxWidth: 300 }}>{t.intro}</p>
               {dnd && (
                 <p style={{ margin: "14px 0 0", display: "inline-block", padding: "6px 12px", borderRadius: 4, background: "#fff1e0", color: "#92400e", fontSize: 13, fontWeight: 600 }}>
                   {t.dndOnBadge}

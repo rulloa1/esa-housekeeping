@@ -48,8 +48,18 @@ export function toRoom(id: string, raw: unknown): RoomDoc {
   };
 }
 
+// All 96 suites: the store only holds suites someone has saved, so the rest are filled in
+// as "not logged" (like the 3D board) instead of being left off the dashboard.
+export const ALL_SUITES: string[] = [1, 2, 3].flatMap((f) =>
+  Array.from({ length: 32 }, (_, i) => `${f}${String(i + 1).padStart(2, "0")}`),
+);
+
 export function toRooms(docs: Record<string, unknown>): SuiteDocs {
   const out: SuiteDocs = {};
-  for (const [id, d] of Object.entries(docs || {})) out[id] = toRoom(id, d);
+  for (const id of ALL_SUITES) {
+    const d = docs?.[id];
+    out[id] = d ? toRoom(id, d) : { ...toRoom(id, {}), status: "not_logged" };
+  }
+  for (const [id, d] of Object.entries(docs || {})) if (!out[id]) out[id] = toRoom(id, d);
   return out;
 }
