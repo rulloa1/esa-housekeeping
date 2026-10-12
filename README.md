@@ -28,4 +28,4 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000/housekeeping. Without Redis settings, data is kept in memory until the server restarts, and both PINs are `1234`.
+Open http://localhost:3000/housekeeping. Without Redis settings, data is kept in memory until the server restarts, the Housekeeper and Supervisor PINs are `1234` and the Administrator PIN is `9999`. These defaults never apply in production: there, a role can only sign in once its PIN variable (`HOUSEKEEPING_PIN`, `FRONTDESK_PIN` for Supervisor, `ADMIN_PIN`) is set.

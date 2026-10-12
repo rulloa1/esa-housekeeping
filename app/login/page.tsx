@@ -9,7 +9,7 @@ const TEXT = {
     role: "Role",
     pin: "Staff PIN",
     error: "That PIN didn't match. Try again.",
-    pinPlaceholder: "Enter PIN (dev: 1234, admin: 9999)",
+    pinPlaceholder: "Enter PIN",
     roles: {
       housekeeper: "Housekeeper",
       supervisor: "Supervisor",
@@ -21,7 +21,7 @@ const TEXT = {
     role: "Puesto",
     pin: "PIN del personal",
     error: "Ese PIN no coincide. Inténtalo de nuevo.",
-    pinPlaceholder: "Ingresar PIN (1234)",
+    pinPlaceholder: "Ingresar PIN",
     roles: {
       housekeeper: "Limpieza / Housekeeping",
       supervisor: "Supervisor / Recepción",

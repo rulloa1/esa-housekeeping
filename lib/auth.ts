@@ -17,21 +17,27 @@ export const ROLES: Record<string, string> = {
 const COOKIE = "hk_session";
 const MAX_AGE = 60 * 60 * 16; // one 16-hour shift
 
+const isProduction = process.env.NODE_ENV === "production";
+
+// Built-in fallbacks exist only for local development. In production a missing secret is an
+// error and a role without its PIN variable can't sign in, so no default PIN ever works live.
 function secret(): string {
-  return process.env.AUTH_SECRET || "dev-secret-esa-housekeeping-iah";
+  const s = process.env.AUTH_SECRET;
+  if (s) return s;
+  if (isProduction) throw new Error("AUTH_SECRET is not set");
+  return "dev-secret-esa-housekeeping-iah";
+}
+
+function pinFrom(envValue: string | undefined, devPin: string): string | undefined {
+  if (envValue) return envValue;
+  return isProduction ? undefined : devPin;
 }
 
 export function pinFor(role: string): string | undefined {
-  if (role === "housekeeper" || role === "housekeeping") {
-    return process.env.HOUSEKEEPING_PIN || "1234";
-  }
-  if (role === "supervisor" || role === "frontdesk") {
-    return process.env.FRONTDESK_PIN || "1234";
-  }
-  if (role === "admin") {
-    return process.env.ADMIN_PIN || "9999";
-  }
-  return "1234";
+  if (role === "housekeeper" || role === "housekeeping") return pinFrom(process.env.HOUSEKEEPING_PIN, "1234");
+  if (role === "supervisor" || role === "frontdesk") return pinFrom(process.env.FRONTDESK_PIN, "1234");
+  if (role === "admin") return pinFrom(process.env.ADMIN_PIN, "9999");
+  return undefined;
 }
 
 let key: Promise<CryptoKey> | undefined;
