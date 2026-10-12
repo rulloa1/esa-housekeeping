@@ -26,6 +26,7 @@ const TEXT = {
     elseTitle: "Need something else?",
     elseBody: "Call or stop by the front desk. Check-out is at 11 AM.",
     call: "Call",
+    floor: "Floor",
     send: "Send request",
     more: "More for your stay",
     dndTitle: "Do Not Disturb",
@@ -68,6 +69,7 @@ const TEXT = {
     elseTitle: "¿Necesitas algo más?",
     elseBody: "Llama o pasa por recepción. La salida es a las 11 AM.",
     call: "Llamar",
+    floor: "Piso",
     send: "Enviar solicitud",
     more: "Más para tu estancia",
     dndTitle: "No molestar",
@@ -125,7 +127,23 @@ function when(iso: string, lang: Lang): string {
   return new Date(iso).toLocaleString(TEXT[lang].locale, { timeZone: "America/Chicago", weekday: "short", hour: "numeric", minute: "2-digit" });
 }
 
-export default function GuestApp({ lang, suite, k, dnd: initialDnd, initialRequests }: { lang: Lang; suite: string; k: string; dnd: boolean; initialRequests: Req[] }) {
+// roomType is accepted for the page's props but not shown: it defaults to a guess when the suite has none.
+export default function GuestApp({
+  lang,
+  suite,
+  k,
+  dnd: initialDnd,
+  initialRequests,
+  floor,
+}: {
+  lang: Lang;
+  suite: string;
+  k: string;
+  dnd: boolean;
+  initialRequests: Req[];
+  roomType?: string;
+  floor?: number;
+}) {
   const t = TEXT[lang];
   const [tab, setTab] = useState<"home" | "requests">("home");
   const [dnd, setDnd] = useState(initialDnd);
@@ -191,6 +209,7 @@ export default function GuestApp({ lang, suite, k, dnd: initialDnd, initialReque
             <div className={css.heroText}>
               <span className={css.suiteChip}>
                 {t.suite} {suite}
+                {floor ? ` · ${t.floor} ${floor}` : ""}
               </span>
               <h1 className={css.hello}>{hello}</h1>
               <p className={css.intro}>{t.intro}</p>
