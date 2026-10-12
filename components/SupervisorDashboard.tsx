@@ -446,7 +446,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
             overflow: "hidden",
             marginBottom: 20,
             boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.22), 0 8px 10px -6px rgba(0, 0, 0, 0.12)",
-            backgroundImage: "linear-gradient(135deg, rgba(20, 36, 18, 0.90) 0%, rgba(47, 122, 30, 0.82) 48%, rgba(45, 30, 20, 0.90) 100%), url('/landing/hero-exterior-2752.jpg')",
+            backgroundImage: "linear-gradient(135deg, rgba(28, 24, 20, 0.94) 0%, rgba(46, 38, 32, 0.86) 48%, rgba(22, 26, 32, 0.92) 100%), url('/landing/hero-exterior-2752.jpg')",
             backgroundSize: "cover",
             backgroundPosition: "center 35%",
             color: "#FFFFFF",
