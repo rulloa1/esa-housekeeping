@@ -4,6 +4,7 @@ import QRCode from "qrcode";
 import { getRole } from "@/lib/auth";
 import { SUITES, guestKey } from "@/lib/guest";
 import BrandLogo from "@/components/BrandLogo";
+import { NavigationHeader } from "@/components/NavigationHeader";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Guest QR cards" };
@@ -11,7 +12,8 @@ export const metadata = { title: "Guest QR cards" };
 // Staff-only sheet of QR cards, one per suite, to print and place in each suite.
 // Each code opens that suite's guest request page.
 export default async function GuestLinks() {
-  if (!(await getRole())) redirect("/login");
+  const role = await getRole();
+  if (!role) redirect("/login");
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
   const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
@@ -23,9 +25,13 @@ export default async function GuestLinks() {
     }),
   );
   return (
-    <main style={{ maxWidth: 1000, margin: "0 auto", padding: "24px 16px", color: "#483729" }}>
-      <style>{`@media print { .no-print { display: none } main { padding: 0 } } .card { break-inside: avoid }`}</style>
+    <>
       <div className="no-print">
+        <NavigationHeader currentRole={role} />
+      </div>
+      <main style={{ maxWidth: 1000, margin: "0 auto", padding: "24px 16px", color: "#483729" }}>
+        <style>{`@media print { .no-print { display: none } main { padding: 0 } } .card { break-inside: avoid }`}</style>
+        <div className="no-print">
         <h1 style={{ margin: "0 0 6px" }}>Guest QR cards</h1>
         <p style={{ margin: "0 0 20px", color: "#7a6a5d" }}>
           Print this page and place each card in its suite. Guests scan it to request cleaning, towels or amenities, or to
@@ -47,5 +53,6 @@ export default async function GuestLinks() {
         ))}
       </div>
     </main>
+  </>
   );
 }

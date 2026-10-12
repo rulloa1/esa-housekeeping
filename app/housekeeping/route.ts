@@ -29,19 +29,21 @@ export async function GET(req: Request) {
   const inject = `<script>try{localStorage.setItem("iah-hk-role","${boardRole}")}catch{}${langSync}</script>\n<script src="/hk-db.js"></script>\n<link rel="icon" href="/icon.png" type="image/png"><link rel="apple-touch-icon" href="/apple-icon.png">`;
 
   const navBanner = `
-<div style="position:sticky;top:0;z-index:9999;background:#2F7A1E;color:#FFFFFF;padding:8px 16px;font-family:system-ui,-apple-system,sans-serif;font-size:13px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
-  <div style="display:flex;align-items:center;gap:10px;">
-    <img src="/esa-logo.png" style="height:24px;filter:brightness(0) invert(1);" alt="ESA Logo" />
-    <span style="font-weight:700;letter-spacing:0.5px;">Houston IAH · 3D Building Board</span>
-  </div>
-  <div style="display:flex;align-items:center;gap:16px;">
-    <a href="/dashboard" style="color:#FFFFFF;text-decoration:none;font-weight:700;display:flex;align-items:center;gap:4px;">📊 Operations Dashboard</a>
-    <a href="/housekeeper" style="color:#FFFFFF;text-decoration:none;font-weight:700;display:flex;align-items:center;gap:4px;">📱 Housekeeper View</a>
-    <a href="/guest-links" style="color:#FFFFFF;text-decoration:none;font-weight:700;display:flex;align-items:center;gap:4px;">🖨️ Guest QR Cards</a>
-    <a href="/staff" style="color:#FFFFFF;text-decoration:none;font-weight:700;display:flex;align-items:center;gap:4px;">🏠 Staff Portal</a>
+<div style="position:sticky;top:0;z-index:9999;background:#2F7A1E;color:#FFFFFF;padding:8px 14px;font-family:system-ui,-apple-system,sans-serif;font-size:12px;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <img src="/esa-logo.png" style="height:20px;filter:brightness(0) invert(1);" alt="ESA Logo" />
+      <span style="font-weight:700;letter-spacing:0.5px;">Houston IAH · 3D Board</span>
+    </div>
     <form method="post" action="/api/logout" style="margin:0;display:inline;">
-      <button type="submit" style="background:rgba(255,255,255,0.2);border:none;color:#FFFFFF;padding:4px 10px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;">Sign out</button>
+      <button type="submit" style="background:rgba(255,255,255,0.25);border:none;color:#FFFFFF;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;">Sign out</button>
     </form>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px 0;">
+    <a href="/dashboard" style="color:#FFFFFF;text-decoration:none;font-weight:700;white-space:nowrap;">📊 Operations Dashboard</a>
+    <a href="/housekeeper" style="color:#FFFFFF;text-decoration:none;font-weight:700;white-space:nowrap;">📱 Housekeeper View</a>
+    <a href="/guest-links" style="color:#FFFFFF;text-decoration:none;font-weight:700;white-space:nowrap;">🖨️ Guest QR Cards</a>
+    <a href="/staff" style="color:#FFFFFF;text-decoration:none;font-weight:700;white-space:nowrap;">🏠 Staff Portal</a>
   </div>
 </div>`;
 
