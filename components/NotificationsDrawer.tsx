@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { RoomDoc } from "@/lib/models";
+import { isGuestTask, type RoomDoc } from "@/lib/models";
 
 interface NotificationsDrawerProps {
   rooms: RoomDoc[];
@@ -50,7 +50,7 @@ export function NotificationsDrawer({
       });
 
       // From guest requests
-      const docAny = room as unknown as { guestRequests?: Array<{ type: string; at: string }> };
+      const docAny = room as unknown as { guestRequests?: Array<{ type: string; at: string; doneAt?: string; doneBy?: string }> };
       if (Array.isArray(docAny.guestRequests)) {
         docAny.guestRequests.forEach((gr, idx) => {
           list.push({
@@ -58,7 +58,7 @@ export function NotificationsDrawer({
             roomId: room.id,
             category: "guest",
             title: `Suite ${room.id} · Guest Request`,
-            details: `Guest requested: ${gr.type.replace("_", " ")}`,
+            details: `Guest requested: ${gr.type.replace("_", " ")}${gr.doneAt ? ` · done by ${gr.doneBy}` : isGuestTask(gr.type) ? " · open" : ""}`,
             by: "Guest",
             timestamp: gr.at,
           });
