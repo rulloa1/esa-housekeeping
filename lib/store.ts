@@ -30,6 +30,16 @@ function tcp(): Promise<TcpClient> {
   return g.__hkRedis;
 }
 
+// Rejects if a Redis reply takes longer than TIMEOUT_MS, so a stalled connection can't
+// hang a request. Covers both single commands and MULTI/EXEC on the TCP client.
+function withTimeout<T>(p: Promise<T>): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error("Redis timed out")), TIMEOUT_MS);
+  });
+  return Promise.race([p, timeout]).finally(() => clearTimeout(timer));
+}
+
 type Command = (string | number)[];
 type Reply = { result?: unknown; error?: string };
 
@@ -49,7 +59,7 @@ async function call(path: string, body: unknown): Promise<unknown> {
 }
 
 async function redis(...command: Command): Promise<unknown> {
-  if (redisUrl) return (await tcp()).sendCommand(command.map(String));
+  if (redisUrl) return withTimeout(tcp().then((c) => c.sendCommand(command.map(String))));
   return ((await call("", command)) as Reply).result;
 }
 
@@ -57,9 +67,11 @@ async function redis(...command: Command): Promise<unknown> {
 // land together or not at all. Returns the last command's result.
 async function transaction(...commands: Command[]): Promise<unknown> {
   if (redisUrl) {
-    const multi = (await tcp()).multi();
-    for (const c of commands) multi.addCommand(c.map(String));
-    const results = await multi.exec();
+    const results = await withTimeout(tcp().then((client) => {
+      const multi = client.multi();
+      for (const c of commands) multi.addCommand(c.map(String));
+      return multi.exec();
+    }));
     return results[results.length - 1];
   }
   const replies = (await call("/multi-exec", commands)) as Reply[];
