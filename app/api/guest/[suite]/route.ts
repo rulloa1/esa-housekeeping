@@ -17,7 +17,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ suite: 
   const type = body?.type as GuestRequest;
   if (!(type in REQUEST_LABEL)) return NextResponse.json({ error: "unknown request" }, { status: 400 });
 
-  const doc = (await get(suite)) ?? {};
+  const doc = ((await get(suite)) ?? {}) as Record<string, any>;
   const now = new Date();
   const at = now.toISOString();
   const history = (Array.isArray(doc.guestRequests) ? doc.guestRequests : []) as Entry[];

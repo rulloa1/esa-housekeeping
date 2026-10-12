@@ -16,3 +16,6 @@ export default function BrandLogo({ height = 40 }: { height?: number }) {
   // eslint-disable-next-line @next/next/no-img-element
   return <img src={BRAND.logo} alt="Extended Stay America Logo" height={height} style={{ height, width: "auto", display: "block" }} onError={() => setFailed(true)} />;
 }
+
+export { BrandLogo };
+

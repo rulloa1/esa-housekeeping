@@ -287,9 +287,74 @@ async function runTests() {
   history.slice(0, 5).forEach((h) => {
     console.log(`   - [${h.timestamp.substring(11, 19)}] ${h.event}: ${h.details} (by ${h.by})`);
   });
+  console.log("");
+
+  // 14. Guest QR Cards Generation & Link Resolution
+  console.log("Test 14: Supervisor accesses /guest-links and verifies QR cards...");
+  const guestLinksRes = await fetch(`${BASE_URL}/guest-links`, {
+    headers: { Cookie: supervisorCookie },
+  });
+  if (!guestLinksRes.ok) throw new Error(`GET /guest-links failed: ${guestLinksRes.status}`);
+  const guestLinksHtml = await guestLinksRes.text();
+  const match = guestLinksHtml.match(/\/guest\/204\?k=([a-zA-Z0-9_-]+)/);
+  if (!match) throw new Error("Could not find guest link for suite 204 in /guest-links HTML");
+  const guestKey = match[1];
+  console.log(`✓ Found guest key for suite 204: ${guestKey}\n`);
+
+  // 15. Guest Accesses Self-Service Portal
+  console.log(`Test 15: Guest visits /guest/204?k=${guestKey}...`);
+  const guestPortalRes = await fetch(`${BASE_URL}/guest/204?k=${guestKey}`);
+  if (!guestPortalRes.ok) throw new Error(`GET /guest/204 failed: ${guestPortalRes.status}`);
+  const portalHtml = await guestPortalRes.text();
+  if (!portalHtml.includes("Suite 204") && !portalHtml.includes("204")) {
+    throw new Error("Guest portal did not return expected suite content");
+  }
+  console.log("✓ Guest portal loaded successfully without requiring login.\n");
+
+  // 16. Guest Submits Request (Towels)
+  console.log("Test 16: Guest submits request for fresh towels via POST /api/guest/204...");
+  const guestReqRes = await fetch(`${BASE_URL}/api/guest/204`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ k: guestKey, type: "towels" }),
+  });
+  if (!guestReqRes.ok) throw new Error(`POST /api/guest/204 failed: ${guestReqRes.status}`);
+  const guestReqData = await guestReqRes.json();
+  if (!guestReqData.ok || !guestReqData.requests?.some((r) => r.type === "towels")) {
+    throw new Error("Guest request response did not include towels");
+  }
+  console.log("✓ Guest request received and acknowledged by API.\n");
+
+  // 17. Verify Guest Request in Room Record
+  console.log("Test 17: Verifying guest request registered in suite 204 store record...");
+  const verifyRes = await fetch(`${BASE_URL}/api/suites`, { headers: { Cookie: supervisorCookie } });
+  const verifyData = await verifyRes.json();
+  const updatedRoom204 = verifyData.docs["204"];
+  if (!updatedRoom204.notes?.includes("Fresh towels requested")) {
+    throw new Error(`Expected notes to contain 'Fresh towels requested', got: ${updatedRoom204.notes}`);
+  }
+  if (!updatedRoom204.guestRequests?.some((r) => r.type === "towels")) {
+    throw new Error("guestRequests array missing 'towels' entry");
+  }
+  console.log(`✓ Room 204 notes updated: "${updatedRoom204.notes.split("\n")[0]}"\n`);
+
+  // 18. Guest Rate Limiting / Debounce Check
+  console.log("Test 18: Verifying 2-minute debounce prevents duplicate spam...");
+  const repeatReqRes = await fetch(`${BASE_URL}/api/guest/204`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ k: guestKey, type: "towels" }),
+  });
+  if (!repeatReqRes.ok) throw new Error(`Repeat request failed: ${repeatReqRes.status}`);
+  const repeatData = await repeatReqRes.json();
+  const towelsCount = repeatData.requests.filter((r) => r.type === "towels").length;
+  if (towelsCount !== 1) {
+    throw new Error(`Expected exactly 1 towels request due to debounce, found ${towelsCount}`);
+  }
+  console.log("✓ Duplicate tap within 2 minutes successfully debounced.\n");
 
   console.log("\n=================================================");
-  console.log("ALL 13 END-TO-END OPERATIONAL TESTS PASSED ✓");
+  console.log("ALL 18 END-TO-END OPERATIONAL & GUEST TESTS PASSED ✓");
   console.log("=================================================");
 }
 

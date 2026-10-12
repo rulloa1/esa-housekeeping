@@ -33,8 +33,10 @@ export async function GET(req: Request) {
     <span style="font-weight:700;letter-spacing:0.5px;">Houston IAH · 3D Building Board</span>
   </div>
   <div style="display:flex;align-items:center;gap:16px;">
-    <a href="/" style="color:#FFFFFF;text-decoration:none;font-weight:700;display:flex;align-items:center;gap:4px;">📊 Operations Dashboard</a>
+    <a href="/dashboard" style="color:#FFFFFF;text-decoration:none;font-weight:700;display:flex;align-items:center;gap:4px;">📊 Operations Dashboard</a>
     <a href="/housekeeper" style="color:#FFFFFF;text-decoration:none;font-weight:700;display:flex;align-items:center;gap:4px;">📱 Housekeeper View</a>
+    <a href="/guest-links" style="color:#FFFFFF;text-decoration:none;font-weight:700;display:flex;align-items:center;gap:4px;">🖨️ Guest QR Cards</a>
+    <a href="/staff" style="color:#FFFFFF;text-decoration:none;font-weight:700;display:flex;align-items:center;gap:4px;">🏠 Staff Portal</a>
     <form method="post" action="/api/logout" style="margin:0;display:inline;">
       <button type="submit" style="background:rgba(255,255,255,0.2);border:none;color:#FFFFFF;padding:4px 10px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;">Sign out</button>
     </form>

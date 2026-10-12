@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   if (role === "housekeeper" || role === "housekeeping") {
     next.pathname = "/housekeeper";
   } else {
-    next.pathname = "/";
+    next.pathname = "/dashboard";
   }
   next.search = "";
   return NextResponse.redirect(next, 303);

@@ -11,23 +11,39 @@ export const dynamic = "force-dynamic";
 const TEXT = {
   en: {
     eyebrow: "Houston IAH Airport",
-    title: "Housekeeping",
-    signedIn: { housekeeping: "Signed in as Housekeeping", frontdesk: "Signed in as Front desk" },
-    board: ["Housekeeping board", "Suite status, assignments and guest requests"],
+    title: "Housekeeping Operations",
+    signedIn: {
+      housekeeper: "Signed in as Housekeeper",
+      supervisor: "Signed in as Supervisor",
+      admin: "Signed in as Administrator",
+      housekeeping: "Signed in as Housekeeper",
+      frontdesk: "Signed in as Supervisor",
+    },
+    dashboard: ["Operations Dashboard", "Live room table, QA inspections, room assignments & maintenance"],
+    housekeeper: ["Housekeeper Mobile View", "Mobile attendant workspace, cleaning checklists & supply requests"],
+    board: ["3D Building Board", "Interactive 3D building layout, suite status and guest requests"],
     cards: ["Guest QR cards", "Print a request card for each suite"],
     signOut: "Sign out",
   },
   es: {
     eyebrow: "Houston IAH Airport",
-    title: "Limpieza",
-    signedIn: { housekeeping: "Sesión: Limpieza", frontdesk: "Sesión: Recepción" },
-    board: ["Tablero de limpieza", "Estado de suites, asignaciones y solicitudes"],
+    title: "Operaciones de Limpieza",
+    signedIn: {
+      housekeeper: "Sesión: Limpieza",
+      supervisor: "Sesión: Supervisor",
+      admin: "Sesión: Administrador",
+      housekeeping: "Sesión: Limpieza",
+      frontdesk: "Sesión: Supervisor",
+    },
+    dashboard: ["Panel de Operaciones", "Control en vivo, inspecciones de calidad, asignaciones y mantenimiento"],
+    housekeeper: ["Vista Móvil de Limpieza", "Espacio de trabajo del personal, listas de control y solicitudes"],
+    board: ["Tablero 3D del Edificio", "Modelo interactivo 3D, estado de suites y solicitudes"],
     cards: ["Tarjetas QR para huéspedes", "Imprime una tarjeta para cada suite"],
     signOut: "Cerrar sesión",
   },
 } as const;
 
-// Staff home: the two things staff open from here, in the ESA brand.
+// Staff home: operations portals in the ESA brand.
 export default async function Home() {
   const role = await getRole();
   if (!role) redirect("/login");
@@ -90,10 +106,14 @@ export default async function Home() {
           {t.eyebrow}
         </div>
         <h1 style={{ margin: "6px 0 4px", fontSize: 28, color: BRAND.text }}>{t.title}</h1>
-        <p style={{ margin: "0 0 24px", color: BRAND.muted, fontSize: 14 }}>{t.signedIn[role]}</p>
+        <p style={{ margin: "0 0 24px", color: BRAND.muted, fontSize: 14 }}>
+          {t.signedIn[role as keyof typeof t.signedIn] || role}
+        </p>
 
         <div style={{ display: "grid", gap: 12 }}>
-          {card("/housekeeping", t.board, true)}
+          {card("/dashboard", t.dashboard, true)}
+          {card("/housekeeper", t.housekeeper, false)}
+          {card("/housekeeping", t.board, false)}
           {card("/guest-links", t.cards, false)}
         </div>
 

@@ -37,7 +37,7 @@ export function NavigationHeader({ currentRole, activeTab }: HeaderProps) {
       >
         {/* Brand / Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+          <Link href="/dashboard" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
             <img
               src="/esa-logo.png"
               alt="Extended Stay America"
@@ -57,7 +57,7 @@ export function NavigationHeader({ currentRole, activeTab }: HeaderProps) {
         {/* View Switchers */}
         <nav style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
           <Link
-            href="/"
+            href="/dashboard"
             style={{
               padding: "7px 14px",
               borderRadius: "var(--radius-sm)",
@@ -67,8 +67,8 @@ export function NavigationHeader({ currentRole, activeTab }: HeaderProps) {
               display: "flex",
               alignItems: "center",
               gap: 6,
-              background: pathname === "/" ? "var(--esa-green)" : "transparent",
-              color: pathname === "/" ? "#FFFFFF" : "var(--text-secondary)",
+              background: pathname === "/dashboard" ? "var(--esa-green)" : "transparent",
+              color: pathname === "/dashboard" ? "#FFFFFF" : "var(--text-secondary)",
               transition: "all 0.15s ease",
             }}
           >
@@ -111,6 +111,44 @@ export function NavigationHeader({ currentRole, activeTab }: HeaderProps) {
             }}
           >
             <span>🏢</span> 3D Building Board
+          </Link>
+
+          <Link
+            href="/guest-links"
+            style={{
+              padding: "7px 14px",
+              borderRadius: "var(--radius-sm)",
+              fontSize: 13,
+              fontWeight: 600,
+              textDecoration: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              background: pathname === "/guest-links" ? "var(--esa-green)" : "transparent",
+              color: pathname === "/guest-links" ? "#FFFFFF" : "var(--text-secondary)",
+              transition: "all 0.15s ease",
+            }}
+          >
+            <span>🖨️</span> Guest QR Cards
+          </Link>
+
+          <Link
+            href="/staff"
+            style={{
+              padding: "7px 14px",
+              borderRadius: "var(--radius-sm)",
+              fontSize: 13,
+              fontWeight: 600,
+              textDecoration: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              background: pathname === "/staff" ? "var(--esa-green)" : "transparent",
+              color: pathname === "/staff" ? "#FFFFFF" : "var(--text-secondary)",
+              transition: "all 0.15s ease",
+            }}
+          >
+            <span>🏠</span> Staff Portal
           </Link>
         </nav>
 

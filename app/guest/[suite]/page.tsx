@@ -32,7 +32,7 @@ export default async function GuestPage({
       </main>
     );
   }
-  const doc = (await get(suite)) ?? {};
+  const doc = ((await get(suite)) ?? {}) as Record<string, any>;
   const requests = Array.isArray(doc.guestRequests) ? doc.guestRequests : [];
   return <GuestApp lang={lang} suite={suite} k={k!} dnd={Boolean(doc.dndSince)} initialRequests={requests} />;
 }

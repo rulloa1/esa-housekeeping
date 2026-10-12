@@ -43,3 +43,6 @@ export default function LangToggle({ lang, style }: { lang: "en" | "es"; style?:
     </div>
   );
 }
+
+export { LangToggle };
+
