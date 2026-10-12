@@ -20,9 +20,13 @@ export function pinFor(role: Role): string | undefined {
   return process.env.NODE_ENV === "production" ? undefined : "1234";
 }
 
+let key: Promise<CryptoKey> | undefined;
+
 async function sign(value: string): Promise<string> {
-  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret()), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(value));
+  key ??= crypto.subtle
+    .importKey("raw", new TextEncoder().encode(secret()), { name: "HMAC", hash: "SHA-256" }, false, ["sign"])
+    .catch((err) => { key = undefined; throw err; });
+  const sig = await crypto.subtle.sign("HMAC", await key, new TextEncoder().encode(value));
   return Buffer.from(sig).toString("base64url");
 }
 

@@ -4,6 +4,14 @@
 // backed by /api/suites, polling every few seconds so every signed-in screen stays current.
 (() => {
   const POLL_MS = 3000;
+  const TIMEOUT_MS = 10000;
+  // Aborts a request that stalls, so a hung connection can't freeze polling or a save.
+  const timeout = () => {
+    if (AbortSignal.timeout) return AbortSignal.timeout(TIMEOUT_MS);
+    const c = new AbortController();
+    setTimeout(() => c.abort(), TIMEOUT_MS);
+    return c.signal;
+  };
   let version = null;
   let docs = {};
   const listeners = new Set();
@@ -27,7 +35,7 @@
 
   async function refresh() {
     const q = version === null ? "" : `?since=${version}`;
-    const res = await fetch(`/api/suites${q}`, { cache: "no-store", credentials: "same-origin" });
+    const res = await fetch(`/api/suites${q}`, { cache: "no-store", credentials: "same-origin", signal: timeout() });
     if (res.status === 401) return toLogin();
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
@@ -63,6 +71,7 @@
     const res = await fetch(`/api/suites/${encodeURIComponent(id)}`, {
       method,
       credentials: "same-origin",
+      signal: timeout(),
       headers: body ? { "Content-Type": "application/json" } : undefined,
       body: body ? JSON.stringify(body) : undefined,
     });

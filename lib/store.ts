@@ -11,16 +11,37 @@ const VERSION_KEY = "hk:version";
 
 export const usingRedis = Boolean(url && token);
 
-async function redis(...command: (string | number)[]): Promise<unknown> {
-  const res = await fetch(url!, {
+const TIMEOUT_MS = 8000;
+
+type Command = (string | number)[];
+type Reply = { result?: unknown; error?: string };
+
+async function call(path: string, body: unknown): Promise<unknown> {
+  const res = await fetch(url! + path, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify(command),
+    body: JSON.stringify(body),
     cache: "no-store",
+    signal: AbortSignal.timeout(TIMEOUT_MS),
   });
-  const json = (await res.json()) as { result?: unknown; error?: string };
-  if (!res.ok || json.error) throw new Error(json.error ?? `Redis HTTP ${res.status}`);
-  return json.result;
+  const json = (await res.json()) as Reply | Reply[];
+  if (!res.ok || (!Array.isArray(json) && json.error)) {
+    throw new Error((!Array.isArray(json) && json.error) || `Redis HTTP ${res.status}`);
+  }
+  return json;
+}
+
+async function redis(...command: Command): Promise<unknown> {
+  return ((await call("", command)) as Reply).result;
+}
+
+// Runs the commands as one MULTI/EXEC transaction, so a write and its version bump
+// land together or not at all. Returns the last command's result.
+async function transaction(...commands: Command[]): Promise<unknown> {
+  const replies = (await call("/multi-exec", commands)) as Reply[];
+  const failed = replies.find((r) => r.error);
+  if (failed) throw new Error(failed.error);
+  return replies[replies.length - 1].result;
 }
 
 const memory = globalThis as unknown as { __hkDocs?: Map<string, string>; __hkVersion?: number };
@@ -51,8 +72,7 @@ export async function put(id: string, doc: unknown): Promise<number> {
     memory.__hkDocs!.set(id, raw);
     return ++memory.__hkVersion!;
   }
-  await redis("HSET", DOCS_KEY, id, raw);
-  return Number(await redis("INCR", VERSION_KEY));
+  return Number(await transaction(["HSET", DOCS_KEY, id, raw], ["INCR", VERSION_KEY]));
 }
 
 export async function remove(id: string): Promise<number> {
@@ -60,6 +80,5 @@ export async function remove(id: string): Promise<number> {
     memory.__hkDocs!.delete(id);
     return ++memory.__hkVersion!;
   }
-  await redis("HDEL", DOCS_KEY, id);
-  return Number(await redis("INCR", VERSION_KEY));
+  return Number(await transaction(["HDEL", DOCS_KEY, id], ["INCR", VERSION_KEY]));
 }
