@@ -25,6 +25,7 @@ const TEXT = {
     board: ["3D Building Board", "Interactive 3D building layout, suite status and guest requests"],
     cards: ["Guest QR cards", "Print a request card for each suite"],
     lostFound: ["Lost & found", "Log items found in suites and around the hotel"],
+    handover: ["Handover log", "Notes for the next shift"],
     roster: ["Staff roster", "Give each person their own PIN"],
     signOut: "Sign out",
   },
@@ -43,6 +44,7 @@ const TEXT = {
     board: ["Tablero 3D del Edificio", "Modelo interactivo 3D, estado de suites y solicitudes"],
     cards: ["Tarjetas QR para huéspedes", "Imprime una tarjeta para cada suite"],
     lostFound: ["Objetos perdidos", "Registra lo que encuentres en suites y en el hotel"],
+    handover: ["Notas de turno", "Notas para el siguiente turno"],
     roster: ["Lista de personal", "Da a cada persona su propio PIN"],
     signOut: "Cerrar sesión",
   },
@@ -127,6 +129,7 @@ export default async function Home() {
           {card("/dashboard", t.dashboard, true)}
           {card("/housekeeper", t.housekeeper, false)}
           {card("/housekeeping", t.board, false)}
+          {card("/handover", t.handover, false)}
           {card("/lost-found", t.lostFound, false)}
           {card("/guest-links", t.cards, false)}
           {role === "admin" && card("/roster", t.roster, false)}

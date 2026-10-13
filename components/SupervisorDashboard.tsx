@@ -5,6 +5,7 @@ import { toRoom, toRooms } from "@/lib/roomView";
 import type { RoomDoc, RoomStatus, Role } from "@/lib/models";
 import { useAttendants } from "@/lib/useAttendants";
 import { OverdueAlerts } from "./OverdueAlerts";
+import { HandoverStrip } from "./Handover";
 import { FrontDeskListModal } from "./FrontDeskListModal";
 import { PushToggle } from "./PushToggle";
 import { NavigationHeader } from "./NavigationHeader";
@@ -782,6 +783,9 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
           <PushToggle compact />
         </div>
+
+        {/* Notes the previous shift left (app/handover) */}
+        <HandoverStrip />
 
         {/* Overdue: guest requests, checkouts not ready by check-in, waiting inspections */}
         <OverdueAlerts
