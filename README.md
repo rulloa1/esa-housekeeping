@@ -7,7 +7,8 @@ A hospitality operations and housekeeping management platform for Extended Stay 
 
 ## Key Interfaces & Routes
 
-- **`/`**: Public landing page for hotel visitors and guests (`board/landing.html`); signed-in staff are automatically redirected to their respective work station.
+- **`/`**: Opens the work screens: signed-in staff go straight to the dashboard (housekeepers to their own view); anyone else gets the sign-in page first.
+- **`/welcome`**: Public landing page for hotel visitors and guests (`board/landing.html`).
 - **`/staff`**: Staff Operations launchpad with bilingual language switcher (`EN` / `ES`) and role-based links.
 - **`/dashboard`**: **Supervisor Operations Dashboard**
   - **Live KPI Summary**: 8 metrics cards (Total, Dirty, Assigned, Cleaning, Awaiting Inspection, Clean & Ready, Maintenance, Overdue / Urgent).
