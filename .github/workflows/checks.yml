@@ -1,0 +1,29 @@
+# Runs on every pull request and every push to main: type check, unit tests, production build.
+# A red check here means the change would break the live site; Vercel would refuse the same build.
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Type check
+        run: npx tsc --noEmit
+      - name: Unit tests
+        run: npm test
+      - name: Production build
+        run: npm run build

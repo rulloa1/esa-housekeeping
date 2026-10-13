@@ -456,3 +456,21 @@ export async function snapshotBeforeReset(what = "reset"): Promise<string> {
   await snapshot(label);
   return label;
 }
+
+// ---------- Short-lived values (photos) ----------
+// A plain Redis key that expires on its own; a Map in development.
+const vals = globalThis as unknown as { __hkVals?: Map<string, { v: string; exp: number }> };
+vals.__hkVals ??= new Map();
+
+export async function setExpiring(key: string, value: string, ttlSeconds: number): Promise<void> {
+  if (!usingRedis) { vals.__hkVals!.set(key, { v: value, exp: Date.now() + ttlSeconds * 1000 }); return; }
+  await redis("SET", key, value, "EX", ttlSeconds);
+}
+
+export async function getValue(key: string): Promise<string | null> {
+  if (!usingRedis) {
+    const cur = vals.__hkVals!.get(key);
+    return cur && cur.exp > Date.now() ? cur.v : null;
+  }
+  return ((await redis("GET", key)) as string | null) ?? null;
+}

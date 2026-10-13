@@ -24,6 +24,7 @@ const TEXT = {
     housekeeper: ["Housekeeper Mobile View", "Mobile attendant workspace, cleaning checklists & supply requests"],
     board: ["3D Building Board", "Interactive 3D building layout, suite status and guest requests"],
     cards: ["Guest QR cards", "Print a request card for each suite"],
+    lostFound: ["Lost & found", "Log items found in suites and around the hotel"],
     roster: ["Staff roster", "Give each person their own PIN"],
     signOut: "Sign out",
   },
@@ -41,6 +42,7 @@ const TEXT = {
     housekeeper: ["Vista Móvil de Limpieza", "Espacio de trabajo del personal, listas de control y solicitudes"],
     board: ["Tablero 3D del Edificio", "Modelo interactivo 3D, estado de suites y solicitudes"],
     cards: ["Tarjetas QR para huéspedes", "Imprime una tarjeta para cada suite"],
+    lostFound: ["Objetos perdidos", "Registra lo que encuentres en suites y en el hotel"],
     roster: ["Lista de personal", "Da a cada persona su propio PIN"],
     signOut: "Cerrar sesión",
   },
@@ -125,6 +127,7 @@ export default async function Home() {
           {card("/dashboard", t.dashboard, true)}
           {card("/housekeeper", t.housekeeper, false)}
           {card("/housekeeping", t.board, false)}
+          {card("/lost-found", t.lostFound, false)}
           {card("/guest-links", t.cards, false)}
           {role === "admin" && card("/roster", t.roster, false)}
         </div>

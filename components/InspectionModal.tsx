@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { RoomDoc } from "@/lib/models";
 import { INSPECTION_CATEGORIES } from "@/lib/models";
+import { PhotoPicker } from "./PhotoPicker";
 
 interface InspectionModalProps {
   room: RoomDoc;
@@ -32,6 +33,7 @@ export function InspectionModal({ room, onClose, onComplete }: InspectionModalPr
 
   const [selectedReasons, setSelectedReasons] = useState<string[]>(room.inspectionFailReasons || []);
   const [customReason, setCustomReason] = useState("");
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [notes, setNotes] = useState(room.inspectionNotes || "");
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -91,6 +93,7 @@ export function InspectionModal({ room, onClose, onComplete }: InspectionModalPr
           action: "inspect_fail",
           inspectionCategories: categories,
           failReasons: reasons,
+          photoUrl: photoUrl || undefined,
           inspectionNotes: notes || reasons.join("; "),
         }),
       });
@@ -290,6 +293,10 @@ export function InspectionModal({ room, onClose, onComplete }: InspectionModalPr
                   outline: "none",
                 }}
               />
+            </div>
+            <div style={{ marginTop: 10, display: "grid", gap: 6, fontSize: 13, fontWeight: 600, color: "var(--esa-brown)" }}>
+              Photo of what needs fixing (optional, sent with a fail)
+              <PhotoPicker value={photoUrl} onChange={setPhotoUrl} />
             </div>
           </div>
 

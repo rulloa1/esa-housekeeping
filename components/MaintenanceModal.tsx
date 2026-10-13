@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { RoomDoc } from "@/lib/models";
 import { MAINTENANCE_CATEGORIES } from "@/lib/models";
+import { PhotoPicker } from "./PhotoPicker";
 
 interface MaintenanceModalProps {
   room: RoomDoc;
@@ -16,6 +17,7 @@ export function MaintenanceModal({ room, reportedByName, onClose, onComplete }: 
   const [priority, setPriority] = useState<"urgent" | "high" | "medium" | "low">("medium");
   const [description, setDescription] = useState("");
   const [takeOutOfService, setTakeOutOfService] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -40,6 +42,7 @@ export function MaintenanceModal({ room, reportedByName, onClose, onComplete }: 
             category,
             description: description.trim(),
             priority: takeOutOfService ? "urgent" : priority,
+            photoUrl: photoUrl || undefined,
           },
           status: takeOutOfService ? "ooo" : undefined,
         }),
@@ -183,6 +186,11 @@ export function MaintenanceModal({ room, reportedByName, onClose, onComplete }: 
               }}
             />
           </label>
+
+          <div style={{ display: "grid", gap: 6, fontSize: 13, fontWeight: 600, color: "var(--esa-brown)" }}>
+            Photo (optional)
+            <PhotoPicker value={photoUrl} onChange={setPhotoUrl} userName={reportedByName} />
+          </div>
 
           <label
             style={{
