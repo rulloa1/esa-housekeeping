@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getRole } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { getLang } from "@/lib/lang";
 import { BRAND } from "@/lib/brand";
 import BrandLogo from "@/components/BrandLogo";
@@ -24,6 +24,7 @@ const TEXT = {
     housekeeper: ["Housekeeper Mobile View", "Mobile attendant workspace, cleaning checklists & supply requests"],
     board: ["3D Building Board", "Interactive 3D building layout, suite status and guest requests"],
     cards: ["Guest QR cards", "Print a request card for each suite"],
+    roster: ["Staff roster", "Give each person their own PIN"],
     signOut: "Sign out",
   },
   es: {
@@ -40,14 +41,16 @@ const TEXT = {
     housekeeper: ["Vista Móvil de Limpieza", "Espacio de trabajo del personal, listas de control y solicitudes"],
     board: ["Tablero 3D del Edificio", "Modelo interactivo 3D, estado de suites y solicitudes"],
     cards: ["Tarjetas QR para huéspedes", "Imprime una tarjeta para cada suite"],
+    roster: ["Lista de personal", "Da a cada persona su propio PIN"],
     signOut: "Cerrar sesión",
   },
 } as const;
 
 // Staff home: operations portals in the ESA brand.
 export default async function Home() {
-  const role = await getRole();
-  if (!role) redirect("/login");
+  const session = await getSession();
+  if (!session) redirect("/login");
+  const role = session.role;
   const lang = await getLang();
   const t = TEXT[lang];
 
@@ -108,7 +111,7 @@ export default async function Home() {
           focus="55%"
           eyebrow={t.eyebrow}
           title={t.title}
-          subtitle={t.signedIn[role as keyof typeof t.signedIn] || role}
+          subtitle={session.staff ? session.staff.name + " · " + (t.signedIn[role as keyof typeof t.signedIn] || role).replace(/^.*?(as |: )/, "") : t.signedIn[role as keyof typeof t.signedIn] || role}
         />
 
         <div style={{ display: "grid", gap: 12 }}>
@@ -116,6 +119,7 @@ export default async function Home() {
           {card("/housekeeper", t.housekeeper, false)}
           {card("/housekeeping", t.board, false)}
           {card("/guest-links", t.cards, false)}
+          {role === "admin" && card("/roster", t.roster, false)}
         </div>
 
         <form method="post" action="/api/logout" style={{ marginTop: 28 }}>

@@ -3,7 +3,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { toRoom, toRooms } from "@/lib/roomView";
 import type { RoomDoc, RoomStatus, Role } from "@/lib/models";
-import { STAFF_ATTENDANTS, DEFAULT_CHECKLIST_TEMPLATE } from "@/lib/models";
+import { DEFAULT_CHECKLIST_TEMPLATE } from "@/lib/models";
+import { useAttendants } from "@/lib/useAttendants";
 import { NavigationHeader } from "./NavigationHeader";
 import PageBanner, { BANNERS } from "./PageBanner";
 import { ChecklistModal } from "./ChecklistModal";
@@ -15,12 +16,17 @@ interface HousekeeperViewProps {
   initialDocs: Record<string, RoomDoc>;
   initialVersion: number;
   currentRole: Role;
+  // Set when the person signed in with their own PIN: the page shows their suites only.
+  staffName?: string;
 }
 
-export function HousekeeperView({ initialDocs, initialVersion, currentRole }: HousekeeperViewProps) {
+export function HousekeeperView({ initialDocs, initialVersion, currentRole, staffName }: HousekeeperViewProps) {
   const [docs, setDocs] = useState<Record<string, RoomDoc>>(initialDocs);
   const [version, setVersion] = useState<number>(initialVersion);
-  const [selectedAttendant, setSelectedAttendant] = useState<string>("Maria S.");
+  const attendants = useAttendants();
+  const [pickedAttendant, setSelectedAttendant] = useState<string>("Maria S.");
+  // A personal sign-in always works as that person; a shared housekeeping PIN picks from the list.
+  const selectedAttendant = staffName || (attendants.includes(pickedAttendant) ? pickedAttendant : attendants[0]);
   const [viewScope, setViewScope] = useState<"assigned" | "all">("assigned");
   const [activeFloor, setActiveFloor] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -130,6 +136,10 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
         }),
       });
       const data = await res.json();
+      if (res.status === 403 && data.reason === "notYours") {
+        showToast(`Suite ${room.id} is assigned to ${data.attendant}. Ask a supervisor to reassign it.`);
+        return;
+      }
       if (!res.ok) throw new Error(data.error);
       setDocs((prev) => ({ ...prev, [room.id]: data.room }));
       showToast(`Started cleaning Suite ${room.id}`);
@@ -217,7 +227,12 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
           {/* Staff Switcher & Shift Badge */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 12 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "var(--esa-brown)" }}>Housekeeper:</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: "var(--esa-brown)" }}>{staffName ? "My suites:" : "Housekeeper:"}</span>
+              {staffName ? (
+                <span style={{ padding: "6px 12px", borderRadius: 8, fontWeight: 700, fontSize: 14, backgroundColor: "var(--esa-brown-soft)", color: "var(--esa-brown)" }}>
+                  {staffName}
+                </span>
+              ) : (
               <select
                 value={selectedAttendant}
                 onChange={(e) => setSelectedAttendant(e.target.value)}
@@ -232,12 +247,13 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
                   outline: "none",
                 }}
               >
-                {STAFF_ATTENDANTS.map((name) => (
+                {attendants.map((name) => (
                   <option key={name} value={name}>
                     {name}
                   </option>
                 ))}
               </select>
+              )}
             </div>
 
             <div style={{ fontSize: 12, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>

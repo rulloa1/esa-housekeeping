@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { RoomDoc, RoomPriority, ServiceType } from "@/lib/models";
-import { STAFF_ATTENDANTS } from "@/lib/models";
+import { useAttendants } from "@/lib/useAttendants";
 
 interface AssignmentModalProps {
   room: RoomDoc;
@@ -12,6 +12,9 @@ interface AssignmentModalProps {
 
 export function AssignmentModal({ room, onClose, onComplete }: AssignmentModalProps) {
   const [attendant, setAttendant] = useState(room.attendant || "");
+  const roster = useAttendants();
+  // Keep the current attendant selectable even if they are no longer on the roster.
+  const attendants = room.attendant && !roster.includes(room.attendant) ? [room.attendant, ...roster] : roster;
   const [priority, setPriority] = useState<RoomPriority>(room.priority || "standard");
   const [serviceType, setServiceType] = useState<ServiceType>(room.serviceType || "stayover");
   const [instructions, setInstructions] = useState(room.instructions || "");
@@ -128,7 +131,7 @@ export function AssignmentModal({ room, onClose, onComplete }: AssignmentModalPr
               }}
             >
               <option value="">-- Unassigned --</option>
-              {STAFF_ATTENDANTS.map((name) => (
+              {attendants.map((name) => (
                 <option key={name} value={name}>
                   {name}
                 </option>

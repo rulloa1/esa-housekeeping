@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getRole } from "@/lib/auth";
+import { actorName, getRole, getSession } from "@/lib/auth";
 import { getAll, getVersion } from "@/lib/store";
 import { toRoom } from "@/lib/roomView";
 
@@ -19,8 +19,9 @@ export async function GET(req: Request) {
 // POST /api/suites
 // Batch operations (batch assign, bulk priority, etc.)
 export async function POST(req: Request) {
-  const role = await getRole();
-  if (!role) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const session = await getSession();
+  if (!session) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const role = session.role;
 
   // Only supervisors and administrators can perform batch suite assignments
   const isSup = role === "supervisor" || role === "admin" || role === "frontdesk";
@@ -38,12 +39,16 @@ export async function POST(req: Request) {
   } | null;
 
   if (body?.action === "reset_baseline") {
-    const { resetToDefault, getAll } = await import("@/lib/store");
+    const { resetToDefault, getAll, snapshotBeforeReset } = await import("@/lib/store");
+    // Keep a copy of every suite first, so a reset pressed by mistake can be undone (see README).
+    const savedAs = await snapshotBeforeReset();
+    console.warn("suites reset to the demo baseline; previous state saved as hk:snapshot:" + savedAs);
     await resetToDefault();
     const updated = await getAll();
     return NextResponse.json({
       ok: true,
       action: "reset_baseline",
+      savedAs,
       version: updated.version,
       docs: updated.docs,
     });
@@ -54,7 +59,7 @@ export async function POST(req: Request) {
   }
 
   const now = new Date().toISOString();
-  const userName = body.userName || "Supervisor";
+  const userName = actorName(session, body.userName);
   const { get, put, withSuiteLock } = await import("@/lib/store");
 
   let updatedCount = 0;

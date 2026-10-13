@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getRole, isSupervisor } from "@/lib/auth";
+import { actorName, getSession, isSupervisor, type Session } from "@/lib/auth";
 import { get, put, remove, withSuiteLock } from "@/lib/store";
 import { isGuestTask, type Role, type RoomDoc, type AuditLogEntry, type MaintenanceIssue, type SupplyRequest } from "@/lib/models";
 import { REQUEST_LABEL, type GuestRequest } from "@/lib/guest";
@@ -10,10 +10,10 @@ export const dynamic = "force-dynamic";
 const SUITE = /^[1-3](0[1-9]|[12]\d|3[0-2])$/; // 101–132, 201–232, 301–332
 
 async function guard(id: string) {
-  const role = await getRole();
-  if (!role) return { error: NextResponse.json({ error: "unauthorized" }, { status: 401 }) };
+  const session = await getSession();
+  if (!session) return { error: NextResponse.json({ error: "unauthorized" }, { status: 401 }) };
   if (!SUITE.test(id)) return { error: NextResponse.json({ error: "unknown suite" }, { status: 400 }) };
-  return { role };
+  return { session, role: session.role };
 }
 
 // GET /api/suites/:id
@@ -45,11 +45,11 @@ const isObj = (v: unknown): v is Doc => typeof v === "object" && v !== null && !
 // update: only the writable fields present in the body are applied (see WRITABLE in lib/suiteDoc).
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { error, role } = await guard(id);
-  if (error || !role) return error!;
+  const { error, session } = await guard(id);
+  if (error || !session) return error!;
   const body = await req.json().catch(() => null);
   if (!isObj(body)) return NextResponse.json({ error: "body must be an object" }, { status: 400 });
-  return withSuiteLock(id, () => update(id, role, body as Body, null));
+  return withSuiteLock(id, () => update(id, session, body as Body, null));
 }
 
 // PATCH /api/suites/:id  { base, next }  from the 3D board (public/hk-db.js).
@@ -59,19 +59,22 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 // (a guest request, another iPad, the operations dashboard) are kept.
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { error, role } = await guard(id);
-  if (error || !role) return error!;
+  const { error, session } = await guard(id);
+  if (error || !session) return error!;
   const body = await req.json().catch(() => null);
   if (!isObj(body) || !isObj(body.next) || !(body.base === null || isObj(body.base))) {
     return NextResponse.json({ error: "body must be { base, next }" }, { status: 400 });
   }
-  return withSuiteLock(id, () => update(id, role, body.next as Body, { base: body.base as Doc | null }));
+  return withSuiteLock(id, () => update(id, session, body.next as Body, { base: body.base as Doc | null }));
 }
 
-async function update(id: string, role: Role, body: Body, board: { base: Doc | null } | null) {
+async function update(id: string, session: Session, body: Body, board: { base: Doc | null } | null) {
+  const role: Role = session.role;
   const existing = await get(id);
   const now = new Date().toISOString();
-  const userName = (typeof body.userName === "string" && body.userName.trim().slice(0, 60)) || (role === "housekeeper" || role === "housekeeping" ? "Housekeeper" : "Supervisor");
+  const userName = actorName(session, body.userName);
+  // A housekeeper signed in with their own PIN works on their own suites (or unassigned ones).
+  const personalHousekeeper = session.staff && !isSupervisor(role) ? session.staff.name : null;
 
   const room: RoomDoc = existing ?? {
     id,
@@ -120,14 +123,20 @@ async function update(id: string, role: Role, body: Body, board: { base: Doc | n
   if (body.action) {
     switch (body.action) {
       case "start_cleaning": {
+        if (personalHousekeeper && room.attendant && room.attendant !== personalHousekeeper) {
+          return NextResponse.json({ error: `This suite is assigned to ${room.attendant}.`, reason: "notYours", attendant: room.attendant }, { status: 403 });
+        }
         room.status = "in_progress";
         room.startedAt = now;
-        if (!room.attendant && body.attendant) room.attendant = body.attendant;
+        if (!room.attendant) room.attendant = personalHousekeeper || body.attendant || null;
         logEvent("Cleaning Started", `${userName} began cleaning suite.`);
         break;
       }
 
       case "complete_cleaning": {
+        if (personalHousekeeper && room.attendant && room.attendant !== personalHousekeeper) {
+          return NextResponse.json({ error: `This suite is assigned to ${room.attendant}.`, reason: "notYours", attendant: room.attendant }, { status: 403 });
+        }
         // Enforce operational workflow: completing cleaning moves to awaiting_inspection
         room.status = "awaiting_inspection";
         room.completedAt = now;
