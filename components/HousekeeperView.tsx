@@ -12,6 +12,7 @@ import { MaintenanceModal } from "./MaintenanceModal";
 import { SupplyModal } from "./SupplyModal";
 import { RoomHistoryDrawer } from "./RoomHistoryDrawer";
 import { HousekeeperAlerts } from "./HousekeeperAlerts";
+import { PushToggle } from "./PushToggle";
 
 interface HousekeeperViewProps {
   initialDocs: Record<string, RoomDoc>;
@@ -263,6 +264,10 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--st-clean)", display: "inline-block" }}></span>
               <span style={{ fontWeight: 600, color: "var(--text-secondary)" }}>Est. Work: {stats.estTimeFormatted}</span>
             </div>
+          </div>
+
+          <div style={{ marginBottom: 12 }}>
+            <PushToggle name={selectedAttendant} />
           </div>
 
           {/* Shift Metrics Grid */}

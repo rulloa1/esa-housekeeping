@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
+import { notify } from "@/lib/push";
 import { actorName, getRole, getSession } from "@/lib/auth";
 import { getAll, getVersion } from "@/lib/store";
 import { toRoom } from "@/lib/roomView";
@@ -133,6 +134,13 @@ export async function POST(req: Request) {
         updatedCount++;
       }
     });
+  }
+
+  // One notification per housekeeper for the whole batch.
+  if (body.action === "batch_assign" && body.attendant && updatedCount) {
+    const name = body.attendant;
+    const list = body.suiteIds.filter((s) => /^[1-3](0[1-9]|[12]\d|3[0-2])$/.test(s)).slice(0, 12).join(", ");
+    after(() => notify({ names: [name] }, { title: `${updatedCount} suite${updatedCount === 1 ? "" : "s"} assigned to you`, body: list, url: "/my-rooms", tag: "batch-assign" }).then(() => {}));
   }
 
   const updated = await getAll();

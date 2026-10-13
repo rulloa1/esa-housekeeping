@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
+import { notify } from "@/lib/push";
 import { get, hit, put, withSuiteLock } from "@/lib/store";
 import { REQUEST_LABEL, hotelTime, hotelToday, validGuest, type GuestRequest } from "@/lib/guest";
 
@@ -63,6 +64,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ suite: 
     const requests = [{ type, at }, ...history].slice(0, 10);
     next.guestRequests = requests;
     await put(suite, next);
+    // Tell the suite's housekeeper, or the supervisors when nobody is assigned.
+    if (type === "cleaning" || type === "towels" || type === "amenities") {
+      const attendant = typeof doc.attendant === "string" && doc.attendant ? doc.attendant : null;
+      after(() => notify(attendant ? { names: [attendant] } : { supervisors: true }, {
+        title: `Guest request · Suite ${suite}`,
+        body: REQUEST_LABEL[type],
+        url: attendant ? "/my-rooms" : "/dashboard",
+        tag: `guest-${suite}-${type}`,
+      }).then(() => {}));
+    }
     return NextResponse.json({ ok: true, requests: forGuest(requests) });
   });
 }

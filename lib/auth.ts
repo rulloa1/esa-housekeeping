@@ -139,3 +139,14 @@ export function isHousekeeper(role: Role | null): boolean {
 export function isAdmin(role: Role | null): boolean {
   return role === "admin";
 }
+
+// Settings that are falling back to the built-in development values. Shown to administrators so a
+// missing production setting (where the sample PIN 1234 or 9999 would work) doesn't go unnoticed.
+export function builtInSettings(): string[] {
+  const missing: string[] = [];
+  if (!process.env.AUTH_SECRET) missing.push("AUTH_SECRET");
+  if (!process.env.HOUSEKEEPING_PIN) missing.push("HOUSEKEEPING_PIN");
+  if (!process.env.FRONTDESK_PIN) missing.push("FRONTDESK_PIN");
+  if (!process.env.ADMIN_PIN) missing.push("ADMIN_PIN");
+  return missing;
+}

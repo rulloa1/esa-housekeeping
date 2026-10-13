@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth";
+import { builtInSettings, getSession } from "@/lib/auth";
 import { getLang } from "@/lib/lang";
 import { BRAND } from "@/lib/brand";
 import BrandLogo from "@/components/BrandLogo";
@@ -113,6 +113,13 @@ export default async function Home() {
           title={t.title}
           subtitle={session.staff ? session.staff.name + " · " + (t.signedIn[role as keyof typeof t.signedIn] || role).replace(/^.*?(as |: )/, "") : t.signedIn[role as keyof typeof t.signedIn] || role}
         />
+
+        {role === "admin" && process.env.NODE_ENV === "production" && builtInSettings().length > 0 && (
+          <div role="alert" style={{ padding: "12px 14px", marginBottom: 12, borderRadius: BRAND.radius, background: "#FEF3C7", border: "1px solid #FCD34D", color: "#78350F", fontSize: 14, lineHeight: 1.5 }}>
+            <strong>Sign-in is using built-in sample values</strong> for {builtInSettings().join(", ")}. Anyone who knows the sample PINs can sign in.
+            Set these in Vercel → Settings → Environment Variables, then redeploy.
+          </div>
+        )}
 
         <div style={{ display: "grid", gap: 12 }}>
           {card("/dashboard", t.dashboard, true)}
