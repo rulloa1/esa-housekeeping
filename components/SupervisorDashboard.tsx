@@ -5,6 +5,7 @@ import { toRoom, toRooms } from "@/lib/roomView";
 import type { RoomDoc, RoomStatus, Role } from "@/lib/models";
 import { useAttendants } from "@/lib/useAttendants";
 import { OverdueAlerts } from "./OverdueAlerts";
+import { FrontDeskListModal } from "./FrontDeskListModal";
 import { NavigationHeader } from "./NavigationHeader";
 import { InspectionModal } from "./InspectionModal";
 import { AssignmentModal } from "./AssignmentModal";
@@ -51,6 +52,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
   const [isSubmittingBatch, setIsSubmittingBatch] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isResetting, setIsResetting] = useState<boolean>(false);
+  const [showFrontDesk, setShowFrontDesk] = useState<boolean>(false);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
 
   const showToast = (msg: string) => {
@@ -639,6 +641,29 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                 }}
               >
                 <span>🔔</span> Activity & Alerts
+              </button>
+
+              <button
+                type="button"
+                className="glass-btn"
+                onClick={() => setShowFrontDesk(true)}
+                title="Paste today's departures and arrivals"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  backgroundColor: "rgba(255, 255, 255, 0.18)",
+                  backdropFilter: "blur(6px)",
+                  border: "1px solid rgba(255, 255, 255, 0.35)",
+                  color: "#FFFFFF",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                <span>🛎️</span> Departures & Arrivals
               </button>
 
               <button
@@ -1636,6 +1661,17 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
           reportedByName="Supervisor Sarah J."
           onClose={() => setMaintenanceRoom(null)}
           onComplete={handleRoomUpdated}
+        />
+      )}
+
+      {showFrontDesk && (
+        <FrontDeskListModal
+          onClose={() => setShowFrontDesk(false)}
+          onApplied={(newDocs, newVersion, count) => {
+            setDocs(newDocs);
+            setVersion(newVersion);
+            showToast(`Updated ${count} suite${count === 1 ? "" : "s"} from today's lists`);
+          }}
         />
       )}
 

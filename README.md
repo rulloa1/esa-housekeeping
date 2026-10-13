@@ -23,6 +23,9 @@ A hospitality operations and housekeeping management platform for Extended Stay 
   - Category-based 21-item cleaning checklists (Bedroom, Bathroom, Kitchenette, Final Check) with auto-save and mandatory item validation.
   - Attendant touch controls: Start Cleaning, Submit for Inspection, Report Maintenance, and Request Supplies.
 - **`/roster`** (administrators): **Staff roster with personal PINs**. Add a person with a name, role and their own 4–8 digit PIN; change a PIN, change a role, or switch someone off. Nobody is deleted, so history keeps their name. The shared role PINs keep working alongside.
+- **`/reports`** (supervisors and admins): **Shift report** for any of the last 14 hotel days: suites cleaned and average clean time, inspections and first-time pass rate, guest requests with median response time, maintenance and supplies, a by-person table and each suite's activity. Print it, or download it as CSV (`GET /api/reports?date=YYYY-MM-DD`). Worked out from suite history (latest 50 entries per suite), so older days may be incomplete.
+- **Departures & Arrivals** (dashboard button, supervisors): paste today's departure and arrival suite numbers from the property system, check what will change, then apply. Departures become checkouts needing a turnover (a clean suite goes back to needing cleaning); arrivals get high priority (urgent for a same-day turn) and are flagged on the Overdue panel if not ready by 3 PM. Every suite is snapshotted first.
+- **Housekeeper alerts**: the housekeeper page shows a banner, vibrates and chimes when a suite is assigned to that person, a guest in one of their suites makes a request, or one of their suites fails inspection.
 - **`/my-rooms`**: short link to `/housekeeper`. A housekeeper who signed in with their own PIN sees only their own suites there, and their name goes on everything they do.
 - **`/housekeeping`**: **3D Building Board (v21)**
   - Interactive 3D building layout with real-time suite state synchronization and top navigation banner.
@@ -49,6 +52,7 @@ A hospitality operations and housekeeping management platform for Extended Stay 
 - `POST /api/guest/:suite` processes guest requests with 2-minute debounce and 10 req/hr rate limiting. Refuses requests (409) if suite is Vacant or Checkout.
 - `DELETE /api/suites/:id` clears a suite (supervisors only).
 - `GET /api/staff` lists the roster (supervisors see everything but PINs; housekeepers get active housekeepers' names). `POST /api/staff { name, role, pin }` and `PATCH /api/staff/:id { name?, role?, active?, pin? }` are admin only.
+- `POST /api/suites { action: "front_desk_list", departures, arrivals, apply }` (supervisors): `apply: false` previews `plan`; `apply: true` snapshots to `hk:snapshot:before-front-desk-list-<time>` first, then saves and logs "Front Desk List" on each suite.
 - `POST /api/suites { action: "reset_baseline" }` first copies every suite to `hk:snapshot:before-reset-<time>` (kept 30 days) and returns that name as `savedAs`.
 
 ### Staff roster and personal PINs
@@ -62,7 +66,7 @@ A hospitality operations and housekeeping management platform for Extended Stay 
 ### Overdue flags (supervisor dashboard)
 Read-only, worked out from what each suite already holds (`lib/overdue.ts`); nothing is written:
 - a towel, cleaning or amenity guest request open 30 minutes or more;
-- a checkout suite not clean, awaiting inspection or inspected after 3 PM hotel time (check-in);
+- a checkout suite, or one on today's arrivals list, not clean, awaiting inspection or inspected after 3 PM hotel time (check-in);
 - a suite cleaned and waiting 30 minutes or more for inspection;
 - a suite in progress for 60 minutes or more;
 - a maintenance issue open 24 hours or more.

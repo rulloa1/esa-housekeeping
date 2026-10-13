@@ -54,6 +54,44 @@ export async function POST(req: Request) {
     });
   }
 
+  // Today's departures and arrivals from the front desk (lib/frontDesk.ts). With apply: false it
+  // only previews what would change.
+  if (body?.action === "front_desk_list") {
+    const { parseSuiteList, frontDeskChange } = await import("@/lib/frontDesk");
+    const { hotelToday } = await import("@/lib/guest");
+    const { get, put, withSuiteLock, snapshotBeforeReset } = await import("@/lib/store");
+    const raw = body as unknown as { departures?: unknown; arrivals?: unknown; apply?: unknown };
+    const dep = parseSuiteList(raw.departures);
+    const arr = parseSuiteList(raw.arrivals);
+    const today = hotelToday();
+    const ids = Array.from(new Set([...dep.suites, ...arr.suites])).sort();
+    const plan: { suite: string; summary: string }[] = [];
+    let savedAs: string | null = null;
+    if (raw.apply === true && ids.length) savedAs = await snapshotBeforeReset("front-desk-list");
+    for (const id of ids) {
+      await withSuiteLock(id, async () => {
+        const room = (await get(id)) ?? toRoom(id, {});
+        const change = frontDeskChange(room, { departure: dep.suites.includes(id), arrival: arr.suites.includes(id) }, today);
+        if (!change) return;
+        plan.push({ suite: id, summary: change.summary });
+        if (raw.apply !== true) return;
+        const now = new Date().toISOString();
+        const next = { ...room, ...change.changes, updatedAt: now, updatedBy: room.updatedBy === "guest" ? "guest" : role };
+        next.history = [
+          { id: `hist_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`, event: "Front Desk List", details: change.summary, by: actorName(session, body.userName), role, timestamp: now },
+          ...(room.history || []),
+        ].slice(0, 50);
+        await put(id, next);
+      });
+    }
+    const after = raw.apply === true ? await getAll() : null;
+    return NextResponse.json({
+      ok: true, action: "front_desk_list", applied: raw.apply === true, savedAs, plan,
+      invalid: [...dep.invalid, ...arr.invalid],
+      ...(after ? { version: after.version, docs: after.docs } : {}),
+    });
+  }
+
   if (!body || !Array.isArray(body.suiteIds) || body.suiteIds.length === 0) {
     return NextResponse.json({ error: "suiteIds array required" }, { status: 400 });
   }

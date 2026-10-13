@@ -8,7 +8,8 @@
     "start": "next start",
     "test": "vitest run",
     "test:workflow": "node scripts/test-workflow.mjs",
-    "test:roster": "node scripts/test-roster.mjs"
+    "test:roster": "node scripts/test-roster.mjs",
+    "test:stage4": "node scripts/test-stage4.mjs"
   },
   "dependencies": {
     "next": "16.4.0",

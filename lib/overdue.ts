@@ -37,7 +37,7 @@ export function hotelMinutes(now: Date): number {
 
 const NOT_READY = new Set(["dirty", "assigned", "in_progress", "inspection_failed"]);
 
-export function overdueFor(room: RoomDoc & { occ?: string }, now: Date): OverdueFlag[] {
+export function overdueFor(room: RoomDoc & { occ?: string; arrivalDate?: string | null }, now: Date): OverdueFlag[] {
   const t = now.getTime();
   const flags: OverdueFlag[] = [];
   const add = (kind: OverdueKind, minutes: number) => flags.push({ suite: room.id, kind, minutes, attendant: room.attendant ?? null });
@@ -48,9 +48,11 @@ export function overdueFor(room: RoomDoc & { occ?: string }, now: Date): Overdue
     .reduce((a, b) => Math.max(a, b), -1);
   if (oldestRequest >= LIMITS.guestRequestMin) add("guest", oldestRequest);
 
+  // Checkouts, and suites on today's arrivals list (lib/frontDesk.ts), must be ready for check-in.
   const isCheckout = room.occ === "checkout" || (room.occ === undefined && room.serviceType === "turnover");
+  const arriving = Boolean(room.arrivalDate) && room.arrivalDate === new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(now);
   const pastCheckIn = hotelMinutes(now) - LIMITS.checkInHour * 60;
-  if (isCheckout && pastCheckIn >= 0 && NOT_READY.has(room.status)) add("checkin", pastCheckIn);
+  if ((isCheckout || arriving) && pastCheckIn >= 0 && NOT_READY.has(room.status)) add("checkin", pastCheckIn);
 
   if (room.status === "awaiting_inspection") {
     const m = minutesSince(room.completedAt, t);
@@ -89,7 +91,7 @@ export function describe(flag: OverdueFlag): string {
     case "guest":
       return `Guest request waiting ${waited(flag.minutes)}`;
     case "checkin":
-      return flag.minutes === 0 ? "Checkout not ready at 3 PM check-in" : `Checkout not ready, ${waited(flag.minutes)} past 3 PM check-in`;
+      return flag.minutes === 0 ? "Not ready at 3 PM check-in" : `Not ready, ${waited(flag.minutes)} past 3 PM check-in`;
     case "inspection":
       return `Cleaned, waiting ${waited(flag.minutes)} for inspection`;
     case "cleaning":

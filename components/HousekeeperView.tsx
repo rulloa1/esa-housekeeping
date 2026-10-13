@@ -11,6 +11,7 @@ import { ChecklistModal } from "./ChecklistModal";
 import { MaintenanceModal } from "./MaintenanceModal";
 import { SupplyModal } from "./SupplyModal";
 import { RoomHistoryDrawer } from "./RoomHistoryDrawer";
+import { HousekeeperAlerts } from "./HousekeeperAlerts";
 
 interface HousekeeperViewProps {
   initialDocs: Record<string, RoomDoc>;
@@ -208,6 +209,7 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
         }
       `}</style>
       <NavigationHeader currentRole={currentRole} activeTab="housekeeper" />
+      <HousekeeperAlerts rooms={allRooms} me={selectedAttendant} />
 
       {/* Photo banner */}
       <div style={{ maxWidth: 840, width: "100%", margin: "0 auto", padding: "16px 16px 0" }}>

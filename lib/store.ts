@@ -450,9 +450,9 @@ export async function hashWrite(ops: { key: string; field: string; value: string
   await transaction(...ops.map((o): Command => (o.value === null ? ["HDEL", o.key, o.field] : ["HSET", o.key, o.field, o.value])));
 }
 
-// Copies every suite to hk:snapshot:<label> before a bulk reset, kept 30 days like the daily ones.
-export async function snapshotBeforeReset(): Promise<string> {
-  const label = `before-reset-${new Date().toISOString()}`;
+// Copies every suite to hk:snapshot:before-<what>-<time> before a bulk change, kept 30 days like the daily ones.
+export async function snapshotBeforeReset(what = "reset"): Promise<string> {
+  const label = `before-${what}-${new Date().toISOString()}`;
   await snapshot(label);
   return label;
 }
