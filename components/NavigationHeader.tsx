@@ -20,6 +20,7 @@ export function NavigationHeader({ currentRole }: HeaderProps) {
     { href: "/housekeeping", label: "3D Building Board", icon: "🏢" },
     { href: "/guest-links", label: "Guest QR Cards", icon: "🖨️" },
     { href: "/staff", label: "Staff Portal", icon: "🏠" },
+    ...(currentRole && currentRole !== "housekeeper" && currentRole !== "housekeeping" ? [{ href: "/reports", label: "Reports", icon: "📈" }] : []),
     ...(currentRole === "admin" ? [{ href: "/roster", label: "Staff Roster", icon: "👥" }] : []),
   ];
 
