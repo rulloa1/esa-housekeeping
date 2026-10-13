@@ -11,7 +11,8 @@
     "test:roster": "node scripts/test-roster.mjs",
     "test:stage4": "node scripts/test-stage4.mjs",
     "test:stage5": "node scripts/test-stage5.mjs",
-    "test:stage6": "node scripts/test-stage6.mjs"
+    "test:stage6": "node scripts/test-stage6.mjs",
+    "test:stage7": "node scripts/test-stage7.mjs"
   },
   "dependencies": {
     "next": "16.4.0",

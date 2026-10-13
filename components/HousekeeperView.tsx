@@ -14,6 +14,8 @@ import { RoomHistoryDrawer } from "./RoomHistoryDrawer";
 import { HousekeeperAlerts } from "./HousekeeperAlerts";
 import { PushToggle } from "./PushToggle";
 import { PhotoThumb } from "./PhotoPicker";
+import { ConnectionBanner } from "./ConnectionBanner";
+import { reliableFetch } from "@/lib/reliableFetch";
 
 interface HousekeeperViewProps {
   initialDocs: Record<string, RoomDoc>;
@@ -63,7 +65,7 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
           }
         }
       } catch (err) {
-        console.error("Polling error:", err);
+        if (navigator.onLine) console.error("Polling error:", err); // offline is expected; the banner says so
       }
       timer = setTimeout(poll, document.hidden ? 15000 : 3000);
     };
@@ -129,7 +131,7 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
 
   const handleStartCleaning = async (room: RoomDoc) => {
     try {
-      const res = await fetch(`/api/suites/${room.id}`, {
+      const res = await reliableFetch(`/api/suites/${room.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -211,6 +213,7 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
         }
       `}</style>
       <NavigationHeader currentRole={currentRole} activeTab="housekeeper" />
+      <ConnectionBanner />
       <HousekeeperAlerts rooms={allRooms} me={selectedAttendant} />
 
       {/* Photo banner */}

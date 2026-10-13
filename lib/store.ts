@@ -474,3 +474,21 @@ export async function getValue(key: string): Promise<string | null> {
   }
   return ((await redis("GET", key)) as string | null) ?? null;
 }
+
+// ---------- Capped lists (sign-in activity) ----------
+// Newest first; only the newest `max` entries are kept. A Redis list in production.
+const lists = globalThis as unknown as { __hkLists?: Map<string, string[]> };
+lists.__hkLists ??= new Map();
+
+export async function listPush(key: string, value: string, max: number): Promise<void> {
+  if (!usingRedis) {
+    lists.__hkLists!.set(key, [value, ...(lists.__hkLists!.get(key) ?? [])].slice(0, max));
+    return;
+  }
+  await transaction(["LPUSH", key, value], ["LTRIM", key, 0, max - 1]);
+}
+
+export async function listRange(key: string, count: number): Promise<string[]> {
+  if (!usingRedis) return (lists.__hkLists!.get(key) ?? []).slice(0, count);
+  return ((await redis("LRANGE", key, 0, count - 1)) as string[] | null) ?? [];
+}

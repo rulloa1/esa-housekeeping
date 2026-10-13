@@ -87,6 +87,22 @@ Read-only, worked out from what each suite already holds (`lib/overdue.ts`); not
 - Don't record guest names, phone numbers or addresses in the log; those stay in the hotel's own system.
 - Stored in one new Redis hash, `hk:lostfound`. **Rollback:** revert the PR; the hash is left unused.
 
+### Handover log (`/handover`)
+- Short notes one shift leaves for the next: topic, optional suite, and an "important" flag. Anyone signed in can add one; supervisors mark notes handled or reopen them (the API enforces this: `403 { reason: "supervisorOnly" }`).
+- The supervisor dashboard shows open notes from the last 24 hours, important ones first.
+- Kept 30 days in one Redis hash, `hk:handover`; older notes are dropped when a new one is added. No guest phone numbers, card details or addresses.
+- **Rollback:** revert the PR; the hash is left unused.
+
+### Saves on bad Wi-Fi (housekeeper screens)
+- Starting a suite, checklist taps and submitting for inspection are retried when they can't reach the server: as soon as the phone is back online, otherwise after 2, 4, 8, 15 and 30 seconds, for up to 10 minutes (`lib/reliableFetch.ts`). A save the server answered, even with a refusal, is never repeated.
+- Checklist taps are sent one at a time with the newest state, so a late retry can't undo a newer tap.
+- A banner says when the phone is offline or changes are waiting, and to keep the page open.
+
+### Sign-in activity (admins, on `/roster`)
+- Each sign-in, wrong PIN and lockout: time, role, the person's name for a personal PIN, and the kind of device (iPad, iPhone, Android, Windows, Mac). PINs and network addresses are never recorded.
+- Newest 500 entries in one Redis list, `hk:signins`. Recording never blocks a sign-in.
+- **Rollback:** revert the PR; `DEL hk:signins` if you want the history gone.
+
 ### Automatic checks
 `.github/workflows/checks.yml` runs the type check, unit tests and a production build on every pull request and every push to `main`. A red check means Vercel would reject the same build.
 

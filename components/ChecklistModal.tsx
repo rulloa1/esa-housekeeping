@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { reliableFetch } from "@/lib/reliableFetch";
 import type { RoomDoc } from "@/lib/models";
 import { DEFAULT_CHECKLIST_TEMPLATE } from "@/lib/models";
 
@@ -41,54 +42,54 @@ export function ChecklistModal({ room, attendantName, onClose, onComplete }: Che
   const completedMandatory = mandatoryItems.filter((i) => checklist[i.id]).length;
   const allMandatoryCompleted = completedMandatory === mandatoryItems.length;
 
-  const handleToggle = async (itemId: string) => {
-    const nextChecklist = { ...checklist, [itemId]: !checklist[itemId] };
-    setChecklist(nextChecklist);
+  // Checklist saves go one at a time, always sending the newest state, so a save retried after
+  // a Wi-Fi drop can never land after (and undo) a newer tap.
+  const latest = useRef<Record<string, boolean> | null>(null);
+  const saving = useRef(false);
+  const saveChecklist = async (next: Record<string, boolean>) => {
+    latest.current = next;
     setSaveStatus("saving");
-
+    if (saving.current) return;
+    saving.current = true;
     try {
-      const res = await fetch(`/api/suites/${room.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          checklist: nextChecklist,
-          userName: attendantName,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setSaveStatus("saved");
-      onComplete(data.room);
-    } catch {
-      setSaveStatus("error");
+      while (latest.current) {
+        const body = latest.current;
+        latest.current = null;
+        try {
+          const res = await reliableFetch(`/api/suites/${room.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ checklist: body, userName: attendantName }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error);
+          if (!latest.current) {
+            setSaveStatus("saved");
+            onComplete(data.room);
+          }
+        } catch {
+          setSaveStatus("error");
+        }
+      }
+    } finally {
+      saving.current = false;
     }
   };
 
-  const handleCheckAllCurrent = async () => {
+  const handleToggle = (itemId: string) => {
+    const nextChecklist = { ...checklist, [itemId]: !checklist[itemId] };
+    setChecklist(nextChecklist);
+    saveChecklist(nextChecklist);
+  };
+
+  const handleCheckAllCurrent = () => {
     const allChecked = filteredItems.every((i) => checklist[i.id]);
     const nextChecklist = { ...checklist };
     filteredItems.forEach((i) => {
       nextChecklist[i.id] = !allChecked;
     });
     setChecklist(nextChecklist);
-    setSaveStatus("saving");
-
-    try {
-      const res = await fetch(`/api/suites/${room.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          checklist: nextChecklist,
-          userName: attendantName,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setSaveStatus("saved");
-      onComplete(data.room);
-    } catch {
-      setSaveStatus("error");
-    }
+    saveChecklist(nextChecklist);
   };
 
   const handleCompleteCleaning = async () => {
@@ -101,7 +102,7 @@ export function ChecklistModal({ room, attendantName, onClose, onComplete }: Che
     setErrorMsg("");
 
     try {
-      const res = await fetch(`/api/suites/${room.id}`, {
+      const res = await reliableFetch(`/api/suites/${room.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -175,7 +176,7 @@ export function ChecklistModal({ room, attendantName, onClose, onComplete }: Che
               Suite {room.id} · {room.type}
             </h2>
             <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
-              Attendant: {attendantName || "Housekeeper"} · Status: {saveStatus === "saving" ? "Autosaving..." : saveStatus === "error" ? "Sync pending" : "All progress saved"}
+              Attendant: {attendantName || "Housekeeper"} · Status: {saveStatus === "saving" ? "Autosaving..." : saveStatus === "error" ? "Not saved. Tap an item again to retry" : "All progress saved"}
             </div>
           </div>
           <button
