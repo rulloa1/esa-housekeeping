@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
+import { notify } from "@/lib/push";
 import { actorName, getSession, isSupervisor, type Session } from "@/lib/auth";
 import { get, put, remove, withSuiteLock } from "@/lib/store";
 import { isGuestTask, type Role, type RoomDoc, type AuditLogEntry, type MaintenanceIssue, type SupplyRequest } from "@/lib/models";
@@ -116,6 +117,11 @@ async function update(id: string, session: Session, body: Body, board: { base: D
     });
   };
 
+  // Lock-screen notifications to send once the save is done (lib/push.ts).
+  const notifyAttendant = (name: string | null, title: string, text: string) => {
+    if (name && name !== userName) after(() => notify({ names: [name] }, { title, body: text, url: "/my-rooms", tag: `suite-${id}` }).then(() => {}));
+  };
+
   let conflicts: string[] = [];
   const rejected: { field: string; reason: string }[] = [];
 
@@ -174,6 +180,7 @@ async function update(id: string, session: Session, body: Body, board: { base: D
         room.inspectionNotes = body.inspectionNotes || reasons.join("; ");
         if (body.inspectionCategories) room.inspectionCategories = body.inspectionCategories;
         logEvent("Inspection Failed", `Rejected by ${userName}: ${reasons.join(", ")}`);
+        notifyAttendant(room.attendant, `Suite ${id} failed inspection`, (room.inspectionFailReasons || []).slice(0, 3).join(", ") || "Tap to see what needs fixing.");
         break;
       }
 
@@ -187,6 +194,9 @@ async function update(id: string, session: Session, body: Body, board: { base: D
         if (body.instructions) room.instructions = body.instructions;
         if (room.status === "dirty" && room.attendant) room.status = "assigned";
         logEvent("Assignment Updated", `Assigned to ${room.attendant || "Unassigned"} (was ${oldAttendant || "Unassigned"}).`);
+        if (room.attendant !== oldAttendant) {
+          notifyAttendant(room.attendant, `Suite ${id} assigned to you`, room.priority === "urgent" ? "Urgent. " + (room.instructions || "") : room.instructions || "Tap to see your suites.");
+        }
         break;
       }
 
@@ -325,7 +335,10 @@ async function update(id: string, session: Session, body: Body, board: { base: D
 
     if (changes.attendant !== undefined) {
       const attendant = (changes.attendant as string | null) || null;
-      if (attendant !== room.attendant) logEvent("Attendant Changed", `Attendant set to ${attendant || "None"}`);
+      if (attendant !== room.attendant) {
+        logEvent("Attendant Changed", `Attendant set to ${attendant || "None"}`);
+        notifyAttendant(attendant, `Suite ${id} assigned to you`, "Tap to see your suites.");
+      }
       room.attendant = attendant;
       delete changes.attendant;
     }
