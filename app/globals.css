@@ -182,5 +182,45 @@ input, select, textarea {
   .page-banner__title { font-size: 21px; }
 }
 @media print {
-  .page-banner { display: none; }
+  .page-banner,
+  .no-print,
+  nav,
+  header,
+  button:not(.print-keep),
+  .dash-batch-bar {
+    display: none !important;
+  }
+  body {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+  }
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .card, .hk-room-card, tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
 }
+
+/* ── Animation Utilities ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.anim-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.anim-slide-up {
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+

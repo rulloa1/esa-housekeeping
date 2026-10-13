@@ -95,14 +95,27 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
     });
   }, [myRooms, allRooms, viewScope, activeFloor, statusFilter, searchQuery]);
 
-  // Housekeeper metrics
+  // Housekeeper metrics & estimated time
   const stats = useMemo(() => {
     const total = myRooms.length;
     const completed = myRooms.filter((r) => r.status === "clean" || r.status === "awaiting_inspection").length;
     const inProgress = myRooms.filter((r) => r.status === "in_progress").length;
     const remaining = total - completed;
     const urgent = myRooms.filter((r) => r.priority === "urgent" && r.status !== "clean").length;
-    return { total, completed, inProgress, remaining, urgent };
+
+    // Estimate: Turnover = ~40 mins, Stayover = ~25 mins
+    const uncompletedRooms = myRooms.filter((r) => r.status !== "clean" && r.status !== "awaiting_inspection");
+    const estMinutes = uncompletedRooms.reduce((acc, r) => acc + (r.serviceType === "turnover" ? 40 : 25), 0);
+    const estHours = Math.floor(estMinutes / 60);
+    const estRemMins = estMinutes % 60;
+    const estTimeFormatted =
+      estMinutes === 0
+        ? "All caught up"
+        : estHours > 0
+        ? `~${estHours}h ${estRemMins > 0 ? `${estRemMins}m` : ""}`
+        : `~${estRemMins}m`;
+
+    return { total, completed, inProgress, remaining, urgent, estMinutes, estTimeFormatted };
   }, [myRooms]);
 
   const handleStartCleaning = async (room: RoomDoc) => {
@@ -168,6 +181,21 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
             grid-template-columns: repeat(2, 1fr) !important;
           }
         }
+        .hk-room-card {
+          transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        }
+        .hk-room-card:hover {
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-md) !important;
+        }
+        @keyframes pulseHkLive {
+          0% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4); }
+          70% { box-shadow: 0 0 0 8px rgba(217, 119, 6, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0); }
+        }
+        .pulse-hk-inprog {
+          animation: pulseHkLive 2s infinite;
+        }
       `}</style>
       <NavigationHeader currentRole={currentRole} activeTab="housekeeper" />
 
@@ -179,7 +207,7 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
           focus="55%"
           eyebrow="Houston IAH Airport"
           title={`${selectedAttendant}'s suites`}
-          subtitle={`${stats.completed} of ${stats.total} done today`}
+          subtitle={`${stats.completed} of ${stats.total} done today · Est. ${stats.estTimeFormatted} remaining`}
         />
       </div>
 
@@ -212,10 +240,10 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
               </select>
             </div>
 
-            <div style={{ fontSize: 12, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <span>Shift: 7:00 AM – 3:30 PM</span>
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--st-clean)", display: "inline-block" }}></span>
-              <span>Live Synced</span>
+              <span style={{ fontWeight: 600, color: "var(--text-secondary)" }}>Est. Work: {stats.estTimeFormatted}</span>
             </div>
           </div>
 
@@ -243,7 +271,7 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
           <div style={{ marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4, fontSize: 12 }}>
               <span style={{ fontWeight: 700, color: "var(--text-secondary)" }}>
-                Shift Progress: {stats.completed} of {stats.total} suites complete
+                Shift Progress: {stats.completed} of {stats.total} suites complete · {stats.estTimeFormatted} left
               </span>
               <span style={{ fontWeight: 800, color: "var(--esa-green-dark)" }}>
                 {stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0}%
@@ -411,22 +439,103 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
         )}
 
         {displayedRooms.length === 0 ? (
-          <div
-            style={{
-              padding: "48px 20px",
-              textAlign: "center",
-              backgroundColor: "#FFFFFF",
-              borderRadius: 14,
-              border: "1px solid var(--border-default)",
-              marginTop: 12,
-            }}
-          >
-            <div style={{ fontSize: 32, marginBottom: 8 }}>🎉</div>
-            <h3 style={{ margin: "0 0 6px", fontSize: 18, color: "var(--text-main)" }}>No Rooms in Queue</h3>
-            <p style={{ margin: 0, fontSize: 13, color: "var(--text-muted)" }}>
-              No suites match your current filter on Floor {activeFloor === "all" ? "1-3" : activeFloor}.
-            </p>
-          </div>
+          viewScope === "assigned" && stats.total > 0 && stats.remaining === 0 ? (
+            <div
+              style={{
+                padding: "40px 24px",
+                textAlign: "center",
+                backgroundColor: "#FFFFFF",
+                borderRadius: 16,
+                border: "2px solid #A7F3D0",
+                background: "linear-gradient(180deg, #F0FDF4 0%, #FFFFFF 100%)",
+                boxShadow: "var(--shadow-sm)",
+                marginTop: 12,
+              }}
+            >
+              <div style={{ fontSize: 44, marginBottom: 12 }}>🎉</div>
+              <h3 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 800, color: "#065F46" }}>
+                All {stats.total} Assigned Suites Complete!
+              </h3>
+              <p style={{ margin: "0 0 16px", fontSize: 14, color: "#047857", maxWidth: 460, marginInline: "auto" }}>
+                Outstanding job, {selectedAttendant}! Every suite assigned to you today has been completed or submitted for supervisor inspection.
+              </p>
+              <div style={{ display: "flex", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  onClick={() => setViewScope("all")}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "var(--radius-pill)",
+                    backgroundColor: "var(--esa-green)",
+                    color: "#FFFFFF",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  View All Hotel Rooms ({allRooms.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStatusFilter("all");
+                    setActiveFloor("all");
+                    setSearchQuery("");
+                  }}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "var(--radius-pill)",
+                    backgroundColor: "#FFFFFF",
+                    color: "var(--text-secondary)",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    border: "1px solid var(--border-default)",
+                    cursor: "pointer",
+                  }}
+                >
+                  Reset Filters
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div
+              style={{
+                padding: "48px 20px",
+                textAlign: "center",
+                backgroundColor: "#FFFFFF",
+                borderRadius: 14,
+                border: "1px solid var(--border-default)",
+                marginTop: 12,
+              }}
+            >
+              <div style={{ fontSize: 36, marginBottom: 10 }}>🔍</div>
+              <h3 style={{ margin: "0 0 6px", fontSize: 18, color: "var(--text-main)" }}>No Rooms Match Filters</h3>
+              <p style={{ margin: "0 0 16px", fontSize: 13, color: "var(--text-muted)" }}>
+                No suites match your current criteria on Floor {activeFloor === "all" ? "1-3" : activeFloor}.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setStatusFilter("all");
+                  setActiveFloor("all");
+                  setSearchQuery("");
+                }}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "var(--radius-pill)",
+                  backgroundColor: "var(--esa-brown)",
+                  color: "#FFFFFF",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                Reset All Filters
+              </button>
+            </div>
+          )
         ) : (
           <div style={{ display: "grid", gap: 12 }}>
             {displayedRooms.map((room) => {
@@ -436,14 +545,20 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
               const checkPercent = Math.round((completedChecks / totalChecks) * 100);
               const isTurnover = room.serviceType === "turnover";
               const isUrgent = room.priority === "urgent";
+              const isInProgress = room.status === "in_progress";
 
               return (
                 <div
                   key={room.id}
+                  className="hk-room-card"
                   style={{
                     backgroundColor: "#FFFFFF",
                     borderRadius: 14,
-                    border: isUrgent ? "2px solid #F87171" : "1px solid var(--border-default)",
+                    border: isUrgent
+                      ? "2px solid #F87171"
+                      : isInProgress
+                      ? "2px solid var(--st-in-prog)"
+                      : "1px solid var(--border-default)",
                     padding: "16px",
                     boxShadow: "var(--shadow-xs)",
                     display: "flex",
@@ -452,9 +567,9 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
                   }}
                 >
                   {/* Top Bar: Room Number, Type & Status */}
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10, flexWrap: "wrap" }}>
                     <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                         <span style={{ fontSize: 24, fontWeight: 800, color: "var(--text-main)", lineHeight: 1 }}>
                           Suite {room.id}
                         </span>
@@ -485,6 +600,19 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
                         >
                           {isTurnover ? "Checkout Turnover" : "Stayover Refresh"}
                         </span>
+                        <span
+                          style={{
+                            padding: "2px 7px",
+                            borderRadius: 4,
+                            backgroundColor: "#F3F4F6",
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: "var(--text-muted)",
+                          }}
+                          title={`Estimated service time: ${isTurnover ? "40 mins" : "25 mins"}`}
+                        >
+                          ⏱ {isTurnover ? "~40 min" : "~25 min"}
+                        </span>
                       </div>
                       <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>
                         {room.type} · Floor {room.floor}
@@ -492,6 +620,7 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
                     </div>
 
                     <span
+                      className={isInProgress ? "pulse-hk-inprog" : ""}
                       style={{
                         padding: "5px 10px",
                         borderRadius: "var(--radius-pill)",
@@ -500,8 +629,22 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
                         backgroundColor: st.bg,
                         color: st.color,
                         border: `1px solid ${st.border}`,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 5,
                       }}
                     >
+                      {isInProgress && (
+                        <span
+                          style={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: "50%",
+                            backgroundColor: "var(--st-in-prog)",
+                            display: "inline-block",
+                          }}
+                        />
+                      )}
                       {st.label}
                     </span>
                   </div>
@@ -574,7 +717,7 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
                     </div>
                   </div>
 
-                  {/* Prominent Operational Touch Actions (Phase 6) */}
+                  {/* Prominent Operational Touch Actions */}
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8, paddingTop: 4 }}>
                     {/* START CLEANING button */}
                     {room.status !== "in_progress" && room.status !== "awaiting_inspection" && room.status !== "clean" && (
@@ -603,7 +746,7 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
                       </button>
                     )}
 
-                    {/* VIEW CHECKLIST button */}
+                    {/* VIEW / RESUME CHECKLIST button */}
                     <button
                       type="button"
                       onClick={() => setChecklistRoom(room)}
@@ -612,9 +755,9 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
                         minWidth: 140,
                         padding: "12px 14px",
                         borderRadius: 8,
-                        border: "1px solid var(--border-default)",
-                        backgroundColor: "#FFFFFF",
-                        color: "var(--text-main)",
+                        border: isInProgress ? "none" : "1px solid var(--border-default)",
+                        backgroundColor: isInProgress ? "var(--st-in-prog)" : "#FFFFFF",
+                        color: isInProgress ? "#FFFFFF" : "var(--text-main)",
                         fontSize: 13,
                         fontWeight: 700,
                         cursor: "pointer",
@@ -622,9 +765,10 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole }: Ho
                         alignItems: "center",
                         justifyContent: "center",
                         gap: 6,
+                        boxShadow: isInProgress ? "0 2px 8px rgba(217, 119, 6, 0.3)" : undefined,
                       }}
                     >
-                      <span>📝</span> VIEW CHECKLIST
+                      <span>📝</span> {isInProgress ? `RESUME CHECKLIST (${completedChecks}/${totalChecks})` : "VIEW CHECKLIST"}
                     </button>
 
                     {/* REPORT MAINTENANCE button */}

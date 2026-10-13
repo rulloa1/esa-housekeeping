@@ -64,6 +64,33 @@ export function ChecklistModal({ room, attendantName, onClose, onComplete }: Che
     }
   };
 
+  const handleCheckAllCurrent = async () => {
+    const allChecked = filteredItems.every((i) => checklist[i.id]);
+    const nextChecklist = { ...checklist };
+    filteredItems.forEach((i) => {
+      nextChecklist[i.id] = !allChecked;
+    });
+    setChecklist(nextChecklist);
+    setSaveStatus("saving");
+
+    try {
+      const res = await fetch(`/api/suites/${room.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          checklist: nextChecklist,
+          userName: attendantName,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setSaveStatus("saved");
+      onComplete(data.room);
+    } catch {
+      setSaveStatus("error");
+    }
+  };
+
   const handleCompleteCleaning = async () => {
     if (!allMandatoryCompleted) {
       setErrorMsg(`Please complete all mandatory items (${completedMandatory}/${mandatoryItems.length} checked).`);
@@ -209,6 +236,29 @@ export function ChecklistModal({ room, attendantName, onClose, onComplete }: Che
                 {c.label}
               </button>
             ))}
+          </div>
+
+          {/* Quick Category Action Bar */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8, paddingTop: 8, borderTop: "1px dashed var(--border-subtle)" }}>
+            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+              {filteredItems.filter((i) => checklist[i.id]).length} of {filteredItems.length} items checked
+            </span>
+            <button
+              type="button"
+              onClick={handleCheckAllCurrent}
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                padding: "3px 10px",
+                borderRadius: "var(--radius-pill)",
+                backgroundColor: "var(--bg-muted)",
+                color: "var(--text-secondary)",
+                border: "1px solid var(--border-default)",
+                cursor: "pointer",
+              }}
+            >
+              {filteredItems.every((i) => checklist[i.id]) ? "Uncheck All in Category" : "✓ Check All in Category"}
+            </button>
           </div>
         </div>
 

@@ -82,6 +82,43 @@ export function OperationsReportModal({ rooms, onClose }: OperationsReportModalP
     };
   }, [rooms]);
 
+  const handleExportCSV = () => {
+    const headers = [
+      "Suite",
+      "Type",
+      "Floor",
+      "Status",
+      "Priority",
+      "ServiceType",
+      "Attendant",
+      "StartedAt",
+      "CompletedAt",
+      "InspectionResult",
+    ];
+    const rows = rooms.map((r) => [
+      r.id,
+      `"${r.type}"`,
+      r.floor,
+      r.status,
+      r.priority,
+      r.serviceType,
+      `"${r.attendant || "Unassigned"}"`,
+      `"${r.startedAt || ""}"`,
+      `"${r.completedAt || ""}"`,
+      `"${r.inspectionResult || "None"}"`,
+    ]);
+    const csvContent = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `esa-housekeeping-report-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div
       style={{
@@ -118,6 +155,8 @@ export function OperationsReportModal({ rooms, onClose }: OperationsReportModalP
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            flexWrap: "wrap",
+            gap: 12,
           }}
         >
           <div>
@@ -128,7 +167,27 @@ export function OperationsReportModal({ rooms, onClose }: OperationsReportModalP
               📊 Housekeeping Operations & QA Report
             </h2>
           </div>
-          <div style={{ display: "flex", gap: 10 }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <button
+              type="button"
+              onClick={handleExportCSV}
+              style={{
+                padding: "8px 14px",
+                borderRadius: 8,
+                backgroundColor: "var(--esa-green)",
+                color: "#FFFFFF",
+                border: "none",
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+              title="Download detailed operations CSV spreadsheet"
+            >
+              <span>📥</span> Export CSV
+            </button>
             <button
               type="button"
               onClick={() => window.print()}

@@ -260,9 +260,19 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
     setDocs((prev) => ({ ...prev, [updated.id]: updated }));
   };
 
+  // Workload composition breakdown for selected suites
+  const selectedCounts = useMemo(() => {
+    const selected = allRooms.filter((r) => selectedRoomIds.includes(r.id));
+    const dirty = selected.filter((r) => r.status === "dirty").length;
+    const turnover = selected.filter((r) => r.serviceType === "turnover").length;
+    const stayover = selected.filter((r) => r.serviceType === "stayover").length;
+    return { dirty, turnover, stayover };
+  }, [allRooms, selectedRoomIds]);
+
   const handleBatchAssign = async () => {
     if (selectedRoomIds.length === 0) return;
     setIsSubmittingBatch(true);
+    const count = selectedRoomIds.length;
     try {
       const res = await fetch("/api/suites", {
         method: "POST",
@@ -281,10 +291,12 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
           setDocs(json.docs);
           setVersion(json.version);
         }
+        showToast(`✓ Assigned ${count} suites to ${batchAttendant} (${batchPriority} priority)`);
         setSelectedRoomIds([]);
       }
     } catch (err) {
       console.error("Batch assignment error:", err);
+      showToast("Failed to complete batch assignment");
     } finally {
       setIsSubmittingBatch(false);
     }
@@ -310,6 +322,16 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
     setSelectedRoomIds(ids);
   };
 
+
+  const relativeTime = (iso: string): string => {
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  };
 
   const getStatusBadge = (status: RoomStatus) => {
     switch (status) {
@@ -374,8 +396,6 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
         @media (min-width: 1280px) {
           .dash-kpi-grid { grid-template-columns: repeat(8, 1fr); }
         }
-        @media (max-width: 640px) {
-        }
         .dash-filters-scroll {
           display: flex;
           gap: 6px;
@@ -387,6 +407,10 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
         }
         .dash-filters-scroll::-webkit-scrollbar {
           display: none;
+        }
+        @keyframes slideUpBar {
+          from { transform: translate(-50%, 20px); opacity: 0; }
+          to   { transform: translate(-50%, 0); opacity: 1; }
         }
         .dash-batch-bar {
           position: fixed;
@@ -405,24 +429,49 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
           max-width: 960px;
           width: calc(100% - 32px);
           flex-wrap: wrap;
+          animation: slideUpBar 0.22s cubic-bezier(0.16, 1, 0.3, 1);
         }
         @keyframes pulseDot {
           0% { transform: scale(0.9); opacity: 0.7; }
           50% { transform: scale(1.3); opacity: 1; }
           100% { transform: scale(0.9); opacity: 0.7; }
         }
+        @keyframes slideInRow {
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
         .pulse-live {
           animation: pulseDot 2s infinite ease-in-out;
         }
-        @media (max-width: 900px) {
-          .dash-col-insp { display: none; }
+        /* Glass-button hover — must be top-level, not inside a media query */
         .glass-btn {
-          transition: all 0.15s ease;
+          transition: background-color 0.15s ease, transform 0.15s ease;
         }
         .glass-btn:hover {
           background-color: rgba(255, 255, 255, 0.28) !important;
           transform: translateY(-1px);
         }
+        /* KPI tile hover */
+        .dash-kpi-btn {
+          transition: transform 0.12s ease, box-shadow 0.12s ease;
+        }
+        .dash-kpi-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(0,0,0,0.1) !important;
+        }
+        /* Operations table row hover */
+        .dash-ops-row {
+          transition: background-color 0.12s ease;
+        }
+        .dash-ops-row:hover {
+          background-color: rgba(47, 122, 30, 0.04) !important;
+        }
+        /* Narrow screens: hide Inspection and Updated-At columns */
+        @media (max-width: 900px) {
+          .dash-col-insp  { display: none; }
+          .dash-col-updated { display: none; }
+        }
+        /* Mobile overrides */
         @media (max-width: 640px) {
           .dash-kpi-grid {
             grid-template-columns: repeat(2, 1fr) !important;
@@ -434,10 +483,44 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
             gap: 10px;
           }
         }
+        /* Print: hide controls, keep just the table */
+        @media print {
+          .dash-kpi-grid, .dash-filters-scroll, .dash-batch-bar,
+          nav, header, button, input, select { display: none !important; }
+          body { background: #fff !important; }
+          table { font-size: 11px; }
+        }
       `}</style>
       <NavigationHeader currentRole={currentRole} activeTab="supervisor" />
 
       <main style={{ maxWidth: 1320, width: "100%", margin: "0 auto", padding: "16px 12px 60px" }}>
+        {/* Floating Toast Notification */}
+        {toastMessage && (
+          <div
+            style={{
+              position: "fixed",
+              top: 24,
+              right: 24,
+              backgroundColor: "var(--esa-brown-dark)",
+              color: "#FFFFFF",
+              padding: "12px 20px",
+              borderRadius: "var(--radius-pill)",
+              fontSize: 13,
+              fontWeight: 700,
+              boxShadow: "var(--shadow-lg)",
+              zIndex: 2000,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              animation: "fadeIn 0.2s ease-out",
+            }}
+          >
+            <span>🔔</span>
+            <span>{toastMessage}</span>
+          </div>
+        )}
+
         {/* Signature Hotel Property Hero Banner */}
         <section
           style={{
@@ -630,6 +713,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
               <button
                 key={card.key}
                 type="button"
+                className="dash-kpi-btn"
                 onClick={() => setActiveFilter(card.key)}
                 style={{
                   padding: "12px 14px",
@@ -640,7 +724,6 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                   textAlign: "left",
                   cursor: "pointer",
                   boxShadow: isSelected ? "var(--shadow-md)" : "0 2px 6px rgba(0,0,0,0.03)",
-                  transition: "transform 0.15s ease, box-shadow 0.15s ease",
                   display: "grid",
                   gap: 3,
                 }}
@@ -654,6 +737,11 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                 <div style={{ fontSize: 24, fontWeight: 800, color: card.color, lineHeight: 1.1 }}>
                   {card.count}
                 </div>
+                {isSelected && (
+                  <div style={{ fontSize: 10, fontWeight: 700, color: card.color, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                    ● Active filter
+                  </div>
+                )}
               </button>
             );
           })}
@@ -792,6 +880,29 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                   Room Cards
                 </button>
               </div>
+
+              {/* Print Morning Sheet Roster Button */}
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="glass-btn no-print"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "6px 12px",
+                  borderRadius: 8,
+                  border: "1px solid var(--border-default)",
+                  backgroundColor: "#FFFFFF",
+                  color: "var(--esa-brown)",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+                title="Print morning assignment roster and room table"
+              >
+                <span>🖨️</span> Print Roster
+              </button>
             </div>
           </div>
         </div>
@@ -952,6 +1063,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                       Priority {sortField === "priority" && (sortAsc ? "↑" : "↓")}
                     </th>
                     <th className="dash-col-insp" style={{ padding: "12px 14px", fontWeight: 700, color: "var(--esa-brown)" }}>Inspection</th>
+                    <th className="dash-col-updated" style={{ padding: "12px 14px", fontWeight: 700, color: "var(--esa-brown)", whiteSpace: "nowrap" }}>Updated</th>
                     <th style={{ padding: "12px 14px", fontWeight: 700, color: "var(--esa-brown)", textAlign: "right" }}>Actions</th>
                   </tr>
                 </thead>
@@ -972,10 +1084,10 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                       return (
                         <tr
                           key={room.id}
+                          className="dash-ops-row"
                           style={{
                             borderBottom: "1px solid var(--border-subtle)",
                             backgroundColor: isRowSelected ? "rgba(47, 122, 30, 0.05)" : "transparent",
-                            transition: "background-color 0.15s ease",
                           }}
                         >
                           {/* Checkbox */}
@@ -1069,6 +1181,17 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                               </span>
                             ) : (
                               <span style={{ color: "var(--text-muted)", fontSize: 12 }}>—</span>
+                            )}
+                          </td>
+
+                          {/* Last-updated relative timestamp */}
+                          <td className="dash-col-updated" style={{ padding: "12px 14px", whiteSpace: "nowrap" }}>
+                            {room.updatedAt ? (
+                              <span style={{ fontSize: 11, color: "var(--text-muted)" }} title={room.updatedAt}>
+                                {relativeTime(room.updatedAt)}
+                              </span>
+                            ) : (
+                              <span style={{ fontSize: 11, color: "var(--text-muted)" }}>—</span>
                             )}
                           </td>
 
@@ -1341,7 +1464,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
               flexWrap: "wrap",
             }}
           >
-            <div style={{ fontWeight: 700, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ fontWeight: 700, fontSize: 13, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <span
                 style={{
                   backgroundColor: "var(--esa-green)",
@@ -1355,6 +1478,9 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                 {selectedRoomIds.length}
               </span>
               <span>Suites Selected</span>
+              <span style={{ fontSize: 11, opacity: 0.85, fontWeight: 500 }}>
+                ({selectedCounts.dirty} dirty · {selectedCounts.turnover} checkouts · {selectedCounts.stayover} refreshes)
+              </span>
             </div>
 
             {/* Quick Floor & Filter Selectors */}
