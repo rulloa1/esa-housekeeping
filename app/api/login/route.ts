@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { checkPin, createSession, ROLES, type Role } from "@/lib/auth";
 import { count, forget, hit, ttl } from "@/lib/store";
+import { findByPin } from "@/lib/staff";
 
 // Wrong-PIN limit per device address. Generous because every iPad on the hotel's Wi-Fi shares
 // one public address; a correct PIN clears the count.
@@ -25,7 +26,11 @@ export async function POST(req: Request) {
   };
 
   if ((await count(failKey)) >= MAX_FAILURES) return back("locked", await ttl(failKey));
-  if (!(role in ROLES) || !checkPin(role, pin)) {
+  // A shared role PIN signs in as that role. Otherwise a personal PIN from the staff roster signs
+  // that person in with their roster role, whatever role was picked on the form.
+  const shared = role in ROLES && checkPin(role, pin);
+  const person = shared ? null : await findByPin(pin);
+  if (!shared && !person) {
     if ((await hit(failKey, WINDOW_SECONDS)) >= MAX_FAILURES) {
       console.warn("sign-in locked after repeated wrong PINs", failKey);
       return back("locked", await ttl(failKey));
@@ -34,10 +39,11 @@ export async function POST(req: Request) {
   }
 
   await forget(failKey);
-  await createSession(role);
+  const landing: Role = person ? person.role : role;
+  await createSession(landing, person?.id);
 
   // Role-specific landing destinations
-  if (role === "housekeeper" || role === "housekeeping") {
+  if (landing === "housekeeper" || landing === "housekeeping") {
     next.pathname = "/housekeeper";
   } else {
     next.pathname = "/dashboard";

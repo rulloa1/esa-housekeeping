@@ -1,6 +1,6 @@
 // Extended Stay America Suites — Houston IAH Airport
 // Authentication and Authorization with Signed HMAC Cookies
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import type { Role } from "./models";
 
@@ -58,9 +58,30 @@ export async function sign(value: string): Promise<string> {
   return Buffer.from(sig).toString("base64url");
 }
 
-export async function createSession(role: Role): Promise<void> {
+// Lookup key for a personal PIN on the staff roster (lib/staff.ts). Keyed with AUTH_SECRET, so the
+// stored keys are useless without the server's secret.
+export function staffPinKey(pin: string): string {
+  return createHmac("sha256", secret()).update(`staff-pin:${pin}`).digest("hex");
+}
+
+// Cookie value: "<role>.<expires>.<sig>" for a shared role PIN, or
+// "<role>.<expires>.<staffId>.<sig>" for a personal PIN from the staff roster.
+export function sessionPayload(role: Role, expires: number, staffId?: string): string {
+  return staffId ? `${role}.${expires}.${staffId}` : `${role}.${expires}`;
+}
+
+export function parseSessionCookie(raw: string): { role: string; expires: number; staffId?: string; payload: string; sig: string } | null {
+  const parts = raw.split(".");
+  if (parts.length !== 3 && parts.length !== 4) return null;
+  const sig = parts.pop()!;
+  const [role, expires, staffId] = parts;
+  if (staffId !== undefined && !/^[a-z0-9]{1,24}$/.test(staffId)) return null;
+  return { role, expires: Number(expires), staffId, payload: parts.join("."), sig };
+}
+
+export async function createSession(role: Role, staffId?: string): Promise<void> {
   const expires = Date.now() + MAX_AGE * 1000;
-  const value = `${role}.${expires}`;
+  const value = sessionPayload(role, expires, staffId);
   (await cookies()).set(COOKIE, `${value}.${await sign(value)}`, {
     httpOnly: true,
     sameSite: "lax",
@@ -74,13 +95,37 @@ export async function clearSession(): Promise<void> {
   (await cookies()).delete(COOKIE);
 }
 
-export async function getRole(): Promise<Role | null> {
+export interface Session {
+  role: Role;
+  // Set when the person signed in with their own PIN from the staff roster.
+  staff?: { id: string; name: string };
+}
+
+// The signed-in session. A personal sign-in is checked against the roster on every request, so
+// switching someone off (or changing their role) takes effect at once, not at cookie expiry.
+export async function getSession(): Promise<Session | null> {
   const raw = (await cookies()).get(COOKIE)?.value;
   if (!raw) return null;
-  const [role, expires, sig] = raw.split(".");
-  if (!(role in ROLES) || Number(expires) < Date.now()) return null;
-  if (!sig || !safeEqual(sig, await sign(`${role}.${expires}`))) return null;
-  return role as Role;
+  const s = parseSessionCookie(raw);
+  if (!s || !(s.role in ROLES) || !(s.expires > Date.now())) return null;
+  if (!safeEqual(s.sig, await sign(s.payload))) return null;
+  if (!s.staffId) return { role: s.role as Role };
+  const { getStaff } = await import("./staff");
+  const staff = await getStaff(s.staffId);
+  if (!staff?.active) return null;
+  return { role: staff.role, staff: { id: staff.id, name: staff.name } };
+}
+
+export async function getRole(): Promise<Role | null> {
+  return (await getSession())?.role ?? null;
+}
+
+// The name to write in history: the person's own name for a personal sign-in, otherwise
+// whatever the page sent (the shared-PIN pages pick a name from a list), otherwise the role.
+export function actorName(session: Session, sent?: unknown): string {
+  if (session.staff) return session.staff.name;
+  const name = typeof sent === "string" ? sent.trim().slice(0, 60) : "";
+  return name || (session.role === "housekeeper" || session.role === "housekeeping" ? "Housekeeper" : "Supervisor");
 }
 
 export function isSupervisor(role: Role | null): boolean {

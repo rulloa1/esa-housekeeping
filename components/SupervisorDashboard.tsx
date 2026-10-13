@@ -3,7 +3,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { toRoom, toRooms } from "@/lib/roomView";
 import type { RoomDoc, RoomStatus, Role } from "@/lib/models";
-import { STAFF_ATTENDANTS } from "@/lib/models";
+import { useAttendants } from "@/lib/useAttendants";
+import { OverdueAlerts } from "./OverdueAlerts";
 import { NavigationHeader } from "./NavigationHeader";
 import { InspectionModal } from "./InspectionModal";
 import { AssignmentModal } from "./AssignmentModal";
@@ -40,7 +41,12 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
   // Workload and batch assignment state
   const [activeAttendantFilter, setActiveAttendantFilter] = useState<string | null>(null);
   const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>([]);
-  const [batchAttendant, setBatchAttendant] = useState<string>(STAFF_ATTENDANTS[0]);
+  const attendants = useAttendants();
+  const [batchAttendant, setBatchAttendant] = useState<string>(attendants[0]);
+  // When the staff roster loads, pick its first housekeeper if the current pick isn't on it.
+  useEffect(() => {
+    setBatchAttendant((cur) => (cur === "Unassigned" || attendants.includes(cur) ? cur : attendants[0]));
+  }, [attendants]);
   const [batchPriority, setBatchPriority] = useState<"urgent" | "high" | "standard" | "low">("standard");
   const [isSubmittingBatch, setIsSubmittingBatch] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -746,6 +752,12 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
             );
           })}
         </section>
+
+        {/* Overdue: guest requests, checkouts not ready by check-in, waiting inspections */}
+        <OverdueAlerts
+          rooms={allRooms}
+          onSelectSuite={(id) => setViewingHistoryRoom(allRooms.find((r) => r.id === id) ?? null)}
+        />
 
         {/* Staff Workload & Assignment Distribution (Phase 10) */}
         <WorkloadDistribution
@@ -1538,7 +1550,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                   border: "none",
                 }}
               >
-                {STAFF_ATTENDANTS.map((att) => (
+                {attendants.map((att) => (
                   <option key={att} value={att}>{att}</option>
                 ))}
                 <option value="Unassigned">Unassigned</option>

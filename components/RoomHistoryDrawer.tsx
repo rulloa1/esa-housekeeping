@@ -127,7 +127,7 @@ export function RoomHistoryDrawer({ room, onClose, canManage = false, userName, 
         </div>
 
         {/* Content */}
-        <div style={{ padding: "20px", overflowY: "auto", flex: 1, display: "grid", gap: 20 }}>
+        <div style={{ padding: "20px", overflowY: "auto", flex: 1, display: "grid", gap: 20, alignContent: "start" }}>
           {/* Quick Info Box */}
           <div
             style={{

@@ -22,6 +22,8 @@ A hospitality operations and housekeeping management platform for Extended Stay 
   - Touch-optimized interface for smartphones and tablets.
   - Category-based 21-item cleaning checklists (Bedroom, Bathroom, Kitchenette, Final Check) with auto-save and mandatory item validation.
   - Attendant touch controls: Start Cleaning, Submit for Inspection, Report Maintenance, and Request Supplies.
+- **`/roster`** (administrators): **Staff roster with personal PINs**. Add a person with a name, role and their own 4–8 digit PIN; change a PIN, change a role, or switch someone off. Nobody is deleted, so history keeps their name. The shared role PINs keep working alongside.
+- **`/my-rooms`**: short link to `/housekeeper`. A housekeeper who signed in with their own PIN sees only their own suites there, and their name goes on everything they do.
 - **`/housekeeping`**: **3D Building Board (v21)**
   - Interactive 3D building layout with real-time suite state synchronization and top navigation banner.
 - **`/guest-links`**: **Printable Guest QR Cards**
@@ -46,6 +48,27 @@ A hospitality operations and housekeeping management platform for Extended Stay 
   - `guest_request_done`: marks cleaning, towels, or amenity guest requests completed (`requestAt`).
 - `POST /api/guest/:suite` processes guest requests with 2-minute debounce and 10 req/hr rate limiting. Refuses requests (409) if suite is Vacant or Checkout.
 - `DELETE /api/suites/:id` clears a suite (supervisors only).
+- `GET /api/staff` lists the roster (supervisors see everything but PINs; housekeepers get active housekeepers' names). `POST /api/staff { name, role, pin }` and `PATCH /api/staff/:id { name?, role?, active?, pin? }` are admin only.
+- `POST /api/suites { action: "reset_baseline" }` first copies every suite to `hk:snapshot:before-reset-<time>` (kept 30 days) and returns that name as `savedAs`.
+
+### Staff roster and personal PINs
+- Sign-in tries the shared PIN for the chosen role first, then the roster. A personal PIN signs that person in with their roster role, whatever role was picked.
+- Stored in two new Redis hashes: `hk:staff` (id → name, role, active) and `hk:staff:pin` (HMAC of the PIN with `AUTH_SECRET` → id). PINs themselves are never stored. Changing `AUTH_SECRET` invalidates every personal PIN, so re-issue them if you rotate it.
+- A personal session is checked against the roster on every request: switching someone off or changing their role takes effect at once.
+- With a personal sign-in, history uses the person's roster name (a name sent by the page is ignored), and a housekeeper can only start or submit suites assigned to them or unassigned (`403 { reason: "notYours" }`). Shared-PIN sign-ins behave as before.
+- Assignment lists use the roster's active housekeepers once there is at least one; until then they show the sample names.
+- **Rollback:** revert the PR. Personal sessions stop working (people sign in with the shared PINs again); the `hk:staff*` keys are left unused and can be deleted later.
+
+### Overdue flags (supervisor dashboard)
+Read-only, worked out from what each suite already holds (`lib/overdue.ts`); nothing is written:
+- a towel, cleaning or amenity guest request open 30 minutes or more;
+- a checkout suite not clean, awaiting inspection or inspected after 3 PM hotel time (check-in);
+- a suite cleaned and waiting 30 minutes or more for inspection;
+- a suite in progress for 60 minutes or more;
+- a maintenance issue open 24 hours or more.
+
+### Undoing a reset
+Copy the snapshot's `docs` back into the `hk:suites` hash and bump `hk:version`, for example with `redis-cli GET "hk:snapshot:before-reset-…"`, then `HSET hk:suites <id> <json>` for each suite and `INCR hk:version`.
 
 ---
 

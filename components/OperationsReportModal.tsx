@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import type { RoomDoc } from "@/lib/models";
-import { STAFF_ATTENDANTS } from "@/lib/models";
+import { useAttendants } from "@/lib/useAttendants";
 
 interface OperationsReportModalProps {
   rooms: RoomDoc[];
@@ -10,6 +10,7 @@ interface OperationsReportModalProps {
 }
 
 export function OperationsReportModal({ rooms, onClose }: OperationsReportModalProps) {
+  const attendants = useAttendants();
   const stats = useMemo(() => {
     const total = rooms.length;
     const clean = rooms.filter((r) => r.status === "clean").length;
@@ -49,7 +50,8 @@ export function OperationsReportModal({ rooms, onClose }: OperationsReportModalP
     const pendingSupplies = allSupplies.filter((s) => s.status === "pending");
 
     // Attendant Performance breakdown
-    const attendantStats = STAFF_ATTENDANTS.map((name) => {
+    const held = rooms.map((r) => r.attendant).filter((a): a is string => Boolean(a) && !attendants.includes(a!));
+    const attendantStats = [...attendants, ...Array.from(new Set(held))].map((name) => {
       const attRooms = rooms.filter((r) => r.attendant === name);
       const attClean = attRooms.filter((r) => r.status === "clean").length;
       const attInspected = attRooms.filter((r) => r.inspectionResult);
@@ -80,7 +82,7 @@ export function OperationsReportModal({ rooms, onClose }: OperationsReportModalP
       pendingSupplies,
       attendantStats,
     };
-  }, [rooms]);
+  }, [rooms, attendants]);
 
   const handleExportCSV = () => {
     const headers = [

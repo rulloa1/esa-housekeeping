@@ -418,3 +418,41 @@ export async function snapshot(date: string): Promise<number> {
   else memory.__hkSnapshots = { ...(memory.__hkSnapshots ?? {}), [date]: raw };
   return Object.keys(docs).length;
 }
+
+// ---------- Small hashes (staff roster) ----------
+// A Redis hash in production; a Map per key in development.
+const hashes = globalThis as unknown as { __hkHashes?: Map<string, Map<string, string>> };
+hashes.__hkHashes ??= new Map();
+const memHash = (key: string) => {
+  if (!hashes.__hkHashes!.has(key)) hashes.__hkHashes!.set(key, new Map());
+  return hashes.__hkHashes!.get(key)!;
+};
+
+export async function hashGetAll(key: string): Promise<Record<string, string>> {
+  if (!usingRedis) return Object.fromEntries(memHash(key));
+  const flat = ((await redis("HGETALL", key)) as string[] | null) ?? [];
+  const out: Record<string, string> = {};
+  for (let i = 0; i < flat.length; i += 2) out[flat[i]] = flat[i + 1];
+  return out;
+}
+
+export async function hashGet(key: string, field: string): Promise<string | null> {
+  if (!usingRedis) return memHash(key).get(field) ?? null;
+  return ((await redis("HGET", key, field)) as string | null) ?? null;
+}
+
+// Sets fields on one or more hashes in a single transaction, and removes the fields given as null.
+export async function hashWrite(ops: { key: string; field: string; value: string | null }[]): Promise<void> {
+  if (!usingRedis) {
+    for (const o of ops) o.value === null ? memHash(o.key).delete(o.field) : memHash(o.key).set(o.field, o.value);
+    return;
+  }
+  await transaction(...ops.map((o): Command => (o.value === null ? ["HDEL", o.key, o.field] : ["HSET", o.key, o.field, o.value])));
+}
+
+// Copies every suite to hk:snapshot:<label> before a bulk reset, kept 30 days like the daily ones.
+export async function snapshotBeforeReset(): Promise<string> {
+  const label = `before-reset-${new Date().toISOString()}`;
+  await snapshot(label);
+  return label;
+}

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { RoomDoc } from "@/lib/models";
-import { STAFF_ATTENDANTS } from "@/lib/models";
+import { useAttendants } from "@/lib/useAttendants";
 
 interface WorkloadDistributionProps {
   rooms: RoomDoc[];
@@ -33,8 +33,11 @@ export function WorkloadDistribution({
   // Collapsed by default so the dashboard stays uncluttered; opens itself
   // while a housekeeper filter is active.
   const [open, setOpen] = useState(false);
+  const attendants = useAttendants();
   const attendantsData = useMemo(() => {
-    const list = [...STAFF_ATTENDANTS, "Unassigned"];
+    // Roster names plus anyone still holding suites, so no assigned suite drops out of the counts.
+    const held = rooms.map((r) => r.attendant).filter((a): a is string => Boolean(a) && !attendants.includes(a!));
+    const list = [...attendants, ...Array.from(new Set(held)), "Unassigned"];
 
     return list.map((name) => {
       const isUnassigned = name === "Unassigned";
@@ -69,7 +72,7 @@ export function WorkloadDistribution({
         completionPercent,
       };
     });
-  }, [rooms]);
+  }, [rooms, attendants]);
 
   // Detect workload imbalance among assigned staff
   const imbalanceAlert = useMemo(() => {
