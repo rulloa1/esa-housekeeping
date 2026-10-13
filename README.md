@@ -73,6 +73,22 @@ Read-only, worked out from what each suite already holds (`lib/overdue.ts`); not
 - a suite in progress for 60 minutes or more;
 - a maintenance issue open 24 hours or more.
 
+### Photos (maintenance tickets, failed inspections, lost & found)
+- "Add photo" opens the camera on phones and iPads. The photo is shrunk on the device (longest side 1280 px, JPEG) before upload, so it is usually 50 to 150 KB.
+- `POST /api/photos` (any signed-in staff) checks the file's actual bytes (JPEG, PNG or WebP only; no SVG), caps it at 400 KB, and limits uploads to 40 per person per hour and 300 per day for the hotel.
+- Each photo is stored under its own Redis key `hk:photo:<id>` that **expires after 90 days**. `GET /api/photos/<id>` serves it to signed-in staff only. Records keep just the path; links to anything outside the app are dropped.
+- **Rollback:** revert the PR. Records keep a `photoUrl` field that is simply not shown; the `hk:photo:*` keys expire on their own.
+
+### Lost & found (`/lost-found`)
+- Anyone signed in logs an item: what it is, where it was found (a suite or a public area), where it is kept, a "valuable" flag and an optional photo.
+- Supervisors (and admins) mark items **Returned** or **Disposed**, with a short note, or reopen them. The API enforces this (`403 { reason: "supervisorOnly" }`). Nothing is deleted.
+- Items held 90 days or more are flagged so the manager can decide what to do with them.
+- Don't record guest names, phone numbers or addresses in the log; those stay in the hotel's own system.
+- Stored in one new Redis hash, `hk:lostfound`. **Rollback:** revert the PR; the hash is left unused.
+
+### Automatic checks
+`.github/workflows/checks.yml` runs the type check, unit tests and a production build on every pull request and every push to `main`. A red check means Vercel would reject the same build.
+
 ### Undoing a reset
 Copy the snapshot's `docs` back into the `hk:suites` hash and bump `hk:version`, for example with `redis-cli GET "hk:snapshot:before-reset-…"`, then `HSET hk:suites <id> <json>` for each suite and `INCR hk:version`.
 

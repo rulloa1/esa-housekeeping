@@ -36,6 +36,7 @@ export function toRoom(id: string, raw: unknown): RoomDoc {
     inspectionResult: d.inspectionResult === "pass" || d.inspectionResult === "fail" ? d.inspectionResult : d.status === "inspected" ? "pass" : null,
     inspectionNotes: typeof d.inspectionNotes === "string" ? d.inspectionNotes : null,
     inspectionFailReasons: arr<string>(d.inspectionFailReasons),
+    inspectionPhotoUrl: typeof d.inspectionPhotoUrl === "string" ? d.inspectionPhotoUrl : null,
     inspectionCategories: obj<"pass" | "fail" | "na">(d.inspectionCategories),
     checklist: obj<boolean>(d.checklist),
     checklistNotes: obj<string>(d.checklistNotes),

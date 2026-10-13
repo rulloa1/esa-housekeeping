@@ -13,6 +13,7 @@ import { SupplyModal } from "./SupplyModal";
 import { RoomHistoryDrawer } from "./RoomHistoryDrawer";
 import { HousekeeperAlerts } from "./HousekeeperAlerts";
 import { PushToggle } from "./PushToggle";
+import { PhotoThumb } from "./PhotoPicker";
 
 interface HousekeeperViewProps {
   initialDocs: Record<string, RoomDoc>;
@@ -715,6 +716,7 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
                       }}
                     >
                       <strong>QA Correction Needed:</strong> {room.inspectionFailReasons.join(", ")}
+                      {room.inspectionPhotoUrl && <div style={{ marginTop: 6 }}><PhotoThumb url={room.inspectionPhotoUrl} label="Photo from the inspection" /></div>}
                     </div>
                   )}
 

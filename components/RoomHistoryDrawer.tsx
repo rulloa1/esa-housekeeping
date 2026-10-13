@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { isGuestTask, type RoomDoc } from "@/lib/models";
+import { PhotoThumb } from "./PhotoPicker";
 
 interface RoomHistoryDrawerProps {
   room: RoomDoc;
@@ -155,6 +156,9 @@ export function RoomHistoryDrawer({ room, onClose, canManage = false, userName, 
             <div>
               <span style={{ color: "var(--text-muted)", display: "block", fontSize: 11 }}>Last Inspection</span>
               <strong>{room.inspectionResult ? `${room.inspectionResult.toUpperCase()} by ${room.inspectedBy}` : "Pending"}</strong>
+              {room.inspectionResult === "fail" && room.inspectionPhotoUrl && (
+                <div style={{ marginTop: 4 }}><PhotoThumb url={room.inspectionPhotoUrl} size={48} label="Photo from the inspection" /></div>
+              )}
             </div>
           </div>
 
@@ -246,6 +250,7 @@ export function RoomHistoryDrawer({ room, onClose, canManage = false, userName, 
                       <span>[{m.status.toUpperCase()}]</span>
                     </div>
                     <div style={{ margin: "4px 0", color: "var(--text-main)" }}>{m.description}</div>
+                    {m.photoUrl && <div style={{ margin: "6px 0" }}><PhotoThumb url={m.photoUrl} label={`Photo of ${m.category} issue`} /></div>}
                     <div style={{ color: "var(--text-muted)", fontSize: 11 }}>
                       Reported by {m.reportedBy} at {timeOf(m.reportedAt)}
                       {m.resolvedAt ? ` · Resolved by ${m.resolvedBy} at ${timeOf(m.resolvedAt)}` : ""}

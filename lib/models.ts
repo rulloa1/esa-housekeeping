@@ -99,6 +99,7 @@ export interface RoomDoc {
   inspectionResult: "pass" | "fail" | null;
   inspectionNotes: string | null;
   inspectionFailReasons: string[];
+  inspectionPhotoUrl?: string | null; // a photo of what failed (lib/photos.ts)
   inspectionCategories: Record<string, "pass" | "fail" | "na">;
   checklist: Record<string, boolean>;
   checklistNotes: Record<string, string>;

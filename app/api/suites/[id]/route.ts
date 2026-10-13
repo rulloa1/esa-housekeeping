@@ -1,5 +1,6 @@
 import { NextResponse, after } from "next/server";
 import { notify } from "@/lib/push";
+import { cleanPhotoUrl } from "@/lib/photos";
 import { actorName, getSession, isSupervisor, type Session } from "@/lib/auth";
 import { get, put, remove, withSuiteLock } from "@/lib/store";
 import { isGuestTask, type Role, type RoomDoc, type AuditLogEntry, type MaintenanceIssue, type SupplyRequest } from "@/lib/models";
@@ -38,6 +39,7 @@ type Body = Partial<RoomDoc> & {
   requestId?: string;
   requestAt?: string;
   inspectionCategories?: Record<string, "pass" | "fail" | "na">;
+  photoUrl?: string;
 };
 
 const isObj = (v: unknown): v is Doc => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -162,6 +164,7 @@ async function update(id: string, session: Session, body: Body, board: { base: D
         room.inspectionResult = "pass";
         room.inspectionNotes = body.inspectionNotes || "Passed all inspection standards.";
         room.inspectionFailReasons = [];
+        room.inspectionPhotoUrl = null;
         if (body.inspectionCategories) room.inspectionCategories = body.inspectionCategories;
         logEvent("Inspection Passed", `Approved by ${userName}. Room is clean and ready for guests.`);
         break;
@@ -177,9 +180,10 @@ async function update(id: string, session: Session, body: Body, board: { base: D
         room.inspectedBy = userName;
         room.inspectionResult = "fail";
         room.inspectionFailReasons = reasons;
+        room.inspectionPhotoUrl = cleanPhotoUrl(body.photoUrl) ?? null;
         room.inspectionNotes = body.inspectionNotes || reasons.join("; ");
         if (body.inspectionCategories) room.inspectionCategories = body.inspectionCategories;
-        logEvent("Inspection Failed", `Rejected by ${userName}: ${reasons.join(", ")}`);
+        logEvent("Inspection Failed", `Rejected by ${userName}: ${reasons.join(", ")}${room.inspectionPhotoUrl ? " (photo attached)" : ""}`);
         notifyAttendant(room.attendant, `Suite ${id} failed inspection`, (room.inspectionFailReasons || []).slice(0, 3).join(", ") || "Tap to see what needs fixing.");
         break;
       }
@@ -210,14 +214,14 @@ async function update(id: string, session: Session, body: Body, board: { base: D
             reportedBy: userName,
             reportedAt: now,
             status: "open",
-            photoUrl: body.maintenanceIssue.photoUrl,
+            photoUrl: cleanPhotoUrl(body.maintenanceIssue.photoUrl),
             notes: body.maintenanceIssue.notes,
           };
           room.maintenanceIssues = [...(room.maintenanceIssues || []), issue];
           if (body.maintenanceIssue.priority === "urgent") {
             room.status = "maintenance";
           }
-          logEvent("Maintenance Reported", `[${issue.priority.toUpperCase()}] ${issue.category}: ${issue.description}`);
+          logEvent("Maintenance Reported", `[${issue.priority.toUpperCase()}] ${issue.category}: ${issue.description}${issue.photoUrl ? " (photo attached)" : ""}`);
         }
         break;
       }
