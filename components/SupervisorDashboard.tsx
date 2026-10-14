@@ -1185,6 +1185,27 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                 {f.label} ({f.count})
               </button>
             ))}
+            <a
+              href="/lock-programmer"
+              style={{
+                padding: "4px 10px",
+                borderRadius: "var(--radius-pill)",
+                fontSize: 11,
+                fontWeight: 700,
+                border: "1px solid var(--border-default)",
+                backgroundColor: "var(--bg-muted)",
+                color: "var(--text-primary)",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+                whiteSpace: "nowrap",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <span>🔐</span>
+              <span>Lock Programmer</span>
+            </a>
           </div>
         </div>
 
