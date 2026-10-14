@@ -2,11 +2,10 @@
 // guest can access their suite, make requests, and unlock their door with their phone.
 import { sign } from "@/lib/auth";
 
-export const SUITE = /^\d{3,4}$/; // Dynamic room numbers (e.g. 101–532)
+export const SUITE = /^\d{3,4}$/; // Dynamic room numbers (e.g. 101–346)
 
-export const SUITES: string[] = [1, 2, 3].flatMap((f) =>
-  Array.from({ length: 32 }, (_, i) => `${f}${String(i + 1).padStart(2, "0")}`),
-);
+import { FLOOR_ROOM_NUMBERS, SUITES } from "@/lib/rooms";
+export { FLOOR_ROOM_NUMBERS, SUITES };
 
 export type GuestRequest = "cleaning" | "towels" | "amenities" | "dnd_on" | "dnd_off" | "keyless_unlock";
 

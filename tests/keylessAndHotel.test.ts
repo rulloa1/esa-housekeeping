@@ -104,7 +104,7 @@ describe("Universal Hotel Configuration & Brand Presets", () => {
     expect(config.name).toBe("Extended Stay America Suites");
     expect(config.theme.primary).toBe("#1E3A8A");
     expect(config.propertyLayout.floors).toBe(3);
-    expect(config.propertyLayout.roomsPerFloor).toBe(32);
+    expect(config.propertyLayout.roomsPerFloor).toBe(41);
     expect(config.features.hasKitchenettes).toBe(true);
   });
 

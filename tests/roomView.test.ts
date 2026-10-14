@@ -13,6 +13,6 @@ describe("toRoom", () => {
     expect(rooms["101"].status).toBe("dirty");
     expect(rooms["102"].status).toBe("not_logged");
     expect(rooms["103"].status).toBe("dirty");
-    expect(Object.keys(rooms)).toHaveLength(96);
+    expect(Object.keys(rooms)).toHaveLength(123);
   });
 });

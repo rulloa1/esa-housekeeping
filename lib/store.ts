@@ -4,6 +4,7 @@ import { createClient } from "redis";
 import type { RoomDoc, SuiteDocs, RoomStatus, RoomPriority, ServiceType } from "./models";
 import { STAFF_ATTENDANTS, DEFAULT_CHECKLIST_TEMPLATE } from "./models";
 import { HOTEL_CONFIG, HOTEL_PRESETS, getHotelConfig } from "@/hotel.config";
+import { SUITES } from "@/lib/rooms";
 
 export type { SuiteDocs };
 
@@ -96,179 +97,202 @@ export function generateDefaultSuites(presetId?: string): SuiteDocs {
   const roomsPerFloor = hotel.propertyLayout.roomsPerFloor || 32;
   const roomTypes = hotel.propertyLayout.roomTypes || ["Queen Studio", "King Suite", "Double Queen", "Deluxe Studio"];
 
-  for (let f = 1; f <= floors; f++) {
-    for (let r = 1; r <= roomsPerFloor; r++) {
-      const id = `${f}${r.toString().padStart(2, "0")}`;
-      const num = f * 100 + r;
+  // Use authentic suite IDs from evacuation plan when ESA preset is active
+  const isEsa = !presetId || presetId === "esa";
+  const suiteIds = isEsa
+    ? SUITES
+    : Array.from({ length: floors }, (_, f) =>
+        Array.from({ length: roomsPerFloor }, (_, r) => `${f + 1}${String(r + 1).padStart(2, "0")}`)
+      ).flat();
 
-      // Deterministic realistic initial setup
-      const type: RoomDoc["type"] = roomTypes[(r - 1) % roomTypes.length] || "Standard Room";
+  for (const id of suiteIds) {
+    const f = parseInt(id[0], 10);
+    const r = parseInt(id.slice(1), 10);
+    const num = parseInt(id, 10);
 
-      let status: RoomStatus = "clean";
-      let priority: RoomPriority = "standard";
-      let serviceType: ServiceType = "stayover";
-      let attendant: string | null = null;
-      let instructions: string | null = null;
-      let guestNote: string | null = null;
-      let startedAt: string | null = null;
-      let completedAt: string | null = null;
-      let inspectedAt: string | null = now;
-      let inspectedBy: string | null = "Supervisor Sarah J.";
-      let inspectionResult: "pass" | "fail" | null = "pass";
-      const inspectionCategories: Record<string, "pass" | "fail" | "na"> = {
-        bedroom: "pass",
-        bathroom: "pass",
-        kitchenette: "pass",
-        floors: "pass",
-        supplies: "pass",
-        presentation: "pass",
-        safety: "pass",
-      };
-      const checklist: Record<string, boolean> = {};
-      DEFAULT_CHECKLIST_TEMPLATE.forEach((i) => {
-        checklist[i.id] = true;
+    // Architectural layout: x22, x26, x28 are expanded King Suites / Deluxe Studios opposite elevator bank
+    const type: RoomDoc["type"] =
+      (r === 22 || r === 26 || r === 28)
+        ? "King Suite"
+        : (r % 2 === 0 ? "Double Queen" : "Queen Studio");
+
+    let status: RoomStatus = "clean";
+    let priority: RoomPriority = "standard";
+    let serviceType: ServiceType = "stayover";
+    let attendant: string | null = null;
+    let instructions: string | null = null;
+    let guestNote: string | null = null;
+    let startedAt: string | null = null;
+    let completedAt: string | null = null;
+    let inspectedAt: string | null = now;
+    let inspectedBy: string | null = "Supervisor Sarah J.";
+    let inspectionResult: "pass" | "fail" | null = "pass";
+    const inspectionCategories: Record<string, "pass" | "fail" | "na"> = {
+      bedroom: "pass",
+      bathroom: "pass",
+      kitchenette: "pass",
+      floors: "pass",
+      supplies: "pass",
+      presentation: "pass",
+      safety: "pass",
+    };
+    const checklist: Record<string, boolean> = {};
+    DEFAULT_CHECKLIST_TEMPLATE.forEach((i) => {
+      checklist[i.id] = true;
+    });
+
+    const attendantIndex = (f * 10 + r) % STAFF_ATTENDANTS.length;
+    const assignedAttendant = STAFF_ATTENDANTS[attendantIndex];
+
+    if (num === 234) {
+      status = "clean";
+      serviceType = "stayover";
+      priority = "standard";
+      attendant = "Maria G.";
+      instructions = "Routine inspection passed. Digital key active.";
+      guestNote = "Digital Key Active · Mobile pass issued to guest";
+    } else if (num === 235) {
+      status = "assigned";
+      serviceType = "turnover";
+      priority = "high";
+      attendant = "Carlos R.";
+      instructions = "Priority 3 PM check-in turnover. Digital key pre-authorized.";
+      guestNote = "Mobile Key enabled · Fresh towels requested";
+    } else if (num === 101 || num === 105 || num === 203 || num === 215 || num === 301 || num === 317) {
+      status = "awaiting_inspection";
+      serviceType = "turnover";
+      priority = "urgent";
+      attendant = assignedAttendant;
+      instructions = "Check out turnover. Front desk prioritized for 2 PM check-in.";
+      startedAt = new Date(Date.now() - 45 * 60 * 1000).toISOString();
+      completedAt = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      inspectedAt = null;
+      inspectedBy = null;
+      inspectionResult = null;
+    } else if (num === 108 || num === 220 || num === 309) {
+      status = "inspection_failed";
+      serviceType = "stayover";
+      priority = "high";
+      attendant = assignedAttendant;
+      instructions = "Correction needed: Bathroom mirror streaked, re-vacuum entryway.";
+      startedAt = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      completedAt = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+      inspectedAt = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+      inspectedBy = "Supervisor Sarah J.";
+      inspectionResult = "fail";
+      inspectionCategories.bathroom = "fail";
+      inspectionCategories.floors = "fail";
+    } else if (num === 102 || num === 116 || num === 204 || num === 212 || num === 302 || num === 322) {
+      status = "in_progress";
+      serviceType = r % 2 === 0 ? "turnover" : "stayover";
+      priority = "high";
+      attendant = assignedAttendant;
+      startedAt = new Date(Date.now() - 20 * 60 * 1000).toISOString();
+      inspectedAt = null;
+      inspectedBy = null;
+      inspectionResult = null;
+      // Partially completed checklist
+      DEFAULT_CHECKLIST_TEMPLATE.forEach((i, idx) => {
+        checklist[i.id] = idx < 6;
       });
-
-      const attendantIndex = (f * 10 + r) % STAFF_ATTENDANTS.length;
-      const assignedAttendant = STAFF_ATTENDANTS[attendantIndex];
-
-      // Distribution across 96 rooms:
-      // ~10 Dirty Checkout, ~8 Dirty Stayover, ~12 Assigned, ~8 In Progress, ~6 Awaiting Inspection, ~3 Inspection Failed, ~3 Maintenance, ~2 OOO, rest Clean
-      if (num === 101 || num === 105 || num === 203 || num === 215 || num === 301 || num === 317) {
-        status = "awaiting_inspection";
-        serviceType = "turnover";
-        priority = "urgent";
-        attendant = assignedAttendant;
-        instructions = "Check out turnover. Front desk prioritized for 2 PM check-in.";
-        startedAt = new Date(Date.now() - 45 * 60 * 1000).toISOString();
-        completedAt = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-        inspectedAt = null;
-        inspectedBy = null;
-        inspectionResult = null;
-      } else if (num === 108 || num === 220 || num === 309) {
-        status = "inspection_failed";
-        serviceType = "stayover";
-        priority = "high";
-        attendant = assignedAttendant;
-        instructions = "Correction needed: Bathroom mirror streaked, re-vacuum entryway.";
-        startedAt = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-        completedAt = new Date(Date.now() - 30 * 60 * 1000).toISOString();
-        inspectedAt = new Date(Date.now() - 15 * 60 * 1000).toISOString();
-        inspectedBy = "Supervisor Sarah J.";
-        inspectionResult = "fail";
-        inspectionCategories.bathroom = "fail";
-        inspectionCategories.floors = "fail";
-      } else if (num === 102 || num === 114 || num === 204 || num === 212 || num === 302 || num === 322) {
-        status = "in_progress";
-        serviceType = r % 2 === 0 ? "turnover" : "stayover";
-        priority = "high";
-        attendant = assignedAttendant;
-        startedAt = new Date(Date.now() - 20 * 60 * 1000).toISOString();
-        inspectedAt = null;
-        inspectedBy = null;
-        inspectionResult = null;
-        // Partially completed checklist
-        DEFAULT_CHECKLIST_TEMPLATE.forEach((i, idx) => {
-          checklist[i.id] = idx < 6;
-        });
-      } else if (num === 103 || num === 119 || num === 207 || num === 225 || num === 305 || num === 328) {
-        status = "assigned";
-        serviceType = "stayover";
-        priority = "standard";
-        attendant = assignedAttendant;
-        instructions = "Weekly refresh. Guest requested extra coffee & towels.";
-        guestNote = "Please do not vacuum before 11:00 AM";
-        inspectedAt = null;
-        inspectedBy = null;
-        inspectionResult = null;
-        DEFAULT_CHECKLIST_TEMPLATE.forEach((i) => {
-          checklist[i.id] = false;
-        });
-      } else if (num === 106 || num === 124 || num === 210 || num === 228 || num === 307 || num === 319) {
-        status = "dirty";
-        serviceType = "turnover";
-        priority = num === 106 || num === 307 ? "urgent" : "standard";
-        attendant = null;
-        instructions = "Guest checked out at 9:30 AM. Vacant dirty.";
-        inspectedAt = null;
-        inspectedBy = null;
-        inspectionResult = null;
-        DEFAULT_CHECKLIST_TEMPLATE.forEach((i) => {
-          checklist[i.id] = false;
-        });
-      } else if (num === 112 || num === 218) {
-        status = "maintenance";
-        priority = "urgent";
-        attendant = null;
-        instructions = num === 112 ? "PTAC AC unit leaking onto carpet." : "Bathroom sink drain clogged.";
-        inspectedAt = null;
-        inspectedBy = null;
-        inspectionResult = null;
-      } else if (num === 330) {
-        status = "ooo";
-        priority = "low";
-        attendant = null;
-        instructions = "Out of order: Kitchenette cabinet hinge replacement pending.";
-        inspectedAt = null;
-        inspectedBy = null;
-        inspectionResult = null;
-      }
-
-      const maintenanceIssues = status === "maintenance" ? [
-        {
-          id: `maint-${num}-1`,
-          category: num === 112 ? "HVAC & Thermostat" : "Plumbing (Leak, Toilet, Drain)",
-          description: num === 112 ? "PTAC unit dripping condensation into carpet" : "Sink drain clogged completely, slow drain",
-          priority: "urgent" as const,
-          reportedBy: "Supervisor Sarah J.",
-          reportedAt: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
-          status: "open" as const,
-        }
-      ] : [];
-
-      docs[id] = {
-        id,
-        floor: f,
-        type,
-        status,
-        priority,
-        serviceType,
-        attendant,
-        supervisor: "Supervisor Sarah J.",
-        guestNote,
-        instructions,
-        startedAt,
-        completedAt,
-        inspectedAt,
-        inspectedBy,
-        inspectionResult,
-        inspectionNotes: status === "inspection_failed" ? "Failed inspection: bathroom mirror and entryway carpet." : null,
-        inspectionFailReasons: status === "inspection_failed" ? ["Bathroom mirror streaked", "Carpet needs re-vacuuming"] : [],
-        inspectionCategories,
-        checklist,
-        checklistNotes: {},
-        maintenanceIssues,
-        supplyRequests: [],
-        history: [
-          {
-            id: `hist-${num}-init`,
-            event: "System Baseline",
-            details: `Suite configured as ${type} (${status}).`,
-            by: "System",
-            role: "system",
-            timestamp: now,
-          }
-        ],
-        lockBattery: 85 + (num % 14),
-        lockModel: "Onity Trillium RFID / BLE DirectKey",
-        lockFirmware: "v4.2.1-SECURE",
-        lockSignalRssi: "-48 dBm (Strong)",
-        deadboltEngaged: Boolean(guestNote?.includes("Privacy") || num === 103),
-        deadboltEngagedAt: Boolean(guestNote?.includes("Privacy") || num === 103) ? now : null,
-        updatedAt: now,
-        updatedBy: "system",
-      };
+    } else if (num === 103 || num === 117 || num === 207 || num === 225 || num === 305 || num === 328) {
+      status = "assigned";
+      serviceType = "stayover";
+      priority = "standard";
+      attendant = assignedAttendant;
+      instructions = "Weekly refresh. Guest requested extra coffee & towels.";
+      guestNote = "Please do not vacuum before 11:00 AM";
+      inspectedAt = null;
+      inspectedBy = null;
+      inspectionResult = null;
+      DEFAULT_CHECKLIST_TEMPLATE.forEach((i) => {
+        checklist[i.id] = false;
+      });
+    } else if (num === 106 || num === 126 || num === 210 || num === 228 || num === 307 || num === 318) {
+      status = "dirty";
+      serviceType = "turnover";
+      priority = num === 106 || num === 307 ? "urgent" : "standard";
+      attendant = null;
+      instructions = "Guest checked out at 9:30 AM. Vacant dirty.";
+      inspectedAt = null;
+      inspectedBy = null;
+      inspectionResult = null;
+      DEFAULT_CHECKLIST_TEMPLATE.forEach((i) => {
+        checklist[i.id] = false;
+      });
+    } else if (num === 112 || num === 218) {
+      status = "maintenance";
+      priority = "urgent";
+      attendant = null;
+      instructions = num === 112 ? "PTAC AC unit leaking onto carpet." : "Bathroom sink drain clogged.";
+      inspectedAt = null;
+      inspectedBy = null;
+      inspectionResult = null;
+    } else if (num === 330) {
+      status = "ooo";
+      priority = "low";
+      attendant = null;
+      instructions = "Out of order: Kitchenette cabinet hinge replacement pending.";
+      inspectedAt = null;
+      inspectedBy = null;
+      inspectionResult = null;
     }
+
+    const maintenanceIssues = status === "maintenance" ? [
+      {
+        id: `maint-${num}-1`,
+        category: num === 112 ? "HVAC & Thermostat" : "Plumbing (Leak, Toilet, Drain)",
+        description: num === 112 ? "PTAC unit dripping condensation into carpet" : "Sink drain clogged completely, slow drain",
+        priority: "urgent" as const,
+        reportedBy: "Supervisor Sarah J.",
+        reportedAt: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
+        status: "open" as const,
+      }
+    ] : [];
+
+    docs[id] = {
+      id,
+      floor: f,
+      type,
+      status,
+      priority,
+      serviceType,
+      attendant,
+      supervisor: "Supervisor Sarah J.",
+      guestNote,
+      instructions,
+      startedAt,
+      completedAt,
+      inspectedAt,
+      inspectedBy,
+      inspectionResult,
+      inspectionNotes: status === "inspection_failed" ? "Failed inspection: bathroom mirror and entryway carpet." : null,
+      inspectionFailReasons: status === "inspection_failed" ? ["Bathroom mirror streaked", "Carpet needs re-vacuuming"] : [],
+      inspectionCategories,
+      checklist,
+      checklistNotes: {},
+      maintenanceIssues,
+      supplyRequests: [],
+      guestRequests: num === 235 ? [{ type: "towels" as const, at: new Date(Date.now() - 25 * 60 * 1000).toISOString() }] : [],
+      history: [
+        {
+          id: `hist-${num}-init`,
+          event: "System Baseline",
+          details: `Suite configured as ${type} (${status}).`,
+          by: "System",
+          role: "system",
+          timestamp: now,
+        }
+      ],
+      lockBattery: num === 234 ? 94 : num === 235 ? 89 : 85 + (num % 14),
+      lockModel: "Onity Trillium RFID / BLE DirectKey",
+      lockFirmware: "v4.2.1-SECURE",
+      lockSignalRssi: num === 234 ? "-42 dBm (Strong)" : "-48 dBm (Strong)",
+      deadboltEngaged: Boolean(guestNote?.includes("Privacy") || num === 103),
+      deadboltEngagedAt: Boolean(guestNote?.includes("Privacy") || num === 103) ? now : null,
+      updatedAt: now,
+      updatedBy: "system",
+    };
   }
 
   return docs;

@@ -217,9 +217,10 @@ export function DigitalKeyModal({
           overflow: "hidden",
           position: "relative",
           animation: "slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
-          maxHeight: "94vh",
+          maxHeight: "min(94vh, calc(100dvh - 24px))",
           display: "flex",
           flexDirection: "column",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
         onClick={(e) => e.stopPropagation()}
       >

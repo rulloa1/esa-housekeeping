@@ -87,7 +87,7 @@ export const HOTEL_PRESETS: Record<string, HotelPreset> = {
     },
     propertyLayout: {
       floors: 3,
-      roomsPerFloor: 32,
+      roomsPerFloor: 41,
       roomTypes: ["Queen Studio", "King Suite", "Double Queen", "Deluxe Studio"],
     },
     features: {

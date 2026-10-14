@@ -16,6 +16,7 @@ const LINKS = [
   { href: "/housekeeper", label: "Housekeeper View", icon: "📱" },
   { href: "/housekeeping", label: "3D Building Board", icon: "🏢" },
   { href: "/guest-links", label: "Guest QR Cards", icon: "🖨️" },
+  { href: "/lock-programmer", label: "Lock Programmer", icon: "🔐" },
   { href: "/staff", label: "Staff Portal", icon: "🏠" },
 ];
 const ACTIVE = "/housekeeping";

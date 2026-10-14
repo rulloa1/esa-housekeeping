@@ -49,11 +49,8 @@ export function toRoom(id: string, raw: unknown): RoomDoc {
   };
 }
 
-// All 96 suites: the store only holds suites someone has saved, so the rest are filled in
-// as "not logged" (like the 3D board) instead of being left off the dashboard.
-export const ALL_SUITES: string[] = [1, 2, 3].flatMap((f) =>
-  Array.from({ length: 32 }, (_, i) => `${f}${String(i + 1).padStart(2, "0")}`),
-);
+import { ALL_SUITES } from "@/lib/rooms";
+export { ALL_SUITES };
 
 export function toRooms(docs: Record<string, unknown>): SuiteDocs {
   const out: SuiteDocs = {};
