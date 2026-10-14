@@ -90,27 +90,22 @@ def main():
       position: relative;
       z-index: 2;
     }}
-    .header-logo-row {{
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 6px;
-    }}
     .header-logo {{
       height: 38px;
       width: auto;
-      filter: brightness(0) invert(1);
+      margin-bottom: 10px;
+      display: block;
     }}
     .header-eyebrow {{
-      font-size: 11px;
+      font-size: 11.5px;
       font-weight: 800;
-      letter-spacing: 1.2px;
+      letter-spacing: 1.4px;
       text-transform: uppercase;
       opacity: 0.95;
       margin-bottom: 3px;
     }}
     .header-title {{
-      font-size: 27px;
+      font-size: 28px;
       font-weight: 800;
       letter-spacing: -0.4px;
       line-height: 1.15;
@@ -468,13 +463,9 @@ def main():
   <header class="header-banner">
     <div class="header-overlay"></div>
     <div class="header-content">
-      <div class="header-logo-row">
-        <div>
-          <div class="header-eyebrow">HOUSTON IAH AIRPORT · 96 SUITES</div>
-          <h1 class="header-title">Housekeeping Operations App</h1>
-        </div>
-        <img class="header-logo" src="data:image/png;base64,{img_1_b64}" alt="Extended Stay America Suites">
-      </div>
+      <img class="header-logo" src="data:image/png;base64,{img_1_b64}" alt="Extended Stay America Suites">
+      <div class="header-eyebrow">HOUSTON IAH AIRPORT · 96 SUITES</div>
+      <h1 class="header-title">Housekeeping Operations App</h1>
       <p class="header-subtitle">One live operational view for front desk, supervisors, housekeepers, and guests.</p>
     </div>
   </header>
@@ -661,9 +652,12 @@ def main():
     ]
     
     print("Running Edge headless print...")
-    res = subprocess.run(cmd, capture_output=True, text=True)
-    print("Edge stdout:", res.stdout)
-    print("Edge stderr:", res.stderr)
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=25)
+        print("Edge stdout:", res.stdout)
+        print("Edge stderr:", res.stderr)
+    except subprocess.TimeoutExpired:
+        print("Edge print completed (timed out waiting for exit, proceeding)")
 
     if os.path.exists(downloads_pdf):
         print("Successfully generated:", downloads_pdf, "Size:", os.path.getsize(downloads_pdf))
