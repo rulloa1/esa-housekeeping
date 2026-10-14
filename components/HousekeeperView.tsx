@@ -611,6 +611,51 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
                         <span style={{ fontSize: 24, fontWeight: 800, color: "var(--text-main)", lineHeight: 1 }}>
                           Suite {room.id}
                         </span>
+                        {/* Deadbolt Status Badge */}
+                        {room.deadboltEngaged && (
+                          <span
+                            style={{
+                              padding: "2px 8px",
+                              borderRadius: "var(--radius-pill)",
+                              backgroundColor: "#FEF2F2",
+                              color: "#DC2626",
+                              border: "1px solid #FECACA",
+                              fontSize: 11,
+                              fontWeight: 800,
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 4,
+                            }}
+                            title="Guest privacy deadbolt is thrown from the inside thumbturn. Do not knock."
+                          >
+                            <span>🔒</span>
+                            <span>Deadbolt (DND)</span>
+                          </span>
+                        )}
+                        {/* Lock Battery Indicator */}
+                        <span
+                          style={{
+                            padding: "2px 7px",
+                            borderRadius: "var(--radius-pill)",
+                            backgroundColor: (room.lockBattery ?? 92) <= 25 ? "#FEF2F2" : "var(--bg-muted)",
+                            color: (room.lockBattery ?? 92) <= 25 ? "#DC2626" : "var(--text-secondary)",
+                            border: `1px solid ${(room.lockBattery ?? 92) <= 25 ? "#FECACA" : "var(--border-default)"}`,
+                            fontSize: 11,
+                            fontWeight: 700,
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 4,
+                          }}
+                          title={`Lock Battery: ${room.lockBattery ?? 92}% (4x AA Pack)`}
+                        >
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <rect x="2" y="7" width="16" height="10" rx="2" ry="2" />
+                            <line x1="22" y1="11" x2="22" y2="13" />
+                            <line x1="6" y1="11" x2="6" y2="13" stroke={(room.lockBattery ?? 92) <= 25 ? "#DC2626" : "#16A34A"} />
+                            <line x1="10" y1="11" x2="10" y2="13" stroke={(room.lockBattery ?? 92) <= 25 ? "#DC2626" : "#16A34A"} />
+                          </svg>
+                          <span>{room.lockBattery ?? 92}%</span>
+                        </span>
                         {isUrgent && (
                           <span
                             style={{
@@ -658,8 +703,13 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
                           <span>{isTurnover ? "~40 min" : "~25 min"}</span>
                         </span>
                       </div>
-                      <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>
-                        {room.type} · Floor {room.floor}
+                      <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                        <span>{room.type} · Floor {room.floor}</span>
+                        {room.lastUnlockedAt && (
+                          <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>
+                            🔑 Last door access: {new Date(room.lastUnlockedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                          </span>
+                        )}
                       </div>
                     </div>
 

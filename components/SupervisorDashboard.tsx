@@ -252,6 +252,10 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
           return room.status === "not_logged";
         case "OVERDUE":
           return (room.status === "dirty" || room.status === "in_progress") && room.priority === "urgent";
+        case "DEADBOLT":
+          return Boolean(room.deadboltEngaged);
+        case "LOW BATTERY":
+          return (room.lockBattery ?? 92) <= 25;
         default:
           return true;
       }
@@ -954,6 +958,8 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
               { key: "UNASSIGNED", label: "Unassigned", count: allRooms.filter((r) => !r.attendant && (r.status === "dirty" || r.status === "assigned")).length },
               { key: "INSPECTION FAILED", label: "Failed inspection", count: metrics.inspectionFailed },
               { key: "OUT OF SERVICE", label: "Out of service", count: metrics.ooo },
+              { key: "DEADBOLT", label: "🔒 Deadbolt (DND)", count: allRooms.filter((r) => r.deadboltEngaged).length },
+              { key: "LOW BATTERY", label: "🪫 Low Lock Battery", count: allRooms.filter((r) => (r.lockBattery ?? 92) <= 25).length },
               { key: "NOT LOGGED", label: "Not logged", count: allRooms.filter((r) => r.status === "not_logged").length },
             ].map((f) => (
               <button
@@ -1297,7 +1303,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
 
                           {/* Room Number */}
                           <td style={{ padding: "12px 14px", fontWeight: 800, color: "var(--text-main)" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                               <span style={{ fontSize: 15, fontVariantNumeric: "tabular-nums" }}>{room.id}</span>
                               {hasOpenMaint && (
                                 <span title="Open Maintenance Issue" style={{ color: "#DC2626", display: "inline-flex", alignItems: "center" }}>
@@ -1306,6 +1312,44 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                                   </svg>
                                 </span>
                               )}
+                              {room.deadboltEngaged && (
+                                <span
+                                  style={{
+                                    padding: "1px 6px",
+                                    borderRadius: "var(--radius-pill)",
+                                    backgroundColor: "#FEF2F2",
+                                    color: "#DC2626",
+                                    border: "1px solid #FECACA",
+                                    fontSize: 10,
+                                    fontWeight: 800,
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 3,
+                                  }}
+                                  title="Guest privacy deadbolt engaged (DND)"
+                                >
+                                  <span>🔒</span>
+                                  <span>DND</span>
+                                </span>
+                              )}
+                              <span
+                                style={{
+                                  padding: "1px 5px",
+                                  borderRadius: "var(--radius-pill)",
+                                  backgroundColor: (room.lockBattery ?? 92) <= 25 ? "#FEF2F2" : "var(--bg-muted)",
+                                  color: (room.lockBattery ?? 92) <= 25 ? "#DC2626" : "var(--text-secondary)",
+                                  border: `1px solid ${(room.lockBattery ?? 92) <= 25 ? "#FECACA" : "var(--border-default)"}`,
+                                  fontSize: 10,
+                                  fontWeight: 700,
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 2,
+                                }}
+                                title={`Electronic Lock Battery: ${room.lockBattery ?? 92}% (4x AA Alkaline Pack)`}
+                              >
+                                <span>{(room.lockBattery ?? 92) <= 25 ? "🪫" : "🔋"}</span>
+                                <span>{room.lockBattery ?? 92}%</span>
+                              </span>
                             </div>
                             {/* Room type and service folded under the number to keep the table narrow */}
                             <div style={{ fontSize: 11, fontWeight: 500, color: "var(--text-muted)", whiteSpace: "nowrap" }}>
@@ -1532,10 +1576,50 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                     {/* Card Header */}
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
                       <div>
-                        <div style={{ fontSize: 20, fontWeight: 800, color: "var(--text-main)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
-                          Suite {room.id}
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                          <span style={{ fontSize: 20, fontWeight: 800, color: "var(--text-main)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+                            Suite {room.id}
+                          </span>
+                          {room.deadboltEngaged && (
+                            <span
+                              style={{
+                                padding: "2px 7px",
+                                borderRadius: "var(--radius-pill)",
+                                backgroundColor: "#FEF2F2",
+                                color: "#DC2626",
+                                border: "1px solid #FECACA",
+                                fontSize: 10,
+                                fontWeight: 800,
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 3,
+                              }}
+                              title="Guest privacy deadbolt is thrown from the inside thumbturn (DND)"
+                            >
+                              <span>🔒</span>
+                              <span>Deadbolt (DND)</span>
+                            </span>
+                          )}
+                          <span
+                            style={{
+                              padding: "2px 6px",
+                              borderRadius: "var(--radius-pill)",
+                              backgroundColor: (room.lockBattery ?? 92) <= 25 ? "#FEF2F2" : "var(--bg-muted)",
+                              color: (room.lockBattery ?? 92) <= 25 ? "#DC2626" : "var(--text-secondary)",
+                              border: `1px solid ${(room.lockBattery ?? 92) <= 25 ? "#FECACA" : "var(--border-default)"}`,
+                              fontSize: 10,
+                              fontWeight: 700,
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 3,
+                            }}
+                            title={`Lock Battery: ${room.lockBattery ?? 92}% (4x AA Pack)`}
+                          >
+                            <span>{(room.lockBattery ?? 92) <= 25 ? "🪫" : "🔋"}</span>
+                            <span>{room.lockBattery ?? 92}%</span>
+                          </span>
                         </div>
-                        <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>
+                        <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
                           {room.type} · Floor {room.floor}
                         </div>
                       </div>
