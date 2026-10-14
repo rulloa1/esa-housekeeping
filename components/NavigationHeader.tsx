@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import type { Role } from "@/lib/models";
 import { BRAND } from "@/lib/brand";
 import { BrandLogo } from "./BrandLogo";
-import { HotelSwitcherModal } from "./HotelSwitcherModal";
 
 interface HeaderProps {
   currentRole: Role | null;
@@ -17,7 +16,6 @@ export function NavigationHeader({ currentRole }: HeaderProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [toolsDropdownOpen, setToolsDropdownOpen] = useState(false);
-  const [hotelModalOpen, setHotelModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on outside click or Escape key
@@ -356,34 +354,8 @@ export function NavigationHeader({ currentRole }: HeaderProps) {
           </div>
         </nav>
 
-        {/* Right Section: Hotel Switcher + Role Badge + Mobile Toggle & Sign out */}
+        {/* Right Section: Role Badge + Mobile Toggle & Sign out */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-          <button
-            type="button"
-            onClick={() => setHotelModalOpen(true)}
-            title="Switch or customize hotel property"
-            style={{
-              padding: "5px 12px",
-              minHeight: 36,
-              borderRadius: "var(--radius-pill)",
-              background: "rgba(30, 58, 138, 0.08)",
-              border: "1px solid var(--border-default)",
-              color: "var(--color-primary)",
-              fontSize: 12,
-              fontWeight: 700,
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              transition: "all 0.15s ease",
-            }}
-          >
-            <span style={{ fontSize: 13 }}>🏨</span>
-            <span style={{ maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {BRAND.shortName}
-            </span>
-            <span style={{ fontSize: 9, opacity: 0.7 }}>▼</span>
-          </button>
 
           <div
             style={{
@@ -577,11 +549,6 @@ export function NavigationHeader({ currentRole }: HeaderProps) {
         </div>
       )}
 
-      {/* Hotel Property Template Switcher Modal */}
-      <HotelSwitcherModal
-        isOpen={hotelModalOpen}
-        onClose={() => setHotelModalOpen(false)}
-      />
     </header>
   );
 }
