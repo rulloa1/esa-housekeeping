@@ -259,6 +259,12 @@ export function generateDefaultSuites(presetId?: string): SuiteDocs {
             timestamp: now,
           }
         ],
+        lockBattery: 85 + (num % 14),
+        lockModel: "Onity Trillium RFID / BLE DirectKey",
+        lockFirmware: "v4.2.1-SECURE",
+        lockSignalRssi: "-48 dBm (Strong)",
+        deadboltEngaged: Boolean(guestNote?.includes("Privacy") || num === 103),
+        deadboltEngagedAt: Boolean(guestNote?.includes("Privacy") || num === 103) ? now : null,
         updatedAt: now,
         updatedBy: "system",
       };

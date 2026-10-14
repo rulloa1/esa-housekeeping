@@ -109,10 +109,15 @@ export interface RoomDoc {
   history: AuditLogEntry[];
   updatedAt: string;
   updatedBy: string;
-  // Keyless digital entry system fields
+  // Keyless digital entry system & commercial lock telemetry
   lastUnlockedAt?: string | null;
   digitalKeyPassId?: string | null;
   lockBattery?: number;
+  lockModel?: string;
+  lockFirmware?: string;
+  lockSignalRssi?: string;
+  deadboltEngaged?: boolean;
+  deadboltEngagedAt?: string | null;
   // Backwards compatibility with board/housekeeping.html
   notes?: string;
   att?: string;
