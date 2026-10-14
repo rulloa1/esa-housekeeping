@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80">
+  <rect width="320" height="80" rx="8" fill="#8B1E28"/>
+  <!-- Courtyard Crest -->
+  <g transform="translate(18, 16)">
+    <circle cx="24" cy="24" r="22" fill="#D4AF37" opacity="0.2"/>
+    <path d="M34 16 A 14 14 0 1 0 34 32 L 28 32 A 8 8 0 1 1 28 22 Z" fill="#D4AF37"/>
+  </g>
+  <!-- Typography -->
+  <text x="76" y="38" font-family="'Inter', -apple-system, sans-serif" font-size="18" font-weight="900" fill="#FFFFFF" letter-spacing="1.5">COURTYARD</text>
+  <text x="76" y="58" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="500" fill="#F3ECE2" letter-spacing="0.5">BY MARRIOTT</text>
+</svg>

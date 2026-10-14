@@ -34,7 +34,7 @@ const MESSAGES: Record<string, string> = {
 
 // "Add photo" button: opens the camera on phones and iPads, uploads, and shows a thumbnail.
 // Calls onChange with the photo's address (or null when removed).
-export function PhotoPicker({ value, onChange, userName, label = "📷 Add photo" }: {
+export function PhotoPicker({ value, onChange, userName, label = "Add photo" }: {
   value: string | null;
   onChange: (url: string | null) => void;
   userName?: string;
@@ -63,8 +63,19 @@ export function PhotoPicker({ value, onChange, userName, label = "📷 Add photo
   };
 
   const btn: React.CSSProperties = {
-    minHeight: 44, padding: "8px 14px", borderRadius: 8, border: "1px solid var(--border-default, #DBDEDB)",
-    background: "#fff", color: "var(--esa-brown, #483729)", fontWeight: 700, fontSize: 13, fontFamily: "inherit", cursor: busy ? "wait" : "pointer",
+    minHeight: 44,
+    padding: "8px 14px",
+    borderRadius: 8,
+    border: "1px solid var(--border-default)",
+    background: "var(--bg-card, #FFFFFF)",
+    color: "var(--text-main)",
+    fontWeight: 700,
+    fontSize: 13,
+    fontFamily: "inherit",
+    cursor: busy ? "wait" : "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
   };
 
   return (
@@ -73,15 +84,19 @@ export function PhotoPicker({ value, onChange, userName, label = "📷 Add photo
       {value ? (
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={value} alt="Attached photo" style={{ width: 72, height: 72, objectFit: "cover", borderRadius: 8, border: "1px solid var(--border-default, #DBDEDB)" }} />
+          <img src={value} alt="Attached photo" style={{ width: 72, height: 72, objectFit: "cover", borderRadius: 8, border: "1px solid var(--border-default)" }} />
           <button type="button" style={btn} onClick={() => onChange(null)} disabled={busy}>Remove photo</button>
         </div>
       ) : (
         <button type="button" style={btn} onClick={() => input.current?.click()} disabled={busy}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+            <circle cx="12" cy="13" r="4" />
+          </svg>
           {busy ? "Uploading…" : label}
         </button>
       )}
-      {error && <div role="alert" style={{ fontSize: 12, color: "#B91C1C", fontWeight: 600 }}>{error}</div>}
+      {error && <div role="alert" style={{ fontSize: 12, color: "var(--st-dirty, #DC2626)", fontWeight: 600 }}>{error}</div>}
     </div>
   );
 }
@@ -92,7 +107,7 @@ export function PhotoThumb({ url, size = 64, label = "Photo" }: { url?: string |
   return (
     <a href={url} target="_blank" rel="noopener" aria-label={`${label} (opens full size)`} style={{ display: "inline-block", lineHeight: 0 }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={url} alt={label} loading="lazy" style={{ width: size, height: size, objectFit: "cover", borderRadius: 8, border: "1px solid var(--border-default, #DBDEDB)" }} />
+      <img src={url} alt={label} loading="lazy" style={{ width: size, height: size, objectFit: "cover", borderRadius: 8, border: "1px solid var(--border-default)" }} />
     </a>
   );
 }

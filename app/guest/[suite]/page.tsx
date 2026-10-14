@@ -2,11 +2,12 @@ import type { Metadata, Viewport } from "next";
 import { get } from "@/lib/store";
 import { validGuest } from "@/lib/guest";
 import { getLang } from "@/lib/lang";
+import { BRAND } from "@/lib/brand";
 import GuestApp from "./GuestApp";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: { absolute: "Housekeeping · Extended Stay America" } };
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#338802" };
+export const metadata: Metadata = { title: { absolute: `Housekeeping · ${BRAND.name}` } };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: BRAND.green };
 
 import BrandLogo from "@/components/BrandLogo";
 
@@ -77,13 +78,13 @@ export default async function GuestPage({
           <div style={{ display: "grid", gap: 10 }}>
             <a
               id="btn-guest-call-desk"
-              href="tel:+12819873900"
+              href={`tel:${BRAND.phone.replace(/[^+\d]/g, "")}`}
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 8,
-                backgroundColor: "#2F7A1E",
+                backgroundColor: "var(--color-primary, #2F7A1E)",
                 color: "#FFFFFF",
                 fontWeight: 700,
                 fontSize: 14,
@@ -92,7 +93,7 @@ export default async function GuestPage({
                 textDecoration: "none",
               }}
             >
-              📞 {lang === "es" ? "Llamar a Recepción" : "Call Front Desk"}
+              📞 {lang === "es" ? "Llamar a Recepción" : `Call Front Desk (${BRAND.phone})`}
             </a>
           </div>
         </div>

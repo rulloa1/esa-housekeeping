@@ -176,9 +176,9 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
       case "ooo":
         return { label: "Out of Service", bg: "var(--st-ooo-bg)", color: "var(--st-ooo)", border: "var(--st-ooo-border)" };
       case "not_logged":
-        return { label: "Not logged", bg: "#F3F4F6", color: "#6B7280", border: "#E5E7EB" };
+        return { label: "Not logged", bg: "var(--bg-muted, #F1F5F9)", color: "var(--text-muted, #64748B)", border: "var(--border-default, #E2E8F0)" };
       default:
-        return { label: status, bg: "#F3F4F6", color: "#374151", border: "#E5E7EB" };
+        return { label: status, bg: "var(--bg-muted, #F1F5F9)", color: "var(--text-secondary, #475569)", border: "var(--border-default, #E2E8F0)" };
     }
   };
 
@@ -280,17 +280,17 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
               <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase" }}>Assigned</div>
               <div style={{ fontSize: 22, fontWeight: 800, color: "var(--esa-brown)" }}>{stats.total}</div>
             </div>
-            <div style={{ padding: "10px", borderRadius: 10, background: "#ECFDF5", textAlign: "center" }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#065F46", textTransform: "uppercase" }}>Done / Insp.</div>
+            <div style={{ padding: "10px", borderRadius: 10, background: "var(--st-clean-bg)", textAlign: "center" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--st-clean)", textTransform: "uppercase" }}>Done / Insp.</div>
               <div style={{ fontSize: 22, fontWeight: 800, color: "var(--st-clean)" }}>{stats.completed}</div>
             </div>
-            <div style={{ padding: "10px", borderRadius: 10, background: "#FFFBEB", textAlign: "center" }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#92400E", textTransform: "uppercase" }}>Remaining</div>
+            <div style={{ padding: "10px", borderRadius: 10, background: "var(--st-in-prog-bg)", textAlign: "center" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--st-in-prog)", textTransform: "uppercase" }}>Remaining</div>
               <div style={{ fontSize: 22, fontWeight: 800, color: "var(--st-in-prog)" }}>{stats.remaining}</div>
             </div>
-            <div style={{ padding: "10px", borderRadius: 10, background: stats.urgent > 0 ? "#FEE2E2" : "var(--bg-muted)", textAlign: "center" }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: stats.urgent > 0 ? "#DC2626" : "var(--text-muted)", textTransform: "uppercase" }}>Urgent</div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: stats.urgent > 0 ? "#DC2626" : "var(--text-muted)" }}>{stats.urgent}</div>
+            <div style={{ padding: "10px", borderRadius: 10, background: stats.urgent > 0 ? "var(--st-dirty-bg)" : "var(--bg-muted)", textAlign: "center" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: stats.urgent > 0 ? "var(--st-dirty)" : "var(--text-muted)", textTransform: "uppercase" }}>Urgent</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: stats.urgent > 0 ? "var(--st-dirty)" : "var(--text-muted)" }}>{stats.urgent}</div>
             </div>
           </div>
 
@@ -371,13 +371,14 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
                   type="button"
                   onClick={() => setActiveFloor(fl)}
                   style={{
-                    padding: "5px 10px",
+                    padding: "8px 12px",
+                    minHeight: 36,
                     borderRadius: 6,
                     fontSize: 12,
                     fontWeight: 600,
                     border: "1px solid",
-                    borderColor: activeFloor === fl ? "var(--esa-brown)" : "var(--border-default)",
-                    backgroundColor: activeFloor === fl ? "var(--esa-brown)" : "#FFFFFF",
+                    borderColor: activeFloor === fl ? "var(--color-primary)" : "var(--border-default)",
+                    backgroundColor: activeFloor === fl ? "var(--color-primary)" : "#FFFFFF",
                     color: activeFloor === fl ? "#FFFFFF" : "var(--text-secondary)",
                     cursor: "pointer",
                   }}
@@ -398,16 +399,17 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
                   width: "100%",
-                  padding: "6px 10px",
+                  padding: "8px 12px",
+                  minHeight: 38,
                   borderRadius: 8,
                   border: "1px solid var(--border-default)",
-                  fontSize: 12,
+                  fontSize: 13,
                   outline: "none",
                 }}
               />
             </div>
 
-            <div style={{ display: "flex", gap: 4, overflowX: "auto" }}>
+            <div style={{ display: "flex", gap: 6, overflowX: "auto" }}>
               {[
                 { key: "all", label: "All" },
                 { key: "to_clean", label: "To Clean" },
@@ -420,13 +422,14 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
                   type="button"
                   onClick={() => setStatusFilter(st.key)}
                   style={{
-                    padding: "4px 8px",
+                    padding: "7px 12px",
+                    minHeight: 36,
                     borderRadius: "var(--radius-pill)",
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: 600,
                     border: "1px solid",
-                    borderColor: statusFilter === st.key ? "var(--esa-brown)" : "var(--border-default)",
-                    backgroundColor: statusFilter === st.key ? "var(--esa-brown)" : "#FFFFFF",
+                    borderColor: statusFilter === st.key ? "var(--color-primary)" : "var(--border-default)",
+                    backgroundColor: statusFilter === st.key ? "var(--color-primary)" : "#FFFFFF",
                     color: statusFilter === st.key ? "#FFFFFF" : "var(--text-secondary)",
                     cursor: "pointer",
                     whiteSpace: "nowrap",
@@ -471,19 +474,23 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
               style={{
                 padding: "40px 24px",
                 textAlign: "center",
-                backgroundColor: "#FFFFFF",
+                backgroundColor: "var(--bg-card, #FFFFFF)",
                 borderRadius: 16,
-                border: "2px solid #A7F3D0",
-                background: "linear-gradient(180deg, #F0FDF4 0%, #FFFFFF 100%)",
+                border: "2px solid var(--st-clean-border)",
+                background: "linear-gradient(180deg, var(--st-clean-bg) 0%, var(--bg-card, #FFFFFF) 100%)",
                 boxShadow: "var(--shadow-sm)",
                 marginTop: 12,
               }}
             >
-              <div style={{ fontSize: 44, marginBottom: 12 }}>🎉</div>
-              <h3 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 800, color: "#065F46" }}>
+              <div style={{ display: "inline-flex", padding: 14, borderRadius: "50%", backgroundColor: "var(--st-clean-bg)", color: "var(--st-clean)", marginBottom: 12 }}>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+                </svg>
+              </div>
+              <h3 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 800, color: "var(--st-clean)" }}>
                 All {stats.total} Assigned Suites Complete!
               </h3>
-              <p style={{ margin: "0 0 16px", fontSize: 14, color: "#047857", maxWidth: 460, marginInline: "auto" }}>
+              <p style={{ margin: "0 0 16px", fontSize: 14, color: "var(--text-secondary)", maxWidth: 460, marginInline: "auto" }}>
                 Outstanding job, {selectedAttendant}! Every suite assigned to you today has been completed or submitted for supervisor inspection.
               </p>
               <div style={{ display: "flex", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
@@ -536,7 +543,11 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
                 marginTop: 12,
               }}
             >
-              <div style={{ fontSize: 36, marginBottom: 10 }}>🔍</div>
+              <div style={{ display: "inline-flex", padding: 12, borderRadius: "50%", backgroundColor: "var(--bg-muted)", color: "var(--text-muted)", marginBottom: 10 }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+              </div>
               <h3 style={{ margin: "0 0 6px", fontSize: 18, color: "var(--text-main)" }}>No Rooms Match Filters</h3>
               <p style={{ margin: "0 0 16px", fontSize: 13, color: "var(--text-muted)" }}>
                 No suites match your current criteria on Floor {activeFloor === "all" ? "1-3" : activeFloor}.
@@ -635,10 +646,16 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
                             fontSize: 11,
                             fontWeight: 600,
                             color: "var(--text-muted)",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 4,
                           }}
                           title={`Estimated service time: ${isTurnover ? "40 mins" : "25 mins"}`}
                         >
-                          ⏱ {isTurnover ? "~40 min" : "~25 min"}
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+                          </svg>
+                          <span>{isTurnover ? "~40 min" : "~25 min"}</span>
                         </span>
                       </div>
                       <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>
@@ -770,7 +787,10 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
                           boxShadow: "var(--shadow-sm)",
                         }}
                       >
-                        <span>▶</span> START CLEANING
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+                          <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
+                        <span>START CLEANING</span>
                       </button>
                     )}
 
@@ -796,7 +816,10 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
                         boxShadow: isInProgress ? "0 2px 8px rgba(217, 119, 6, 0.3)" : undefined,
                       }}
                     >
-                      <span>📝</span> {isInProgress ? `RESUME CHECKLIST (${completedChecks}/${totalChecks})` : "VIEW CHECKLIST"}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <polyline points="9 11 12 14 22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                      </svg>
+                      <span>{isInProgress ? `RESUME CHECKLIST (${completedChecks}/${totalChecks})` : "VIEW CHECKLIST"}</span>
                     </button>
 
                     {/* REPORT MAINTENANCE button */}
@@ -806,19 +829,22 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
                       style={{
                         padding: "12px 12px",
                         borderRadius: 8,
-                        border: "1px solid #FECACA",
-                        backgroundColor: "#FFF5F5",
-                        color: "#DC2626",
+                        border: "1px solid var(--st-dirty-border)",
+                        backgroundColor: "var(--st-dirty-bg)",
+                        color: "var(--st-dirty)",
                         fontSize: 13,
                         fontWeight: 700,
                         cursor: "pointer",
                         display: "flex",
                         alignItems: "center",
-                        gap: 4,
+                        gap: 5,
                       }}
                       title="Report Maintenance Issue"
                     >
-                      <span>🔧</span> Maintenance
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+                      </svg>
+                      <span>Maintenance</span>
                     </button>
 
                     {/* REQUEST SUPPLIES button */}
@@ -836,11 +862,14 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
                         cursor: "pointer",
                         display: "flex",
                         alignItems: "center",
-                        gap: 4,
+                        gap: 5,
                       }}
                       title="Request Supplies"
                     >
-                      <span>📦</span> Supplies
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <line x1="16.5" y1="9.4" x2="7.5" y2="4.21" /><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" />
+                      </svg>
+                      <span>Supplies</span>
                     </button>
 
                     {/* History button */}
@@ -848,17 +877,22 @@ export function HousekeeperView({ initialDocs, initialVersion, currentRole, staf
                       type="button"
                       onClick={() => setHistoryRoom(room)}
                       style={{
-                        padding: "12px 10px",
+                        padding: "12px 12px",
                         borderRadius: 8,
                         border: "1px solid var(--border-default)",
                         backgroundColor: "#FFFFFF",
                         color: "var(--text-muted)",
                         fontSize: 13,
                         cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
-                      title="Room Log"
+                      title="Room Log & History"
                     >
-                      <span>📋</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" />
+                      </svg>
                     </button>
                   </div>
                 </div>

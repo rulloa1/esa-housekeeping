@@ -1,14 +1,14 @@
-// Guest request links. Each suite gets a fixed link carrying a short signed key, so a
-// guest can only make requests for the suite whose card or QR code they were given.
+// Guest request and keyless entry system. Each suite gets a signed key, so a
+// guest can access their suite, make requests, and unlock their door with their phone.
 import { sign } from "@/lib/auth";
 
-export const SUITE = /^[1-3](0[1-9]|[12]\d|3[0-2])$/; // 101–132, 201–232, 301–332
+export const SUITE = /^\d{3,4}$/; // Dynamic room numbers (e.g. 101–532)
 
 export const SUITES: string[] = [1, 2, 3].flatMap((f) =>
   Array.from({ length: 32 }, (_, i) => `${f}${String(i + 1).padStart(2, "0")}`),
 );
 
-export type GuestRequest = "cleaning" | "towels" | "amenities" | "dnd_on" | "dnd_off";
+export type GuestRequest = "cleaning" | "towels" | "amenities" | "dnd_on" | "dnd_off" | "keyless_unlock";
 
 export const REQUEST_LABEL: Record<GuestRequest, string> = {
   cleaning: "Cleaning requested",
@@ -16,6 +16,7 @@ export const REQUEST_LABEL: Record<GuestRequest, string> = {
   amenities: "Amenities refill requested",
   dnd_on: "Do Not Disturb on",
   dnd_off: "Do Not Disturb off",
+  keyless_unlock: "Digital Key Room Unlock",
 };
 
 export async function guestKey(suite: string): Promise<string> {
@@ -23,10 +24,18 @@ export async function guestKey(suite: string): Promise<string> {
 }
 
 export async function validGuest(suite: string, key: string | null | undefined): Promise<boolean> {
-  return SUITE.test(suite) && typeof key === "string" && key === (await guestKey(suite));
+  if (!suite || typeof key !== "string") return false;
+  const expected = await guestKey(suite);
+  return key === expected;
 }
 
-// The hotel's local date (Houston), as the board's shift date uses.
+// Generates an encrypted rolling digital credential token for the mobile key
+export async function generateDigitalPassToken(suite: string): Promise<string> {
+  const secret = await sign(`keyless.token.${suite}.${hotelToday()}`);
+  return `BLE-${suite}-${secret.slice(0, 8).toUpperCase()}`;
+}
+
+// The hotel's local date (Houston/Central), as the shift date uses.
 export function hotelToday(): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date());
 }

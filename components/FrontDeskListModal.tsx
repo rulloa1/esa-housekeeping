@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { RoomDoc } from "@/lib/models";
 
 interface Props {
@@ -31,9 +31,9 @@ const button = (primary: boolean, disabled = false): React.CSSProperties => ({
   fontFamily: "inherit",
   cursor: disabled ? "not-allowed" : "pointer",
   opacity: disabled ? 0.6 : 1,
-  background: primary ? "var(--esa-green, #338802)" : "#fff",
-  color: primary ? "#fff" : "var(--esa-brown, #483729)",
-  border: primary ? "1px solid var(--esa-green, #338802)" : "1px solid var(--border-default)",
+  background: primary ? "var(--color-primary)" : "#fff",
+  color: primary ? "#fff" : "var(--text-main)",
+  border: primary ? "1px solid var(--color-primary)" : "1px solid var(--border-default)",
 });
 
 // Supervisor tool: paste today's departures and arrivals from the property system, check what
@@ -46,6 +46,16 @@ export function FrontDeskListModal({ onClose, onApplied }: Props) {
   const [invalid, setInvalid] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
 
   const send = async (apply: boolean) => {
     setBusy(true);
@@ -79,13 +89,22 @@ export function FrontDeskListModal({ onClose, onApplied }: Props) {
       role="dialog"
       aria-modal="true"
       aria-label="Today's departures and arrivals"
-      style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(44,32,22,.45)", display: "grid", placeItems: "center", padding: 16 }}
+      style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(15, 23, 42, 0.65)", backdropFilter: "blur(6px)", display: "grid", placeItems: "center", padding: 16 }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div style={{ width: "100%", maxWidth: 560, maxHeight: "90dvh", overflowY: "auto", background: "#fff", borderRadius: 12, padding: 20, display: "grid", gap: 12 }}>
+      <div style={{ width: "100%", maxWidth: 560, maxHeight: "90dvh", overflowY: "auto", background: "#fff", borderRadius: "var(--radius-lg)", border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xl)", padding: 20, display: "grid", gap: 12 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2 style={{ margin: 0, fontSize: 20, color: "var(--esa-brown, #483729)" }}>Today&apos;s departures and arrivals</h2>
-          <button type="button" onClick={onClose} aria-label="Close" style={{ border: "none", background: "none", fontSize: 22, cursor: "pointer", minWidth: 44, minHeight: 44 }}>✕</button>
+          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "var(--text-main)" }}>Today&apos;s departures and arrivals</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close dialog"
+            className="modal-close-btn"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
         </div>
         <p style={{ margin: 0, fontSize: 14, color: "var(--text-muted)" }}>
           Paste suite numbers from the property system&apos;s departure and arrival reports, in any format. Departures become

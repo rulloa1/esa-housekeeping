@@ -1,36 +1,69 @@
 /* Extended Stay America Suites — Houston IAH Airport
-   Design System & Operational Tokens (Phase 3) */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+   Design System & Operational Tokens (UI/UX Pro Max Edition) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Karla:wght@400;500;600;700;800&family=Playfair+Display+SC:wght@700&display=swap');
 
 :root {
-  /* Brand Palette */
-  --esa-green: #2F7A1E;
-  --esa-green-dark: #1E5713;
-  --esa-green-soft: #EAF4E6;
-  --esa-green-hover: #266818;
-  --esa-brown: #4A3728;
-  --esa-brown-dark: #332418;
-  --esa-brown-soft: #F6EFE5;
-  --esa-amber: #D97706;
+  /* Design System Master Tokens */
+  --color-primary: #1E3A8A;
+  --color-on-primary: #FFFFFF;
+  --color-secondary: #3B82F6;
+  --color-on-secondary: #000000;
+  --color-accent: #A16207;
+  --color-on-accent: #FFFFFF;
+  --color-background: #F8FAFC;
+  --color-foreground: #0F172A;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #0F172A;
+  --color-muted: #F1F5F9;
+  --color-muted-foreground: #475569;
+  --color-border: #E2E8F0;
+  --color-destructive: #DC2626;
+  --color-on-destructive: #FFFFFF;
+  --color-ring: #1E3A8A;
+
+  /* Legacy & Brand Compatibility Tokens */
+  --esa-green: #1E3A8A;
+  --esa-green-dark: #172554;
+  --esa-green-soft: #EFF6FF;
+  --esa-green-hover: #1D4ED8;
+  --esa-brown: #334155;
+  --esa-brown-dark: #1E293B;
+  --esa-brown-soft: #F1F5F9;
+  --esa-amber: #A16207;
 
   /* Surfaces & Backgrounds */
-  --bg-page: #FBF9F5;
+  --bg-page: #F8FAFC;
   --bg-card: #FFFFFF;
   --bg-elevated: #FFFFFF;
-  --bg-muted: #F3ECE2;
+  --bg-muted: #F1F5F9;
+
+  /* Glassmorphism / Liquid Glass */
+  --glass-bg: rgba(255, 255, 255, 0.82);
+  --glass-bg-subtle: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(226, 232, 240, 0.85);
+  --glass-blur: blur(14px);
 
   /* Typography Colors */
-  --text-main: #2C2016;
-  --text-secondary: #5C4B3C;
-  --text-muted: #827263;
+  --text-main: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
   --text-inverse: #FFFFFF;
 
   /* Borders & Dividers */
-  --border-subtle: #EBE5DB;
-  --border-default: #DDD5C8;
-  --border-strong: #BAAEA0;
+  --border-subtle: #F1F5F9;
+  --border-default: #E2E8F0;
+  --border-strong: #CBD5E1;
 
-  /* Status Tokens */
+  /* Spacing Scale (Density 8/10: Dashboard Optimized) */
+  --space-xs: 2px;
+  --space-sm: 4px;
+  --space-md: 8px;
+  --space-lg: 12px;
+  --space-xl: 16px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+
+  /* Status Tokens (WCAG 4.5:1 compliant) */
   --st-dirty: #DC2626;
   --st-dirty-bg: #FEF2F2;
   --st-dirty-border: #FECACA;
@@ -59,23 +92,25 @@
   --st-maint-bg: #FEF2F2;
   --st-maint-border: #FECACA;
 
-  --st-ooo: #4B5563;
-  --st-ooo-bg: #F9FAFB;
-  --st-ooo-border: #E5E7EB;
+  --st-ooo: #475569;
+  --st-ooo-bg: #F8FAFC;
+  --st-ooo-border: #E2E8F0;
 
   /* Radius & Shadows */
   --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
   --radius-pill: 9999px;
 
-  --shadow-xs: 0 1px 2px rgba(44, 32, 22, 0.05);
-  --shadow-sm: 0 2px 4px rgba(44, 32, 22, 0.06);
-  --shadow-md: 0 4px 12px rgba(44, 32, 22, 0.08);
-  --shadow-lg: 0 8px 24px rgba(44, 32, 22, 0.12);
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.1);
+  --shadow-xl: 0 20px 35px rgba(15, 23, 42, 0.14);
 
-  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-family: 'Karla', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Playfair Display SC', 'Inter', serif;
 }
 
 * {
@@ -108,11 +143,51 @@ button {
   font-size: 14px;
   cursor: pointer;
   touch-action: manipulation;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+button:active:not(:disabled),
+[role="button"]:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 input, select, textarea {
   font-family: inherit;
   font-size: 14px;
+  touch-action: manipulation;
+}
+
+/* Accessible focus ring across all interactive controls */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Accessible 44px Minimum Touch Target Modal Close Trigger */
+.modal-close-btn {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
+  background-color: var(--bg-card, #FFFFFF);
+  color: var(--text-secondary);
+  cursor: pointer;
+  box-shadow: var(--shadow-xs);
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.modal-close-btn:hover {
+  background-color: var(--bg-muted, #F1F5F9);
+  color: var(--text-main);
+}
+
+.modal-close-btn:active {
+  transform: scale(0.95);
 }
 
 /* Custom Scrollbar */
@@ -222,5 +297,14 @@ input, select, textarea {
 
 .anim-slide-up {
   animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 

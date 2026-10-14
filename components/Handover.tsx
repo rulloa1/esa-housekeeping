@@ -161,18 +161,33 @@ export function HandoverStrip() {
   const open = openNotes(notes);
   const top = open.slice(0, 3);
   return (
-    <section aria-label="Handover notes" style={{ background: "#fff", border: "1px solid var(--border-default)", borderRadius: 12, marginBottom: 16, padding: "12px 16px", display: "grid", gap: 8 }}>
+    <section aria-label="Handover notes" style={{ background: "#FFFFFF", border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)", marginBottom: 16, padding: "12px 16px", display: "grid", gap: 8, boxShadow: "var(--shadow-xs)" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-        <strong style={{ fontSize: 15, color: BRAND.text }}>📝 Handover · {open.length ? `${open.length} open` : "nothing open"}</strong>
-        <a href="/handover" style={{ fontWeight: 700, fontSize: 14, color: BRAND.green, minHeight: 44, display: "inline-flex", alignItems: "center" }}>
-          {open.length ? "Read & add notes" : "Add a note"}
+        <strong style={{ fontSize: 15, color: "var(--text-main)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: "var(--color-primary)" }}>
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" />
+          </svg>
+          <span>Handover · {open.length ? `${open.length} open` : "nothing open"}</span>
+        </strong>
+        <a href="/handover" style={{ fontWeight: 700, fontSize: 13, color: "var(--color-primary)", minHeight: 36, display: "inline-flex", alignItems: "center" }}>
+          {open.length ? "Read & add notes →" : "Add a note →"}
         </a>
       </div>
       {top.map((n) => (
-        <div key={n.id} style={{ fontSize: 14, color: n.important ? "#B91C1C" : BRAND.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {n.important ? "● " : ""}{n.suite ? `${n.suite}: ` : ""}{n.text} <span style={{ color: BRAND.muted }}>({n.by})</span>
+        <div key={n.id} style={{ fontSize: 14, color: n.important ? "#B91C1C" : "var(--text-main)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 4 }}>
+          {n.important ? (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "#DC2626", fontWeight: 700, fontSize: 10, padding: "1px 5px", borderRadius: 4, backgroundColor: "#FEF2F2", border: "1px solid #FECACA", flexShrink: 0 }}>
+              <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+              </svg>
+              URGENT
+            </span>
+          ) : null}
+          <span>{n.suite ? `${n.suite}: ` : ""}{n.text}</span>
+          <span style={{ color: "var(--text-muted)", fontSize: 12, marginLeft: 4 }}>({n.by})</span>
         </div>
       ))}
     </section>
   );
 }
+

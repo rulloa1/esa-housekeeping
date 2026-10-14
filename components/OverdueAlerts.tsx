@@ -5,11 +5,11 @@ import type { RoomDoc } from "@/lib/models";
 import { describe, overdueAll, type OverdueKind } from "@/lib/overdue";
 
 const COLOR: Record<OverdueKind, string> = {
-  guest: "#B91C1C",
-  checkin: "#B91C1C",
-  inspection: "#92400E",
-  cleaning: "#92400E",
-  maintenance: "#6B21A8",
+  guest: "var(--st-dirty, #DC2626)",
+  checkin: "var(--st-dirty, #DC2626)",
+  inspection: "var(--st-in-prog, #D97706)",
+  cleaning: "var(--st-in-prog, #D97706)",
+  maintenance: "var(--st-awaiting-insp, #7C3AED)",
 };
 
 // Supervisor dashboard panel: suites where work has waited too long (see lib/overdue.ts).
@@ -29,8 +29,11 @@ export function OverdueAlerts({ rooms, onSelectSuite }: { rooms: RoomDoc[]; onSe
 
   if (flags.length === 0) {
     return (
-      <section style={{ ...panel, padding: "12px 16px", color: "#065F46", fontWeight: 600, fontSize: 14 }}>
-        ✓ Nothing overdue right now.
+      <section style={{ ...panel, padding: "12px 16px", color: "var(--st-clean, #059669)", fontWeight: 600, fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+        Nothing overdue right now.
       </section>
     );
   }
@@ -51,13 +54,19 @@ export function OverdueAlerts({ rooms, onSelectSuite }: { rooms: RoomDoc[]; onSe
           border: "none",
           cursor: "pointer",
           font: "inherit",
-          color: "#B91C1C",
+          color: "var(--st-dirty, #DC2626)",
           fontWeight: 800,
           fontSize: 15,
           minHeight: 44,
         }}
       >
-        <span>⏱ Overdue · {flags.length}</span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          Overdue · {flags.length}
+        </span>
         <span aria-hidden style={{ color: "var(--text-muted)", fontWeight: 600, fontSize: 13 }}>{open ? "Hide" : "Show"}</span>
       </button>
       {open && (
@@ -75,16 +84,16 @@ export function OverdueAlerts({ rooms, onSelectSuite }: { rooms: RoomDoc[]; onSe
                   padding: "8px 10px",
                   borderRadius: 8,
                   border: "none",
-                  background: "var(--bg-muted, #F7F5F2)",
+                  background: "var(--bg-muted, #F1F5F9)",
                   cursor: onSelectSuite ? "pointer" : "default",
                   font: "inherit",
                   textAlign: "left",
                   minHeight: 44,
                 }}
               >
-                <span style={{ fontWeight: 800, fontSize: 15, color: "var(--esa-brown, #483729)", minWidth: 40 }}>{f.suite}</span>
+                <span style={{ fontWeight: 800, fontSize: 15, color: "var(--text-main)", minWidth: 40 }}>{f.suite}</span>
                 <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: COLOR[f.kind] }}>{describe(f)}</span>
-                <span style={{ fontSize: 13, color: "var(--text-muted, #7a6a5d)" }}>{f.attendant || "Unassigned"}</span>
+                <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{f.attendant || "Unassigned"}</span>
               </button>
             </li>
           ))}
@@ -93,7 +102,7 @@ export function OverdueAlerts({ rooms, onSelectSuite }: { rooms: RoomDoc[]; onSe
               <button
                 type="button"
                 onClick={() => setAll((a) => !a)}
-                style={{ width: "100%", minHeight: 44, border: "none", background: "transparent", font: "inherit", fontWeight: 700, fontSize: 14, color: "var(--esa-brown, #483729)", cursor: "pointer" }}
+                style={{ width: "100%", minHeight: 44, border: "none", background: "transparent", font: "inherit", fontWeight: 700, fontSize: 14, color: "var(--text-secondary)", cursor: "pointer" }}
               >
                 {all ? "Show fewer" : `Show all ${flags.length}`}
               </button>
@@ -106,7 +115,7 @@ export function OverdueAlerts({ rooms, onSelectSuite }: { rooms: RoomDoc[]; onSe
 }
 
 const panel: React.CSSProperties = {
-  background: "#FFFFFF",
+  background: "var(--bg-card, #FFFFFF)",
   borderRadius: 12,
   border: "1px solid var(--border-default)",
   marginBottom: 16,

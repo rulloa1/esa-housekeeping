@@ -3,6 +3,7 @@
 import { createClient } from "redis";
 import type { RoomDoc, SuiteDocs, RoomStatus, RoomPriority, ServiceType } from "./models";
 import { STAFF_ATTENDANTS, DEFAULT_CHECKLIST_TEMPLATE } from "./models";
+import { HOTEL_CONFIG, HOTEL_PRESETS, getHotelConfig } from "@/hotel.config";
 
 export type { SuiteDocs };
 
@@ -86,21 +87,22 @@ memory.__hkVersion ??= 0;
 // mistaken for real suite statuses.
 const seedDemo = process.env.HK_SEED_DEMO !== "0";
 
-// Seed Generator for all 96 Suites at Houston IAH Airport (Floors 1 to 3, 32 suites per floor)
-export function generateDefaultSuites(): SuiteDocs {
+// Seed Generator for Suites dynamically tailored to the active hotel configuration
+export function generateDefaultSuites(presetId?: string): SuiteDocs {
+  const hotel = presetId && HOTEL_PRESETS[presetId] ? HOTEL_PRESETS[presetId] : HOTEL_CONFIG;
   const docs: SuiteDocs = {};
   const now = new Date().toISOString();
+  const floors = hotel.propertyLayout.floors || 3;
+  const roomsPerFloor = hotel.propertyLayout.roomsPerFloor || 32;
+  const roomTypes = hotel.propertyLayout.roomTypes || ["Queen Studio", "King Suite", "Double Queen", "Deluxe Studio"];
 
-  for (let f = 1; f <= 3; f++) {
-    for (let r = 1; r <= 32; r++) {
+  for (let f = 1; f <= floors; f++) {
+    for (let r = 1; r <= roomsPerFloor; r++) {
       const id = `${f}${r.toString().padStart(2, "0")}`;
       const num = f * 100 + r;
 
       // Deterministic realistic initial setup
-      let type: RoomDoc["type"] = "Queen Studio";
-      if (r % 4 === 1) type = "King Suite";
-      else if (r % 4 === 2) type = "Double Queen";
-      else if (r % 4 === 3) type = "Deluxe Studio";
+      const type: RoomDoc["type"] = roomTypes[(r - 1) % roomTypes.length] || "Standard Room";
 
       let status: RoomStatus = "clean";
       let priority: RoomPriority = "standard";
@@ -328,8 +330,8 @@ export async function remove(id: string): Promise<number> {
   return Number(await transaction(["HDEL", DOCS_KEY, id], ["INCR", VERSION_KEY]));
 }
 
-export async function resetToDefault(): Promise<number> {
-  const defaults = generateDefaultSuites();
+export async function resetToDefault(presetId?: string): Promise<number> {
+  const defaults = generateDefaultSuites(presetId);
   if (!usingRedis) {
     memory.__hkDocs!.clear();
     for (const [id, doc] of Object.entries(defaults)) {

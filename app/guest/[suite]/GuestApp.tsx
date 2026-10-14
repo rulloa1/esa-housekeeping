@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import css from "./guest.module.css";
 import LangToggle from "@/components/LangToggle";
 import BrandLogo from "@/components/BrandLogo";
+import { BRAND } from "@/lib/brand";
+import { DigitalKeyModal } from "@/components/DigitalKeyModal";
 
 type Req = { type: string; at: string; doneAt?: string };
 type Lang = "en" | "es";
@@ -134,6 +136,7 @@ export default function GuestApp({
   k,
   dnd: initialDnd,
   initialRequests,
+  roomType = "Signature Suite",
   floor,
 }: {
   lang: Lang;
@@ -146,6 +149,7 @@ export default function GuestApp({
 }) {
   const t = TEXT[lang];
   const [tab, setTab] = useState<"home" | "requests">("home");
+  const [keyModalOpen, setKeyModalOpen] = useState(false);
   const [dnd, setDnd] = useState(initialDnd);
   const [requests, setRequests] = useState<Req[]>(initialRequests);
   const [busy, setBusy] = useState<string | null>(null);
@@ -190,16 +194,23 @@ export default function GuestApp({
     { type: "amenities", txt: t.amenities, ic: ICONS.amenities, tint: "#f3ece4", fg: ink },
   ];
   const photos = [
-    ["/guest/pool.jpg", t.photos[0]],
-    ["/guest/kitchen.jpg", t.photos[1]],
-    ["/guest/lobby.jpg", t.photos[2]],
+    [BRAND.photos?.pool || "/guest/pool.jpg", lang === "es" ? "Piscina y amenidades" : "Pool & Guest Amenities"],
+    [BRAND.photos?.dining || "/guest/kitchen.jpg", BRAND.breakfast?.name || (lang === "es" ? "Desayuno y gastronomía" : "Dining & Breakfast")],
+    [BRAND.photos?.lobby || "/guest/lobby.jpg", lang === "es" ? "Recepción y vestíbulo" : "Lobby & Reception"],
   ];
 
   return (
     <div lang={lang} className={css.page}>
       {tab === "home" ? (
         <div className={css.wrap}>
-          <section className={css.hero}>
+          <section
+            className={css.hero}
+            style={{
+              backgroundImage: `linear-gradient(180deg, rgba(16, 24, 38, 0.45) 0%, rgba(16, 24, 38, 0.85) 100%), url('${BRAND.photos?.suite || "/guest/suite.jpg"}')`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
             <div className={css.topbar}>
               <span className={css.logoChip}>
                 <BrandLogo height={30} />
@@ -222,7 +233,78 @@ export default function GuestApp({
             </div>
           </section>
 
-          <section className={css.feature} aria-labelledby="clean-title">
+          {/* Keyless Mobile Entry Digital Pass Card */}
+          <section
+            style={{
+              margin: "-28px 16px 14px",
+              position: "relative",
+              zIndex: 2,
+              borderRadius: 20,
+              padding: "16px 18px",
+              background: "linear-gradient(135deg, #0F172A 0%, #1E293B 100%)",
+              color: "#FFFFFF",
+              boxShadow: "0 12px 28px -6px rgba(15, 23, 42, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div
+                style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: 14,
+                  background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
+                  display: "grid",
+                  placeItems: "center",
+                  fontSize: 22,
+                  boxShadow: "0 4px 12px rgba(16, 185, 129, 0.35)",
+                  flexShrink: 0,
+                }}
+              >
+                🔑
+              </div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 1.2, color: "#38BDF8" }}>
+                  {lang === "es" ? "Pase Digital de Habitación" : "Digital Room Key"}
+                </div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: "#FFFFFF", marginTop: 2 }}>
+                  {lang === "es" ? "Abrir Puerta de Suite" : "Unlock Suite Door"}
+                </div>
+                <div style={{ fontSize: 12, color: "#94A3B8", marginTop: 2 }}>
+                  {lang === "es" ? "Bluetooth y NFC · Toca para abrir" : "Bluetooth & NFC · Tap to unlock"}
+                </div>
+              </div>
+            </div>
+
+            <button
+              id="btn-open-digital-key"
+              onClick={() => setKeyModalOpen(true)}
+              style={{
+                padding: "10px 18px",
+                borderRadius: 12,
+                background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
+                border: "none",
+                color: "#FFFFFF",
+                fontWeight: 700,
+                fontSize: 13,
+                cursor: "pointer",
+                boxShadow: "0 4px 12px rgba(16, 185, 129, 0.3)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                flexShrink: 0,
+                transition: "all 0.15s ease",
+              }}
+            >
+              <span>📲</span>
+              <span>{lang === "es" ? "Abrir" : "Key"}</span>
+            </button>
+          </section>
+
+          <section className={css.feature} style={{ marginTop: 0 }} aria-labelledby="clean-title">
             <span className={css.featureImg} aria-hidden="true" />
             <span>
               <h2 id="clean-title" className={css.featureTitle}>{t.cleaning[0]}</h2>
@@ -272,12 +354,12 @@ export default function GuestApp({
             </div>
 
             <div className={css.desk}>
-              <span className={css.iconWrap} style={{ background: "#fff", color: green }}>{ICONS.leaf}</span>
+              <span className={css.iconWrap} style={{ background: "#fff", color: BRAND.green }}>{ICONS.leaf}</span>
               <span>
                 <b className={css.tileTitle}>{t.elseTitle}</b>
                 <span className={css.tileSub}>{t.elseBody}</span>
               </span>
-              <a className={css.call} href="tel:+12819873900">
+              <a className={css.call} href={`tel:${BRAND.phone.replace(/[^+\d]/g, "")}`}>
                 {ICONS.phone}
                 {t.call}
               </a>
@@ -338,6 +420,15 @@ export default function GuestApp({
           ))}
         </div>
       </nav>
+
+      <DigitalKeyModal
+        isOpen={keyModalOpen}
+        onClose={() => setKeyModalOpen(false)}
+        suite={suite}
+        k={k}
+        roomType={roomType}
+        floor={floor}
+      />
     </div>
   );
 }

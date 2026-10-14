@@ -110,7 +110,7 @@ export function WorkloadDistribution({
   return (
     <div
       style={{
-        backgroundColor: "#FFFFFF",
+        backgroundColor: "var(--bg-card, #FFFFFF)",
         borderRadius: 12,
         border: "1px solid var(--border-default)",
         padding: "16px 18px",
@@ -150,12 +150,14 @@ export function WorkloadDistribution({
             {staffOnShift} on shift · {unassignedCount} to clean with no housekeeper
           </span>
           {imbalanceAlert && (
-            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, backgroundColor: "#FEF3C7", color: "#92400E", whiteSpace: "nowrap" }}>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, backgroundColor: "var(--st-in-prog-bg)", color: "var(--st-in-prog)", whiteSpace: "nowrap" }}>
               Uneven
             </span>
           )}
-          <span aria-hidden style={{ marginLeft: "auto", fontSize: 13, color: "var(--text-muted)", transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s ease" }}>
-            ▾
+          <span aria-hidden style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", color: "var(--text-muted)", transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s ease" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
           </span>
         </button>
 
@@ -172,9 +174,16 @@ export function WorkloadDistribution({
               color: "var(--esa-brown)",
               border: "1px solid var(--border-default)",
               cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
             }}
           >
-            Clear Filter ({activeAttendantFilter}) ✕
+            Clear Filter ({activeAttendantFilter})
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
           </button>
         )}
       </div>
@@ -185,9 +194,9 @@ export function WorkloadDistribution({
           style={{
             padding: "10px 14px",
             borderRadius: 8,
-            backgroundColor: "#FFFBEB",
-            border: "1px solid #FCD34D",
-            color: "#92400E",
+            backgroundColor: "var(--st-in-prog-bg)",
+            border: "1px solid var(--st-in-prog-border)",
+            color: "var(--st-in-prog)",
             fontSize: 13,
             marginBottom: 14,
             display: "flex",
@@ -195,7 +204,11 @@ export function WorkloadDistribution({
             gap: 10,
           }}
         >
-          <span style={{ fontSize: 18 }}>⚠️</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
           <div style={{ flex: 1 }}>
             <strong>Workload Imbalance Warning:</strong> {imbalanceAlert.maxStaff} has{" "}
             {imbalanceAlert.maxRooms} rooms (~{Math.round(imbalanceAlert.maxMinutes / 60)}h remaining) while{" "}
@@ -228,13 +241,13 @@ export function WorkloadDistribution({
                 padding: "12px 14px",
                 borderRadius: 10,
                 border: isSelected
-                  ? "2px solid var(--esa-green)"
+                  ? "2px solid var(--color-primary)"
                   : "1px solid var(--border-default)",
                 backgroundColor: isSelected
                   ? "var(--esa-green-soft)"
                   : isUnassigned && att.total > 0
-                  ? "#FEF2F2"
-                  : "#FAFAFA",
+                  ? "var(--st-dirty-bg)"
+                  : "var(--bg-muted, #F1F5F9)",
                 cursor: "pointer",
                 transition: "all 0.15s ease",
                 display: "grid",
@@ -246,7 +259,7 @@ export function WorkloadDistribution({
                   style={{
                     fontSize: 13,
                     fontWeight: 700,
-                    color: isUnassigned ? "#B91C1C" : "var(--text-main)",
+                    color: isUnassigned ? "var(--st-dirty)" : "var(--text-main)",
                   }}
                 >
                   {att.name}
@@ -257,8 +270,8 @@ export function WorkloadDistribution({
                     fontWeight: 700,
                     padding: "2px 6px",
                     borderRadius: 4,
-                    backgroundColor: isUnassigned ? "#FEE2E2" : "#E5E7EB",
-                    color: isUnassigned ? "#991B1B" : "#374151",
+                    backgroundColor: isUnassigned ? "var(--st-dirty-bg)" : "var(--border-default)",
+                    color: isUnassigned ? "var(--st-dirty)" : "var(--text-secondary)",
                   }}
                 >
                   {att.total} {att.total === 1 ? "suite" : "suites"}
@@ -276,7 +289,7 @@ export function WorkloadDistribution({
                 style={{
                   height: 5,
                   width: "100%",
-                  backgroundColor: "#E5E7EB",
+                  backgroundColor: "var(--border-default)",
                   borderRadius: 3,
                   overflow: "hidden",
                 }}
@@ -292,8 +305,13 @@ export function WorkloadDistribution({
               </div>
 
               {att.urgent > 0 && (
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#DC2626" }}>
-                  🚨 {att.urgent} Urgent priority
+                <div style={{ fontSize: 10, fontWeight: 700, color: "var(--st-dirty)", display: "flex", alignItems: "center", gap: 4 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  <span>{att.urgent} Urgent priority</span>
                 </div>
               )}
             </button>

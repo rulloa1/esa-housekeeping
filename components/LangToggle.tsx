@@ -19,14 +19,14 @@ export default function LangToggle({ lang, style }: { lang: "en" | "es"; style?:
       lang={l}
       style={{
         border: 0,
-        borderRadius: 3,
+        borderRadius: "var(--radius-xs, 4px)",
         padding: "6px 12px",
         font: "inherit",
         fontSize: 13,
         fontWeight: 700,
         cursor: "pointer",
-        background: lang === l ? "#338802" : "transparent",
-        color: lang === l ? "#fff" : "#483729",
+        background: lang === l ? "var(--color-primary)" : "transparent",
+        color: lang === l ? "var(--color-on-primary, #FFFFFF)" : "var(--text-secondary)",
       }}
     >
       {label}
@@ -36,7 +36,15 @@ export default function LangToggle({ lang, style }: { lang: "en" | "es"; style?:
     <div
       role="group"
       aria-label={lang === "es" ? "Idioma" : "Language"}
-      style={{ display: "inline-flex", gap: 2, padding: 3, borderRadius: 4, background: "#fff", border: "1px solid #DBDEDB", ...style }}
+      style={{
+        display: "inline-flex",
+        gap: 2,
+        padding: 3,
+        borderRadius: "var(--radius-sm, 6px)",
+        background: "var(--bg-card, #FFFFFF)",
+        border: "1px solid var(--border-default)",
+        ...style,
+      }}
     >
       {btn("en", "EN")}
       {btn("es", "ES")}

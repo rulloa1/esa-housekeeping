@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import BrandLogo from "@/components/BrandLogo";
+import { BRAND } from "@/lib/brand";
 import { SUITES, guestKey } from "@/lib/guest";
 import { getLang } from "@/lib/lang";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Guest Self-Service Portal · Extended Stay America Suites",
+  title: `Guest Self-Service Portal · ${BRAND.name}`,
 };
 
 export default async function GuestIndexPage() {
@@ -40,7 +41,7 @@ export default async function GuestIndexPage() {
             <BrandLogo height={42} />
           </div>
           <div style={{ fontSize: 11, fontWeight: 700, color: "var(--esa-green)", letterSpacing: "1px", textTransform: "uppercase" }}>
-            Houston IAH Airport · Houston, TX
+            {BRAND.location} · {BRAND.address}
           </div>
           <h1 style={{ margin: "6px 0", fontSize: 24, fontWeight: 800, color: "var(--text-main)" }}>
             {lang === "es" ? "Portal de Servicios al Huésped" : "Guest Self-Service Portal"}
@@ -50,6 +51,34 @@ export default async function GuestIndexPage() {
               ? "Selecciona tu suite para solicitar toallas limpias, suministros de cocina o programar limpieza."
               : "Select your suite below to request fresh towels, amenities, kitchen supplies, or privacy mode."}
           </p>
+        </div>
+
+        {/* Hotel Photo Hero Banner */}
+        <div
+          style={{
+            position: "relative",
+            height: 180,
+            borderRadius: 16,
+            overflow: "hidden",
+            marginBottom: 20,
+            backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.65)), url(${BRAND.photos.hero})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            display: "flex",
+            alignItems: "flex-end",
+            padding: "16px 20px",
+            color: "#FFFFFF",
+            boxShadow: "var(--shadow-sm)",
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 1, color: "var(--color-accent, #FBBF24)" }}>
+              {BRAND.tagline}
+            </div>
+            <div style={{ fontSize: 18, fontWeight: 800, textShadow: "0 2px 4px rgba(0,0,0,0.4)" }}>
+              {BRAND.name}
+            </div>
+          </div>
         </div>
 
         {/* Quick Highlights / Amenities Card */}
@@ -69,23 +98,23 @@ export default async function GuestIndexPage() {
         >
           <div style={{ padding: "8px" }}>
             <div style={{ fontSize: 20, marginBottom: 4 }}>☕</div>
-            <div style={{ fontSize: 12, fontWeight: 700 }}>Grab & Go Breakfast</div>
-            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>6:00 – 9:30 AM</div>
+            <div style={{ fontSize: 12, fontWeight: 700 }}>{BRAND.breakfast.name}</div>
+            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{BRAND.breakfast.hours}</div>
           </div>
           <div style={{ padding: "8px" }}>
-            <div style={{ fontSize: 20, marginBottom: 4 }}>🧺</div>
-            <div style={{ fontSize: 12, fontWeight: 700 }}>Guest Laundry</div>
-            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Open 24/7 (1st Fl)</div>
+            <div style={{ fontSize: 20, marginBottom: 4 }}>🏊</div>
+            <div style={{ fontSize: 12, fontWeight: 700 }}>{BRAND.amenitiesList[0]}</div>
+            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Guest Access</div>
           </div>
           <div style={{ padding: "8px" }}>
             <div style={{ fontSize: 20, marginBottom: 4 }}>📶</div>
-            <div style={{ fontSize: 12, fontWeight: 700 }}>Free High-Speed Wi-Fi</div>
-            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>ESA_Guest_IAH</div>
+            <div style={{ fontSize: 12, fontWeight: 700 }}>High-Speed Wi-Fi</div>
+            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{BRAND.wifiSsid}</div>
           </div>
           <div style={{ padding: "8px" }}>
             <div style={{ fontSize: 20, marginBottom: 4 }}>📞</div>
             <div style={{ fontSize: 12, fontWeight: 700 }}>Front Desk</div>
-            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Dial Ext. 0 (24/7)</div>
+            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Dial Ext. 0 ({BRAND.phone})</div>
           </div>
         </div>
 
@@ -149,7 +178,7 @@ export default async function GuestIndexPage() {
         {/* Notice */}
         <div style={{ textAlign: "center", marginTop: 24, fontSize: 12, color: "var(--text-muted)" }}>
           <p style={{ margin: 0 }}>
-            Extended Stay America Suites Houston IAH Airport · Staffed 24/7 on site
+            {BRAND.name} {BRAND.location} · Staffed 24/7 on site
           </p>
         </div>
       </div>

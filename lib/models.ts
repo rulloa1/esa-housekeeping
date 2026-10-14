@@ -84,7 +84,7 @@ export interface InspectionRecord {
 export interface RoomDoc {
   id: string; // "101" to "332"
   floor: number; // 1, 2, 3
-  type: "Queen Studio" | "King Suite" | "Double Queen" | "Deluxe Studio";
+  type: "Queen Studio" | "King Suite" | "Double Queen" | "Deluxe Studio" | string;
   status: RoomStatus;
   priority: RoomPriority;
   serviceType: ServiceType;
@@ -109,6 +109,10 @@ export interface RoomDoc {
   history: AuditLogEntry[];
   updatedAt: string;
   updatedBy: string;
+  // Keyless digital entry system fields
+  lastUnlockedAt?: string | null;
+  digitalKeyPassId?: string | null;
+  lockBattery?: number;
   // Backwards compatibility with board/housekeeping.html
   notes?: string;
   att?: string;
@@ -119,7 +123,7 @@ export type SuiteDocs = Record<string, RoomDoc>;
 // Checklist template for Extended Stay America Suites
 export const DEFAULT_CHECKLIST_TEMPLATE: ChecklistItem[] = [
   // Bedroom
-  { id: "bed_linens", category: "bedroom", label: "Strip & replace bedding/linens with fresh ESA sheets", mandatory: true },
+  { id: "bed_linens", category: "bedroom", label: "Strip & replace bedding/linens with fresh hotel sheets", mandatory: true },
   { id: "bed_pillows", category: "bedroom", label: "Inspect pillows, protectors & mattress pad", mandatory: true },
   { id: "bed_surfaces", category: "bedroom", label: "Dust & sanitize nightstands, desk, lamps & TV", mandatory: true },
   { id: "bed_vacuum", category: "bedroom", label: "Vacuum carpet including under desk and bed edges", mandatory: true },
@@ -131,14 +135,14 @@ export const DEFAULT_CHECKLIST_TEMPLATE: ChecklistItem[] = [
   { id: "bath_sink", category: "bathroom", label: "Disinfect sink basin, faucet & vanity countertop", mandatory: true },
   { id: "bath_mirror", category: "bathroom", label: "Clean mirror streak-free", mandatory: true },
   { id: "bath_towels", category: "bathroom", label: "Restock bath towels, hand towels & washcloths to standard", mandatory: true },
-  { id: "bath_amenities", category: "bathroom", label: "Restock ESA soaps, shampoo, conditioner & toilet tissue", mandatory: true },
+  { id: "bath_amenities", category: "bathroom", label: "Restock guest soaps, shampoo, conditioner & toilet tissue", mandatory: true },
   { id: "bath_floor", category: "bathroom", label: "Mop and disinfect tile floor", mandatory: true },
 
-  // Kitchenette (ESA signature full kitchen feature)
+  // Kitchenette / Refreshment Station
   { id: "kitchen_sink", category: "kitchenette", label: "Scrub, disinfect and dry stainless sink & faucet", mandatory: true },
   { id: "kitchen_counters", category: "kitchenette", label: "Disinfect countertops, backsplash & dining table", mandatory: true },
   { id: "kitchen_appliances", category: "kitchenette", label: "Wipe microwave (interior/exterior), stovetop & refrigerator", mandatory: true },
-  { id: "kitchen_dishes", category: "kitchenette", label: "Verify ESA kitchen pack inventory (plates, cookware, cutlery)", mandatory: false },
+  { id: "kitchen_dishes", category: "kitchenette", label: "Verify kitchen dish pack inventory (plates, cookware, cutlery)", mandatory: false },
   { id: "kitchen_trash", category: "kitchenette", label: "Empty kitchen trash bin & install fresh liner", mandatory: true },
 
   // Final Check

@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import type { RoomDoc } from "@/lib/models";
 import { useAttendants } from "@/lib/useAttendants";
+import { BRAND } from "@/lib/brand";
 
 interface OperationsReportModalProps {
   rooms: RoomDoc[];
@@ -11,6 +12,18 @@ interface OperationsReportModalProps {
 
 export function OperationsReportModal({ rooms, onClose }: OperationsReportModalProps) {
   const attendants = useAttendants();
+
+  // Dismiss on Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   const stats = useMemo(() => {
     const total = rooms.length;
     const clean = rooms.filter((r) => r.status === "clean").length;
@@ -137,6 +150,9 @@ export function OperationsReportModal({ rooms, onClose }: OperationsReportModalP
       }}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="operations-report-title"
         style={{
           backgroundColor: "#FFFFFF",
           borderRadius: 14,
@@ -163,10 +179,15 @@ export function OperationsReportModal({ rooms, onClose }: OperationsReportModalP
         >
           <div>
             <div style={{ fontSize: 11, fontWeight: 700, color: "var(--esa-green)", textTransform: "uppercase" }}>
-              Extended Stay America Suites · Houston IAH Airport
+              {BRAND.name} · {BRAND.location}
             </div>
-            <h2 style={{ margin: "2px 0 0", fontSize: 20, fontWeight: 800, color: "var(--text-main)" }}>
-              📊 Housekeeping Operations & QA Report
+            <h2 id="operations-report-title" style={{ margin: "2px 0 0", fontSize: 20, fontWeight: 800, color: "var(--text-main)", display: "flex", alignItems: "center", gap: 8 }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: "var(--color-primary)" }}>
+                <path d="M18 20V10" />
+                <path d="M12 20V4" />
+                <path d="M6 20v-6" />
+              </svg>
+              Housekeeping Operations & QA Report
             </h2>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -188,7 +209,12 @@ export function OperationsReportModal({ rooms, onClose }: OperationsReportModalP
               }}
               title="Download detailed operations CSV spreadsheet"
             >
-              <span>📥</span> Export CSV
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Export CSV
             </button>
             <button
               type="button"
@@ -202,25 +228,28 @@ export function OperationsReportModal({ rooms, onClose }: OperationsReportModalP
                 fontSize: 13,
                 fontWeight: 700,
                 cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
               }}
             >
-              🖨️ Print Report
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points="6 9 6 2 18 2 18 9" />
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                <rect x="6" y="14" width="12" height="8" />
+              </svg>
+              Print Report
             </button>
             <button
               type="button"
               onClick={onClose}
-              style={{
-                padding: "8px 12px",
-                borderRadius: 8,
-                backgroundColor: "#F3F4F6",
-                color: "#4B5563",
-                border: "none",
-                fontSize: 14,
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
+              aria-label="Close operations report"
+              className="modal-close-btn"
             >
-              ✕
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
             </button>
           </div>
         </div>
@@ -405,7 +434,7 @@ export function OperationsReportModal({ rooms, onClose }: OperationsReportModalP
           }}
         >
           <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
-            Extended Stay America Suites · 96 Suites Live Shift Data
+            {BRAND.name} · Live Shift Data
           </span>
           <button
             type="button"

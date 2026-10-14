@@ -3,11 +3,12 @@ import { getLang } from "@/lib/lang";
 import { BrandLogo } from "@/components/BrandLogo";
 import { LangToggle } from "@/components/LangToggle";
 import { LoginForm } from "@/components/LoginForm";
+import { BRAND } from "@/lib/brand";
 
 const TEXT = {
   en: {
     signIn: "Sign in",
-    mockup: "Concept mock-up. Not an official Extended Stay America or J&P Asset Management site. ©",
+    mockup: `Concept mock-up for ${BRAND.name}. Internal operations portal. ©`,
     role: "Role",
     pin: "Staff PIN",
     error: "That PIN didn't match. Try again.",
@@ -21,7 +22,7 @@ const TEXT = {
   },
   es: {
     signIn: "Iniciar sesión",
-    mockup: "Prototipo conceptual. No es un sitio oficial de Extended Stay America ni de J&P Asset Management. ©",
+    mockup: `Prototipo conceptual para ${BRAND.name}. Portal de operaciones internas. ©`,
     role: "Puesto",
     pin: "PIN del personal",
     error: "Ese PIN no coincide. Inténtalo de nuevo.",
@@ -35,29 +36,29 @@ const TEXT = {
   },
 };
 
-const SHADE = "linear-gradient(rgba(10, 20, 35, 0.35), rgba(10, 20, 35, 0.55))";
-const FALLBACK = "linear-gradient(160deg, #1d3c5e 0%, #3f6f93 55%, #c9d8e4 100%)";
-const BACKGROUND_CSS = `
-.login-bg { background: ${SHADE}, url(/login-bg.jpg) center / cover no-repeat, ${FALLBACK}; }
-@media (orientation: portrait) {
-  .login-bg { background: ${SHADE}, url(/login-bg-portrait.jpg) center / cover no-repeat, ${FALLBACK}; }
-}`;
+import { cookies } from "next/headers";
+import { getHotelConfig, HOTEL_CONFIG } from "@/hotel.config";
 
-const field = {
-  padding: "12px 14px",
-  fontSize: "15px",
-  borderRadius: "8px",
-  border: "1px solid #DDD5C8",
-  background: "#FFFFFF",
-  color: "#2C2016",
-  fontFamily: "inherit",
-  outline: "none",
-};
+const SHADE = "linear-gradient(rgba(10, 20, 35, 0.40), rgba(10, 20, 35, 0.65))";
+const FALLBACK = "linear-gradient(160deg, #1d3c5e 0%, #3f6f93 55%, #c9d8e4 100%)";
 
 export default async function Login({ searchParams }: { searchParams: Promise<{ error?: string; wait?: string }> }) {
   const { error, wait } = await searchParams;
   const lang = await getLang();
   const t = TEXT[lang];
+
+  const cookieStore = await cookies();
+  const presetId = cookieStore.get("hotel_preset")?.value;
+  const hotel = presetId ? getHotelConfig(presetId) : HOTEL_CONFIG;
+
+  const heroImg = hotel.photos?.hero || "/login-bg.jpg";
+  const heroPortraitImg = hotel.photos?.heroPortrait || heroImg;
+  const dynamicBackgroundCss = `
+    .login-bg { background: ${SHADE}, url(${heroImg}) center / cover no-repeat, ${FALLBACK}; }
+    @media (orientation: portrait) {
+      .login-bg { background: ${SHADE}, url(${heroPortraitImg}) center / cover no-repeat, ${FALLBACK}; }
+    }
+  `;
 
   return (
     <div
@@ -72,7 +73,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
         overflowY: "auto",
       }}
     >
-      <style>{BACKGROUND_CSS}</style>
+      <style>{dynamicBackgroundCss}</style>
       <LangToggle lang={lang} style={{ position: "fixed", top: 16, right: 16, zIndex: 50 }} />
 
       <main
@@ -83,7 +84,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
           boxSizing: "border-box",
           padding: "32px 28px",
           borderRadius: 14,
-          borderTop: "4px solid #2F7A1E",
+          borderTop: `4px solid ${hotel.theme.primary}`,
           background: "rgba(255, 255, 255, 0.94)",
           backdropFilter: "blur(14px)",
           WebkitBackdropFilter: "blur(14px)",
@@ -93,8 +94,8 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
       >
         <div style={{ textAlign: "center", marginBottom: 20 }}>
           <BrandLogo height={44} />
-          <p style={{ margin: "10px 0 0", fontSize: 12, letterSpacing: 1.2, textTransform: "uppercase", fontWeight: 700, color: "#4A3728" }}>
-            Houston IAH Airport
+          <p style={{ margin: "10px 0 0", fontSize: 12, letterSpacing: 1.2, textTransform: "uppercase", fontWeight: 700, color: hotel.theme.accent }}>
+            {hotel.location}
           </p>
           <h1 style={{ margin: "4px 0 0", fontSize: 24, fontWeight: 800, color: "#2C2016" }}>
             {t.signIn}
@@ -111,7 +112,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
         />
 
         <div style={{ marginTop: 20, paddingTop: 14, borderTop: "1px solid #EBE5DB", textAlign: "center", fontSize: 12, color: "#827263" }}>
-          Extended Stay America Suites Operations
+          {BRAND.name} Operations
         </div>
         <p style={{ margin: "12px 0 0", fontSize: 11, lineHeight: 1.45, textAlign: "center", color: "#8a7a6b" }}>
           {t.mockup} <a href="https://theroyeffect.com" style={{ color: "inherit" }}>theroyeffect.com</a>

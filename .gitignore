@@ -6,3 +6,6 @@ next-env.d.ts
 .env*.local
 .vercel
 AGENTS.md
+antigravity_global_skills/
+.agents/
+skills-lock.json

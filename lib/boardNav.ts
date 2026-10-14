@@ -7,6 +7,8 @@
 // z-index stays under the board's suite sheet (scrim 10, sheet 11) so the sheet's close button
 // is never covered. The board reads --app-nav-h so its sticky toolbar sits just below the menu.
 
+import { BRAND } from "@/lib/brand";
+
 type Role = string | null;
 
 const LINKS = [
@@ -71,8 +73,8 @@ export function boardNavHtml(role: Role): string {
 </style>
 <div class="bar">
   <div class="brand">
-    <a href="/dashboard"><img src="/esa-logo.png" alt="Extended Stay America"></a>
-    <div class="site"><b>Houston IAH</b><span>Housekeeping</span></div>
+    <a href="/dashboard"><img src="${BRAND.logo}" alt="${BRAND.name}"></a>
+    <div class="site"><b>${BRAND.shortName}</b><span>${BRAND.location}</span></div>
   </div>
   <nav class="links" aria-label="Main Navigation">${LINKS.map(link).join("")}</nav>
   <div class="right">

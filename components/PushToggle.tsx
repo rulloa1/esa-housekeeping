@@ -86,30 +86,69 @@ export function PushToggle({ name, compact = false }: { name?: string; compact?:
   if (state === "loading" || state === "unsupported" || state === "notConfigured") return null;
 
   const btn: React.CSSProperties = {
-    display: "inline-flex", alignItems: "center", gap: 6, minHeight: 44, padding: compact ? "8px 12px" : "8px 14px",
-    borderRadius: 8, fontSize: 13, fontWeight: 700, fontFamily: "inherit", cursor: busy ? "wait" : "pointer",
-    border: "1px solid var(--border-default, #DBDEDB)", background: state === "on" ? "#ECFDF5" : "#fff",
-    color: state === "on" ? "#065F46" : "var(--esa-brown, #483729)",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+    minHeight: 44,
+    padding: compact ? "8px 12px" : "8px 14px",
+    borderRadius: 8,
+    fontSize: 13,
+    fontWeight: 700,
+    fontFamily: "inherit",
+    cursor: busy ? "wait" : "pointer",
+    border: "1px solid var(--border-default)",
+    background: state === "on" ? "var(--st-clean-bg, #ECFDF5)" : "var(--bg-card, #FFFFFF)",
+    color: state === "on" ? "var(--st-clean, #059669)" : "var(--text-main)",
   };
 
   return (
     <div style={{ display: "grid", gap: 4, justifyItems: "start" }}>
       {state === "needsInstall" && (
-        <div style={{ fontSize: 13, color: "var(--text-muted, #7a6a5d)", maxWidth: 360 }}>
-          🔔 For notifications on this iPhone or iPad: tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>, and open the app from there.
+        <div style={{ fontSize: 13, color: "var(--text-muted)", maxWidth: 360, display: "flex", alignItems: "flex-start", gap: 6 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ marginTop: 2, flexShrink: 0 }}>
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+          <span>For notifications on this iPhone or iPad: tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>, and open the app from there.</span>
         </div>
       )}
       {state === "blocked" && (
-        <div style={{ fontSize: 13, color: "var(--text-muted, #7a6a5d)", maxWidth: 360 }}>
-          🔕 Notifications are blocked for this app. Allow them in the device&apos;s settings, then reload.
+        <div style={{ fontSize: 13, color: "var(--text-muted)", maxWidth: 360, display: "flex", alignItems: "flex-start", gap: 6 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ marginTop: 2, flexShrink: 0, color: "var(--st-dirty)" }}>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            <path d="M18.63 13A17.89 17.89 0 0 1 18 8" />
+            <path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14" />
+            <path d="M18 8a6 6 0 0 0-9.33-5" />
+            <line x1="1" y1="1" x2="23" y2="23" />
+          </svg>
+          <span>Notifications are blocked for this app. Allow them in the device&apos;s settings, then reload.</span>
         </div>
       )}
       {(state === "off" || state === "on") && (
         <button type="button" disabled={busy} onClick={state === "on" ? turnOff : turnOn} style={btn} aria-pressed={state === "on"}>
-          {state === "on" ? "🔔 Notifications on" : "🔕 Turn on notifications"}
+          {state === "on" ? (
+            <>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              Notifications on
+            </>
+          ) : (
+            <>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                <path d="M18.63 13A17.89 17.89 0 0 1 18 8" />
+                <path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14" />
+                <path d="M18 8a6 6 0 0 0-9.33-5" />
+                <line x1="1" y1="1" x2="23" y2="23" />
+              </svg>
+              Turn on notifications
+            </>
+          )}
         </button>
       )}
-      {note && <div role="status" style={{ fontSize: 12, color: "var(--text-muted, #7a6a5d)", maxWidth: 360 }}>{note}</div>}
+      {note && <div role="status" style={{ fontSize: 12, color: "var(--text-muted)", maxWidth: 360 }}>{note}</div>}
     </div>
   );
 }

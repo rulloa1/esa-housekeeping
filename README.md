@@ -177,3 +177,46 @@ Open [http://localhost:3000](http://localhost:3000) to view the application:
   - Supervisor: `1234`
   - Administrator: `9999`
 
+---
+
+## 🏨 Universal Multi-Hotel Template & White-Label Configuration
+
+This project is fully modularized as a **Universal Hotel Template**. Any hotel brand, boutique property, resort, or extended stay facility can be deployed with customized branding, color palette, room layout, and operational features.
+
+### 1. Instant Live Switching (In-App)
+In the navigation header on any page, click the **`🏨 [Property Name] ▼`** dropdown button to open the **Hotel Property Switcher**. You can instantly toggle between built-in presets:
+- **Extended Stay America Suites** (Navy & Warm Gold)
+- **Hilton Garden Inn** (Regal Navy & Champagne Gold)
+- **Marriott Courtyard** (Burgundy & Bronze)
+- **Hyatt Place** (Slate Charcoal & Electric Blue)
+- **The Azure Palms Boutique Resort** (Deep Ocean Teal & Emerald)
+- **Custom Hotel** (Fully customizable)
+
+### 2. Setting Default Hotel via Environment Variables
+To set a property permanently in `.env.local` without touching code:
+```env
+# Choose any preset: esa | hilton | marriott | hyatt | boutique | custom
+HOTEL_PRESET=hilton
+```
+
+### 3. Configuring Any Custom Hotel
+Select `HOTEL_PRESET=custom` and supply your property's specific attributes:
+```env
+HOTEL_PRESET=custom
+NEXT_PUBLIC_HOTEL_NAME="The Ritz-Carlton Miami Beach"
+NEXT_PUBLIC_HOTEL_SHORT_NAME="Ritz-Carlton"
+NEXT_PUBLIC_HOTEL_LOCATION="Miami Beach Oceanfront"
+NEXT_PUBLIC_HOTEL_ADDRESS="1 Lincoln Rd, Miami Beach, FL 33139"
+NEXT_PUBLIC_HOTEL_PHONE="(786) 276-4000"
+NEXT_PUBLIC_HOTEL_PRIMARY="#0F2B48"
+NEXT_PUBLIC_HOTEL_ACCENT="#D4AF37"
+NEXT_PUBLIC_HOTEL_FLOORS=5
+NEXT_PUBLIC_HOTEL_ROOMS_PER_FLOOR=24
+NEXT_PUBLIC_HOTEL_HAS_KITCHENETTES=false
+NEXT_PUBLIC_HOTEL_HAS_BALCONIES=true
+```
+
+### 4. Code Configuration (`hotel.config.ts`)
+All presets, room layout schemas, branding tokens, and operational checklist flags are defined in [`hotel.config.ts`](file:///c:/Users/roryulloa/esa-housekeeping/hotel.config.ts). Custom properties can easily add additional presets or customize existing ones directly.
+
+

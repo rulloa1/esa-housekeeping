@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { isGuestTask, type RoomDoc } from "@/lib/models";
 import { PhotoThumb } from "./PhotoPicker";
 
@@ -27,9 +27,9 @@ const actionButton = {
   padding: "6px 12px",
   minHeight: 32,
   borderRadius: 8,
-  border: "1px solid var(--esa-green)",
+  border: "1px solid var(--color-primary)",
   background: "#FFFFFF",
-  color: "var(--esa-green)",
+  color: "var(--color-primary)",
   fontWeight: 700,
   fontSize: 12,
   cursor: "pointer",
@@ -43,6 +43,17 @@ export function RoomHistoryDrawer({ room, onClose, canManage = false, userName, 
   const guestRequests = room.guestRequests || [];
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Dismiss on Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
 
   // Sends one close-out action (resolve_maintenance, fulfill_supplies, guest_request_done).
   const act = async (key: string, body: Record<string, unknown>) => {
@@ -69,8 +80,8 @@ export function RoomHistoryDrawer({ room, onClose, canManage = false, userName, 
       style={{
         position: "fixed",
         inset: 0,
-        backgroundColor: "rgba(30, 20, 10, 0.55)",
-        backdropFilter: "blur(3px)",
+        backgroundColor: "rgba(15, 23, 42, 0.6)",
+        backdropFilter: "blur(4px)",
         display: "flex",
         justifyContent: "flex-end",
         zIndex: 1000,
@@ -78,12 +89,15 @@ export function RoomHistoryDrawer({ room, onClose, canManage = false, userName, 
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="history-drawer-title"
         style={{
           width: "100%",
           maxWidth: 480,
           height: "100%",
           backgroundColor: "#FFFFFF",
-          boxShadow: "var(--shadow-lg)",
+          boxShadow: "var(--shadow-xl)",
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
@@ -95,17 +109,17 @@ export function RoomHistoryDrawer({ room, onClose, canManage = false, userName, 
           style={{
             padding: "16px 20px",
             borderBottom: "1px solid var(--border-subtle)",
-            background: "var(--esa-brown-soft)",
+            background: "var(--color-muted)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
           }}
         >
           <div>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--esa-brown)", letterSpacing: 0.8 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--color-primary)", letterSpacing: 0.8 }}>
               Audit History & Room Details
             </div>
-            <h2 style={{ margin: "2px 0 0", fontSize: 20, fontWeight: 700, color: "var(--text-main)" }}>
+            <h2 id="history-drawer-title" style={{ margin: "2px 0 0", fontSize: 20, fontWeight: 800, color: "var(--text-main)" }}>
               Suite {room.id} ({room.type})
             </h2>
             <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
@@ -113,17 +127,14 @@ export function RoomHistoryDrawer({ room, onClose, canManage = false, userName, 
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              fontSize: 22,
-              color: "var(--text-muted)",
-              cursor: "pointer",
-              padding: "4px 8px",
-            }}
+            aria-label="Close room details drawer"
+            className="modal-close-btn"
           >
-            ✕
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
           </button>
         </div>
 

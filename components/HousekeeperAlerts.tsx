@@ -26,11 +26,42 @@ function chime() {
   } catch {}
 }
 
-const TONE: Record<WorkAlert["kind"], { bg: string; fg: string; icon: string }> = {
-  assigned: { bg: "#ECFDF5", fg: "#065F46", icon: "🧹" },
-  guest: { bg: "#EFF6FF", fg: "#1E40AF", icon: "🛎️" },
-  failed: { bg: "#FEE2E2", fg: "#B91C1C", icon: "✗" },
+const TONE: Record<WorkAlert["kind"], { bg: string; fg: string }> = {
+  assigned: { bg: "var(--st-clean-bg, #ECFDF5)", fg: "var(--st-clean, #059669)" },
+  guest: { bg: "var(--st-assigned-bg, #EFF6FF)", fg: "var(--st-assigned, #2563EB)" },
+  failed: { bg: "var(--st-dirty-bg, #FEF2F2)", fg: "var(--st-dirty, #DC2626)" },
 };
+
+function AlertIcon({ kind }: { kind: WorkAlert["kind"] }) {
+  if (kind === "assigned") {
+    return (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 2v4" />
+        <path d="m4.93 10.93 2.83-2.83" />
+        <path d="M2 18h4" />
+        <path d="M20 18h2" />
+        <path d="m19.07 10.93-2.83-2.83" />
+        <polygon points="12 6 9 14 15 14 12 6" />
+        <line x1="8" y1="21" x2="16" y2="21" />
+      </svg>
+    );
+  }
+  if (kind === "guest") {
+    return (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+      </svg>
+    );
+  }
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="15" y1="9" x2="9" y2="15" />
+      <line x1="9" y1="9" x2="15" y2="15" />
+    </svg>
+  );
+}
 
 // Banner on the housekeeper's phone when new work for them arrives: a suite assigned to them, a
 // guest request in one of their suites, or one of their suites failing inspection. Works from the
@@ -73,15 +104,28 @@ export function HousekeeperAlerts({ rooms, me }: { rooms: RoomDoc[]; me: string 
           key={a.id}
           style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, background: TONE[a.kind].bg, color: TONE[a.kind].fg, fontWeight: 700, fontSize: 15 }}
         >
-          <span aria-hidden>{TONE[a.kind].icon}</span>
+          <AlertIcon kind={a.kind} />
           <span style={{ flex: 1 }}>{a.text}</span>
           <button
             type="button"
-            aria-label="Dismiss"
+            aria-label="Dismiss alert"
             onClick={() => setAlerts((list) => list.filter((x) => x.id !== a.id))}
-            style={{ border: "none", background: "transparent", color: "inherit", fontSize: 18, minWidth: 44, minHeight: 44, cursor: "pointer" }}
+            style={{
+              border: "none",
+              background: "transparent",
+              color: "inherit",
+              minWidth: 44,
+              minHeight: 44,
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            ✕
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
           </button>
         </div>
       ))}
@@ -89,7 +133,7 @@ export function HousekeeperAlerts({ rooms, me }: { rooms: RoomDoc[]; me: string 
         <button
           type="button"
           onClick={() => setAlerts([])}
-          style={{ justifySelf: "end", border: "none", background: "transparent", fontWeight: 700, fontSize: 14, color: "var(--esa-brown, #483729)", minHeight: 44, cursor: "pointer" }}
+          style={{ justifySelf: "end", border: "none", background: "transparent", fontWeight: 700, fontSize: 14, color: "var(--text-secondary)", minHeight: 44, cursor: "pointer" }}
         >
           Dismiss all
         </button>
