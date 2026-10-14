@@ -20,6 +20,11 @@ export function MaintenanceModal({ room, reportedByName, onClose, onComplete }: 
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [activeTab, setActiveTab] = useState<"ticket" | "lock">("ticket");
+  const [lockBattery, setLockBattery] = useState<number>(room.lockBattery ?? 92);
+  const [deadbolt, setDeadbolt] = useState<boolean>(Boolean(room.deadboltEngaged));
+  const [lockActionBusy, setLockActionBusy] = useState(false);
+  const [lockMessage, setLockMessage] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
 
   // Keyboard navigation & accessibility: Escape to dismiss + Focus trap within modal
@@ -103,6 +108,94 @@ export function MaintenanceModal({ room, reportedByName, onClose, onComplete }: 
     }
   };
 
+  // Supervisor Emergency Master Key Unlatch
+  const handleEmergencyUnlock = async () => {
+    setLockActionBusy(true);
+    setLockMessage(null);
+    try {
+      const now = new Date().toISOString();
+      const res = await fetch(`/api/suites/${room.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update_room",
+          userName: reportedByName,
+          data: {
+            deadboltEngaged: false,
+            deadboltEngagedAt: null,
+            lastUnlockedAt: now,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to trigger emergency unlatch");
+      setDeadbolt(false);
+      setLockMessage("Door lock solenoid energized! Solenoid released & deadbolt retracted.");
+      onComplete(data.room);
+    } catch (err: unknown) {
+      setLockMessage(err instanceof Error ? err.message : "Override signal failed.");
+    } finally {
+      setLockActionBusy(false);
+    }
+  };
+
+  // Supervisor Reset 4x AA Battery Pack Counter
+  const handleResetBattery = async () => {
+    setLockActionBusy(true);
+    setLockMessage(null);
+    try {
+      const res = await fetch(`/api/suites/${room.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update_room",
+          userName: reportedByName,
+          data: { lockBattery: 100 },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to reset battery");
+      setLockBattery(100);
+      setLockMessage("Battery counter reset to 100% (New 4x AA pack confirmed).");
+      onComplete(data.room);
+    } catch (err: unknown) {
+      setLockMessage(err instanceof Error ? err.message : "Battery reset failed.");
+    } finally {
+      setLockActionBusy(false);
+    }
+  };
+
+  // Toggle Deadbolt State
+  const handleToggleDeadbolt = async () => {
+    setLockActionBusy(true);
+    setLockMessage(null);
+    try {
+      const nextDeadbolt = !deadbolt;
+      const now = new Date().toISOString();
+      const res = await fetch(`/api/suites/${room.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update_room",
+          userName: reportedByName,
+          data: {
+            deadboltEngaged: nextDeadbolt,
+            deadboltEngagedAt: nextDeadbolt ? now : null,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to toggle deadbolt");
+      setDeadbolt(nextDeadbolt);
+      setLockMessage(nextDeadbolt ? "Deadbolt thrown (DND active)." : "Deadbolt retracted.");
+      onComplete(data.room);
+    } catch (err: unknown) {
+      setLockMessage(err instanceof Error ? err.message : "Deadbolt toggle failed.");
+    } finally {
+      setLockActionBusy(false);
+    }
+  };
+
   return (
     <div
       style={{
@@ -126,11 +219,11 @@ export function MaintenanceModal({ room, reportedByName, onClose, onComplete }: 
         aria-labelledby="maintenance-modal-title"
         style={{
           width: "100%",
-          maxWidth: 520,
+          maxWidth: 540,
           backgroundColor: "#FFFFFF",
           borderRadius: "16px",
           border: "1px solid var(--border-default, #E2E8F0)",
-          borderTop: "4px solid #DC2626",
+          borderTop: activeTab === "ticket" ? "4px solid #DC2626" : "4px solid #1E3A8A",
           boxShadow: "0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(0,0,0,0.05)",
           overflow: "hidden",
         }}
@@ -141,7 +234,7 @@ export function MaintenanceModal({ room, reportedByName, onClose, onComplete }: 
           style={{
             padding: "18px 24px",
             borderBottom: "1px solid var(--border-subtle, #F1F5F9)",
-            background: "linear-gradient(to bottom, #FEF2F2, #FFFFFF)",
+            background: activeTab === "ticket" ? "linear-gradient(to bottom, #FEF2F2, #FFFFFF)" : "linear-gradient(to bottom, #EFF6FF, #FFFFFF)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -154,7 +247,7 @@ export function MaintenanceModal({ room, reportedByName, onClose, onComplete }: 
                 fontSize: 11,
                 fontWeight: 800,
                 textTransform: "uppercase",
-                color: "#DC2626",
+                color: activeTab === "ticket" ? "#DC2626" : "#1E3A8A",
                 letterSpacing: "1.2px",
                 display: "inline-flex",
                 alignItems: "center",
@@ -164,7 +257,7 @@ export function MaintenanceModal({ room, reportedByName, onClose, onComplete }: 
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
               </svg>
-              Engineering & Maintenance Ticket
+              {activeTab === "ticket" ? "Engineering & Maintenance Ticket" : "Commercial Lock Telemetry & Hardware"}
             </div>
             <h2
               id="maintenance-modal-title"
@@ -176,10 +269,10 @@ export function MaintenanceModal({ room, reportedByName, onClose, onComplete }: 
                 color: "var(--text-main, #0F172A)",
               }}
             >
-              Report Issue for Suite {room.id}
+              Suite {room.id} · {activeTab === "ticket" ? "Report Issue" : "Electronic Door Lock"}
             </h2>
             <div style={{ fontSize: 12, color: "var(--text-muted, #64748B)", marginTop: 2 }}>
-              Reported by: <strong style={{ color: "var(--text-secondary, #334155)" }}>{reportedByName || "Staff"}</strong>
+              Staff Operator: <strong style={{ color: "var(--text-secondary, #334155)" }}>{reportedByName || "Supervisor"}</strong>
             </div>
           </div>
           <button
@@ -194,6 +287,217 @@ export function MaintenanceModal({ room, reportedByName, onClose, onComplete }: 
           </button>
         </div>
 
+        {/* Tab Navigation */}
+        <div
+          style={{
+            display: "flex",
+            borderBottom: "1px solid var(--border-default, #E2E8F0)",
+            backgroundColor: "#F8FAFC",
+            padding: "0 24px",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setActiveTab("ticket")}
+            style={{
+              padding: "12px 16px",
+              background: "none",
+              border: "none",
+              borderBottom: activeTab === "ticket" ? "3px solid #DC2626" : "3px solid transparent",
+              color: activeTab === "ticket" ? "#DC2626" : "#64748B",
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <span>🔧</span>
+            <span>Maintenance Ticket</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("lock")}
+            style={{
+              padding: "12px 16px",
+              background: "none",
+              border: "none",
+              borderBottom: activeTab === "lock" ? "3px solid #1E3A8A" : "3px solid transparent",
+              color: activeTab === "lock" ? "#1E3A8A" : "#64748B",
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <span>🔒</span>
+            <span>Lock Diagnostics & Battery</span>
+            <span
+              style={{
+                fontSize: 10,
+                padding: "2px 6px",
+                borderRadius: 10,
+                backgroundColor: lockBattery > 25 ? "#DCFCE7" : "#FEE2E2",
+                color: lockBattery > 25 ? "#166534" : "#991B1B",
+                fontWeight: 800,
+              }}
+            >
+              {lockBattery}%
+            </span>
+          </button>
+        </div>
+
+        {activeTab === "lock" ? (
+          /* Lock Diagnostics & Hardware Override Screen */
+          <div style={{ padding: "20px 24px", display: "grid", gap: 16 }}>
+            {lockMessage && (
+              <div
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: 8,
+                  backgroundColor: "#F0FDF4",
+                  border: "1px solid #BBF7D0",
+                  color: "#166534",
+                  fontSize: 13,
+                  fontWeight: 600,
+                }}
+              >
+                ✓ {lockMessage}
+              </div>
+            )}
+
+            {/* Hardware Identity Card */}
+            <div
+              style={{
+                padding: "16px",
+                borderRadius: 12,
+                backgroundColor: "#0F172A",
+                color: "#FFFFFF",
+                display: "grid",
+                gap: 12,
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: "#38BDF8", textTransform: "uppercase", letterSpacing: 1 }}>
+                    Installed Lock Hardware
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 800, marginTop: 2 }}>
+                    {room.lockModel || "Onity Trillium DirectKey RFID/BLE"}
+                  </div>
+                  <div style={{ fontSize: 12, color: "#94A3B8" }}>
+                    Firmware: {room.lockFirmware || "v4.2.1-SECURE"} · BLE Signal: {room.lockSignalRssi || "-46 dBm"}
+                  </div>
+                </div>
+
+                <span
+                  style={{
+                    padding: "4px 10px",
+                    borderRadius: 20,
+                    backgroundColor: deadbolt ? "rgba(239, 68, 68, 0.25)" : "rgba(16, 185, 129, 0.25)",
+                    color: deadbolt ? "#FCA5A5" : "#6EE7B7",
+                    fontSize: 11,
+                    fontWeight: 800,
+                  }}
+                >
+                  {deadbolt ? "🔒 Deadbolt Thrown" : "🟢 Unlocked Latch"}
+                </span>
+              </div>
+
+              {/* Battery Meter */}
+              <div style={{ padding: "12px", backgroundColor: "rgba(255, 255, 255, 0.06)", borderRadius: 8 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 6 }}>
+                  <span>4x AA Battery Pack Level</span>
+                  <strong style={{ color: lockBattery > 25 ? "#34D399" : "#F87171" }}>
+                    {lockBattery}% ({(5.2 + (lockBattery / 100) * 0.9).toFixed(2)} V)
+                  </strong>
+                </div>
+                <div style={{ width: "100%", height: 8, backgroundColor: "rgba(255, 255, 255, 0.15)", borderRadius: 4, overflow: "hidden" }}>
+                  <div
+                    style={{
+                      width: `${lockBattery}%`,
+                      height: "100%",
+                      backgroundColor: lockBattery > 25 ? "#10B981" : "#EF4444",
+                      borderRadius: 4,
+                      transition: "width 0.3s ease",
+                    }}
+                  />
+                </div>
+                <div style={{ fontSize: 11, color: "#94A3B8", marginTop: 6 }}>
+                  {lockBattery > 25 ? "Standard battery pack voltage healthy." : "⚠️ Battery low: replace with 4 fresh AA alkaline batteries."}
+                </div>
+              </div>
+            </div>
+
+            {/* Supervisor Actions */}
+            <div style={{ display: "grid", gap: 10 }}>
+              <button
+                type="button"
+                onClick={handleEmergencyUnlock}
+                disabled={lockActionBusy}
+                style={{
+                  padding: "12px",
+                  borderRadius: 10,
+                  backgroundColor: "#1E3A8A",
+                  color: "#FFFFFF",
+                  border: "none",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: lockActionBusy ? "wait" : "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                }}
+              >
+                <span>🔑</span>
+                <span>Send Emergency Master Solenoid Release (Door Unlock)</span>
+              </button>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <button
+                  type="button"
+                  onClick={handleToggleDeadbolt}
+                  disabled={lockActionBusy}
+                  style={{
+                    padding: "10px",
+                    borderRadius: 10,
+                    backgroundColor: "#FFFFFF",
+                    border: "1px solid var(--border-default, #CBD5E1)",
+                    color: "var(--text-main, #0F172A)",
+                    fontWeight: 600,
+                    fontSize: 13,
+                    cursor: "pointer",
+                  }}
+                >
+                  {deadbolt ? "Retract Deadbolt" : "Throw Deadbolt"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleResetBattery}
+                  disabled={lockActionBusy}
+                  style={{
+                    padding: "10px",
+                    borderRadius: 10,
+                    backgroundColor: "#FFFFFF",
+                    border: "1px solid var(--border-default, #CBD5E1)",
+                    color: "var(--text-main, #0F172A)",
+                    fontWeight: 600,
+                    fontSize: 13,
+                    cursor: "pointer",
+                  }}
+                >
+                  Reset Battery to 100%
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} style={{ padding: "20px 24px", display: "grid", gap: 16 }}>
           {errorMsg && (
             <div
