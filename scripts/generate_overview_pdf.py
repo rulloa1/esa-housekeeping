@@ -12,11 +12,18 @@ def main():
     assets_dir = os.path.join(root, "public", "pdf-assets")
     
     img_0_b64 = get_base64(os.path.join(assets_dir, "img_0.jpeg"))
-    img_1_b64 = get_base64(os.path.join(assets_dir, "img_1.png"))
+    
+    # Use the transparent PNG logo to avoid pitch-black background boxes
+    esa_logo_path = os.path.join(root, "public", "esa-logo.png")
+    if os.path.exists(esa_logo_path):
+        img_1_b64 = get_base64(esa_logo_path)
+    else:
+        img_1_b64 = get_base64(os.path.join(assets_dir, "img_1.png"))
+        
     img_2_b64 = get_base64(os.path.join(assets_dir, "img_2.png"))
     img_3_b64 = get_base64(os.path.join(assets_dir, "img_3.png"))
     
-    # We can also get the king suite image from public/banners/suite-king.jpg
+    # Suite king image
     suite_img_path = os.path.join(root, "public", "banners", "suite-king.jpg")
     suite_b64 = get_base64(suite_img_path) if os.path.exists(suite_img_path) else img_0_b64
 
@@ -37,7 +44,7 @@ def main():
     }}
     body {{
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      color: #2D3748;
+      color: #37332C;
       background-color: #FFFFFF;
       width: 8.5in;
       height: 11in;
@@ -46,7 +53,7 @@ def main():
       -webkit-font-smoothing: antialiased;
     }}
 
-    /* Subtle Diagonal Watermarks matching original */
+    /* Subtle Warm Diagonal Watermarks matching original */
     .watermark-layer {{
       position: absolute;
       top: 0;
@@ -61,20 +68,20 @@ def main():
       position: absolute;
       font-size: 13px;
       font-weight: 700;
-      color: rgba(185, 160, 130, 0.14);
+      color: rgba(180, 145, 110, 0.16);
       transform: rotate(-32deg);
       user-select: none;
       letter-spacing: 0.5px;
     }}
 
-    /* Header Banner */
+    /* Header Banner with Left-to-Right Extended Stay Brand Green Gradient */
     .header-banner {{
       position: relative;
-      height: 1.85in;
+      height: 2.30in;
       background-image: url('data:image/jpeg;base64,{img_0_b64}');
       background-size: cover;
       background-position: center 30%;
-      padding: 24px 34px;
+      padding: 24px 38px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -83,17 +90,18 @@ def main():
     .header-overlay {{
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(35, 95, 20, 0.92) 0%, rgba(20, 65, 15, 0.86) 60%, rgba(15, 45, 12, 0.90) 100%);
+      background: linear-gradient(90deg, rgba(31, 98, 14, 0.97) 0%, rgba(31, 98, 14, 0.93) 38%, rgba(31, 98, 14, 0.58) 60%, rgba(31, 98, 14, 0.0) 84%);
       z-index: 1;
     }}
     .header-content {{
       position: relative;
       z-index: 2;
+      max-width: 5.6in;
     }}
     .header-logo {{
-      height: 38px;
+      height: 40px;
       width: auto;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       display: block;
     }}
     .header-eyebrow {{
@@ -102,44 +110,45 @@ def main():
       letter-spacing: 1.4px;
       text-transform: uppercase;
       opacity: 0.95;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
+      color: #FFFFFF;
     }}
     .header-title {{
       font-size: 28px;
       font-weight: 800;
       letter-spacing: -0.4px;
       line-height: 1.15;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
       color: #FFFFFF;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.25);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.30);
     }}
     .header-subtitle {{
       font-size: 13px;
       opacity: 0.96;
       font-weight: 400;
       letter-spacing: -0.1px;
-      line-height: 1.3;
+      line-height: 1.35;
     }}
 
     /* Main Container */
     .content-wrap {{
-      padding: 16px 34px 18px;
+      padding: 18px 38px 20px;
       position: relative;
       z-index: 5;
     }}
 
     /* Intro Narrative */
     .lead-text {{
-      font-size: 11.8px;
+      font-size: 11.6px;
       line-height: 1.48;
-      color: #374151;
+      color: #37332C;
       margin-bottom: 14px;
     }}
     .lead-text strong {{
-      color: #1F2937;
+      color: #1A1713;
     }}
     .lead-text .highlight {{
-      color: #1E6B15;
+      color: #135D00;
       font-weight: 700;
     }}
 
@@ -152,22 +161,22 @@ def main():
     }}
     .preview-card {{
       background: #FFFFFF;
-      border: 1px solid #E5E7EB;
+      border: 1px solid #E6E2D8;
       border-radius: 9px;
       overflow: hidden;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 2px 7px rgba(0, 0, 0, 0.05);
       display: flex;
       flex-direction: column;
     }}
     .card-thumb {{
-      height: 130px;
-      background: #F3F4F6;
+      height: 132px;
+      background: #F5F2EB;
       position: relative;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-bottom: 1px solid #E5E7EB;
+      border-bottom: 1px solid #E6E2D8;
     }}
     .card-thumb img {{
       width: 100%;
@@ -180,7 +189,7 @@ def main():
     .guest-mockup {{
       width: 100%;
       height: 100%;
-      background: linear-gradient(180deg, rgba(20,20,20,0.55) 0%, rgba(10,10,10,0.85) 100%), url('data:image/jpeg;base64,{suite_b64}');
+      background: linear-gradient(180deg, rgba(20,20,20,0.45) 0%, rgba(10,10,10,0.78) 100%), url('data:image/jpeg;base64,{suite_b64}');
       background-size: cover;
       background-position: center;
       padding: 10px 12px;
@@ -215,7 +224,7 @@ def main():
       border-radius: 4px;
     }}
     .guest-lang span.active {{
-      background: #338802;
+      background: #2B7808;
       color: #FFF;
       padding: 1px 4px;
       border-radius: 3px;
@@ -241,7 +250,7 @@ def main():
       align-items: center;
       justify-content: center;
       gap: 5px;
-      background: linear-gradient(135deg, #338802 0%, #256601 100%);
+      background: linear-gradient(135deg, #2B7808 0%, #1A5403 100%);
       color: #FFFFFF;
       padding: 5px 12px;
       border-radius: 20px;
@@ -277,21 +286,21 @@ def main():
     .card-title {{
       font-size: 12px;
       font-weight: 800;
-      color: #1F2937;
+      color: #1A1713;
       margin-bottom: 2px;
     }}
     .card-desc {{
-      font-size: 9.8px;
-      color: #6B7280;
+      font-size: 9.6px;
+      color: #61594F;
       line-height: 1.35;
     }}
 
     /* Section: What It Does */
     .section-head {{
-      font-size: 14.5px;
+      font-size: 15px;
       font-weight: 800;
-      color: #1E6B15;
-      margin-bottom: 9px;
+      color: #135D00;
+      margin-bottom: 10px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -300,8 +309,8 @@ def main():
     .section-head::after {{
       content: '';
       flex: 1;
-      height: 1px;
-      background: #E5E7EB;
+      height: 1.5px;
+      background: #E5E0D5;
     }}
 
     .features-grid {{
@@ -317,12 +326,12 @@ def main():
       gap: 8px;
     }}
     .feature-num {{
-      width: 17px;
-      height: 17px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
-      background: #DEF7EC;
-      color: #0E9F6E;
-      font-size: 9.5px;
+      background: #E8F2DE;
+      color: #338701;
+      font-size: 10px;
       font-weight: 800;
       display: flex;
       align-items: center;
@@ -331,104 +340,102 @@ def main():
       margin-top: 1px;
     }}
     .feature-text {{
-      font-size: 10px;
+      font-size: 9.8px;
       line-height: 1.38;
-      color: #4B5563;
+      color: #4A443B;
     }}
     .feature-text strong {{
-      color: #111827;
+      color: #1A1713;
       font-weight: 700;
     }}
 
-    /* Capabilities Pills */
+    /* Capabilities Warm Linen Pills */
     .pills-wrap {{
       display: flex;
       flex-wrap: wrap;
-      gap: 5px;
+      gap: 6px;
       margin-bottom: 12px;
     }}
     .spec-pill {{
-      padding: 3px 9px;
+      padding: 3.5px 10px;
       border-radius: 14px;
-      background: #F9FAFB;
-      border: 1px solid #E5E7EB;
-      color: #374151;
+      background: #F6F3EC;
+      border: 1px solid #E6DEC9;
+      color: #3D372E;
       font-size: 9.2px;
-      font-weight: 600;
+      font-weight: 500;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
     }}
-    .spec-pill.highlight {{
-      background: #F0FDF4;
-      border-color: #BBF7D0;
-      color: #166534;
-      font-weight: 700;
+    .spec-pill strong {{
+      color: #2B7808;
+      font-weight: 800;
     }}
 
-    /* Callout Live Action Card */
+    /* Callout Live Action Card in Warm Olive-Sage */
     .live-callout {{
-      background: #F0FDF4;
-      border: 1px solid #BBF7D0;
-      border-radius: 8px;
-      padding: 9px 15px;
+      background: #E4EED7;
+      border: 1.5px solid #CADBBF;
+      border-radius: 12px;
+      padding: 10px 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 11px;
     }}
     .callout-left {{
       display: flex;
       flex-direction: column;
     }}
     .callout-eyebrow {{
-      font-size: 8px;
+      font-size: 8.5px;
       font-weight: 800;
-      color: #166534;
-      letter-spacing: 0.8px;
+      color: #6B6658;
+      letter-spacing: 1.1px;
       text-transform: uppercase;
       margin-bottom: 1px;
     }}
     .callout-link {{
-      font-size: 14.5px;
+      font-size: 15.5px;
       font-weight: 900;
-      color: #1E6B15;
+      color: #135D00;
       text-decoration: none;
       letter-spacing: -0.2px;
     }}
     .callout-right {{
-      font-size: 9px;
-      color: #4B5563;
+      font-size: 9.2px;
+      color: #524C40;
       text-align: right;
       line-height: 1.35;
-      max-width: 280px;
+      max-width: 290px;
     }}
 
-    /* Mockup Notice */
+    /* Mockup Notice with Warm Amber Accent */
     .disclaimer-box {{
-      border-left: 2.5px solid #D97706;
-      padding: 3px 0 3px 8px;
+      border-left: 3px solid #C87515;
+      padding: 3px 0 3px 10px;
       margin-bottom: 12px;
     }}
     .disclaimer-text {{
       font-size: 8px;
       line-height: 1.35;
-      color: #6B7280;
+      color: #6E675C;
     }}
     .disclaimer-text strong {{
-      color: #374151;
+      color: #37332C;
     }}
 
-    /* Footer Strip */
+    /* Footer Strip in Warm Mocha / Espresso */
     .footer-bar {{
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 0.38in;
-      background: #1F2937;
-      color: #9CA3AF;
-      padding: 0 34px;
+      height: 0.40in;
+      background: #483729;
+      color: #C5BCB2;
+      padding: 0 38px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -437,8 +444,8 @@ def main():
       z-index: 5;
     }}
     .footer-bar span.accent {{
-      color: #F3F4F6;
-      font-weight: 600;
+      color: #FFFFFF;
+      font-weight: 700;
     }}
   </style>
 </head>
@@ -585,16 +592,16 @@ def main():
       </div>
     </div>
 
-    <!-- Feature Pills -->
+    <!-- Feature Warm Linen Pills -->
     <div class="pills-wrap">
-      <span class="spec-pill highlight">Keyless Mobile Entry (BLE/RFID)</span>
-      <span class="spec-pill">iPad & phone first</span>
-      <span class="spec-pill">English / Spanish for staff and guests</span>
-      <span class="spec-pill">3D building board by floor</span>
-      <span class="spec-pill">Onity Lock Hardware Telemetry</span>
-      <span class="spec-pill">Universal Hotel White-Labeling</span>
-      <span class="spec-pill">Role-based staff sign-in</span>
-      <span class="spec-pill highlight">Nothing to install, runs in the browser</span>
+      <span class="spec-pill"><strong>Keyless Mobile Entry</strong> (BLE/RFID)</span>
+      <span class="spec-pill"><strong>iPad and phone</strong> first</span>
+      <span class="spec-pill"><strong>English / Spanish</strong> for staff and guests</span>
+      <span class="spec-pill"><strong>3D building board</strong> by floor</span>
+      <span class="spec-pill"><strong>Onity Lock</strong> hardware telemetry</span>
+      <span class="spec-pill"><strong>Universal Hotel</strong> white-labeling</span>
+      <span class="spec-pill"><strong>Role-based</strong> staff sign-in</span>
+      <span class="spec-pill"><strong>Nothing to install,</strong> runs in the browser</span>
     </div>
 
     <!-- Live Callout Box -->
@@ -637,7 +644,8 @@ def main():
     docs_dir = os.path.join(root, "docs")
     os.makedirs(docs_dir, exist_ok=True)
     docs_pdf = os.path.join(docs_dir, "ESA-IAH-Housekeeping-App-Overview.pdf")
-    brain_pdf = r"C:\Users\roryulloa\.gemini\antigravity-ide\brain\64f8f55f-2084-4875-bd51-5edd4ca34688\ESA-IAH-Housekeeping-App-Overview.pdf"
+    brain_prev_pdf = r"C:\Users\roryulloa\.gemini\antigravity-ide\brain\64f8f55f-2084-4875-bd51-5edd4ca34688\ESA-IAH-Housekeeping-App-Overview.pdf"
+    brain_curr_pdf = r"C:\Users\roryulloa\.gemini\antigravity-ide\brain\5e348c26-0c4e-4345-8cb8-e0c6ea1ac9ff\ESA-IAH-Housekeeping-App-Overview.pdf"
 
     edge_bin = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
     
@@ -661,18 +669,26 @@ def main():
 
     if os.path.exists(downloads_pdf):
         print("Successfully generated:", downloads_pdf, "Size:", os.path.getsize(downloads_pdf))
-        # Copy to docs and brain
+        # Copy to docs and brain folders
         import shutil
         shutil.copy2(downloads_pdf, docs_pdf)
-        shutil.copy2(downloads_pdf, brain_pdf)
-        print("Copied to", docs_pdf, "and", brain_pdf)
+        if os.path.exists(os.path.dirname(brain_prev_pdf)):
+            shutil.copy2(downloads_pdf, brain_prev_pdf)
+        if os.path.exists(os.path.dirname(brain_curr_pdf)):
+            shutil.copy2(downloads_pdf, brain_curr_pdf)
+        print("Copied to destinations.")
 
         # Render preview PNG with PyMuPDF
         doc = fitz.open(downloads_pdf)
         pix = doc[0].get_pixmap(dpi=150)
-        preview_png = r"C:\Users\roryulloa\.gemini\antigravity-ide\brain\64f8f55f-2084-4875-bd51-5edd4ca34688\updated_overview_pdf_p1.png"
-        pix.save(preview_png)
-        print("Saved preview image to", preview_png)
+        
+        preview_png_prev = r"C:\Users\roryulloa\.gemini\antigravity-ide\brain\64f8f55f-2084-4875-bd51-5edd4ca34688\updated_overview_pdf_p1.png"
+        preview_png_curr = r"C:\Users\roryulloa\.gemini\antigravity-ide\brain\5e348c26-0c4e-4345-8cb8-e0c6ea1ac9ff\updated_overview_pdf_p1.png"
+        
+        if os.path.exists(os.path.dirname(preview_png_prev)):
+            pix.save(preview_png_prev)
+        pix.save(preview_png_curr)
+        print("Saved preview image to", preview_png_curr)
 
 if __name__ == "__main__":
     main()
