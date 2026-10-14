@@ -553,17 +553,17 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
           </div>
         )}
 
-        {/* Signature Hotel Property Hero Banner */}
+        {/* Signature Hotel Property Hero Banner (Brightened & Streamlined) */}
         <section
           style={{
             position: "relative",
             borderRadius: 16,
             overflow: "hidden",
-            marginBottom: 20,
-            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.22), 0 8px 10px -6px rgba(0, 0, 0, 0.12)",
-            backgroundImage: `linear-gradient(135deg, rgba(28, 24, 20, 0.92) 0%, rgba(46, 38, 32, 0.84) 48%, rgba(22, 26, 32, 0.90) 100%), url('${BRAND.photos?.hero || "/landing/hero-exterior-2752.jpg"}')`,
+            marginBottom: 18,
+            boxShadow: "0 10px 28px -6px rgba(20, 60, 8, 0.22), 0 4px 10px -2px rgba(0, 0, 0, 0.06)",
+            backgroundImage: `linear-gradient(102deg, rgba(20, 60, 8, 0.90) 0%, rgba(24, 75, 12, 0.72) 42%, rgba(20, 60, 8, 0.22) 78%, rgba(0, 0, 0, 0.05) 100%), url('${BRAND.photos?.hero || "/landing/hero-exterior-2752.jpg"}')`,
             backgroundSize: "cover",
-            backgroundPosition: "center 35%",
+            backgroundPosition: "center 38%",
             color: "#FFFFFF",
             padding: "24px 28px",
           }}
@@ -574,25 +574,25 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
               position: "absolute",
               top: -60,
               right: -60,
-              width: 240,
-              height: 240,
-              background: "radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%)",
+              width: 260,
+              height: 260,
+              background: "radial-gradient(circle, rgba(255,255,255,0.22) 0%, transparent 70%)",
               pointerEvents: "none",
             }}
           />
 
           <div style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
             <div>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 20, backgroundColor: "rgba(255, 255, 255, 0.16)", backdropFilter: "blur(6px)", fontSize: 11, fontWeight: 800, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 8 }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 20, backgroundColor: "rgba(255, 255, 255, 0.18)", backdropFilter: "blur(6px)", fontSize: 11, fontWeight: 800, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 8 }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="#FBBF24" stroke="#FBBF24" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                 </svg>
                 {BRAND.name} · {BRAND.location}
               </div>
-              <h1 style={{ margin: "2px 0 6px", fontSize: 26, fontWeight: 800, letterSpacing: -0.5, color: "#FFFFFF", textShadow: "0 2px 4px rgba(0,0,0,0.3)" }}>
+              <h1 style={{ margin: "2px 0 6px", fontSize: 26, fontWeight: 800, letterSpacing: -0.5, color: "#FFFFFF", textShadow: "0 2px 4px rgba(0,0,0,0.25)" }}>
                 Supervisor Operations Dashboard
               </h1>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", fontSize: 13, opacity: 0.94 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", fontSize: 13, opacity: 0.95 }}>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <rect x="4" y="2" width="16" height="20" rx="2" ry="2" /><line x1="9" y1="22" x2="9" y2="22.01" /><line x1="15" y1="22" x2="15" y2="22.01" /><line x1="9" y1="6" x2="9" y2="6.01" /><line x1="15" y1="6" x2="15" y2="6.01" /><line x1="9" y1="10" x2="9" y2="10.01" /><line x1="15" y1="10" x2="15" y2="10.01" /><line x1="9" y1="14" x2="9" y2="14.01" /><line x1="15" y1="14" x2="15" y2="14.01" /><line x1="9" y1="18" x2="9" y2="18.01" /><line x1="15" y1="18" x2="15" y2="18.01" />
@@ -616,32 +616,9 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
               </div>
             </div>
 
-            {/* Action Buttons with Glassmorphic Styling */}
+            {/* Action Buttons with Clean Visual Hierarchy */}
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <button
-                type="button"
-                className="glass-btn"
-                onClick={handleExportCsv}
-                title="Download shift roster as CSV"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  padding: "8px 14px",
-                  borderRadius: 8,
-                  backgroundColor: "rgba(255, 255, 255, 0.18)",
-                  backdropFilter: "blur(6px)",
-                  border: "1px solid rgba(255, 255, 255, 0.35)",
-                  color: "#FFFFFF",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                <span>Export CSV</span>
-              </button>
-
+              {/* Primary Action Button: Operations Report */}
               <button
                 type="button"
                 className="glass-btn"
@@ -650,44 +627,22 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  padding: "8px 14px",
-                  borderRadius: 8,
-                  backgroundColor: "rgba(255, 255, 255, 0.18)",
-                  backdropFilter: "blur(6px)",
-                  border: "1px solid rgba(255, 255, 255, 0.35)",
-                  color: "#FFFFFF",
-                  fontSize: 12,
-                  fontWeight: 700,
+                  padding: "8px 16px",
+                  borderRadius: 10,
+                  backgroundColor: "#FFFFFF",
+                  border: "none",
+                  color: "#15803D",
+                  fontSize: 13,
+                  fontWeight: 800,
                   cursor: "pointer",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
                 }}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>
                 <span>Operations Report</span>
               </button>
 
-              <button
-                type="button"
-                className="glass-btn"
-                onClick={() => setShowNotifications(true)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  padding: "8px 14px",
-                  borderRadius: 8,
-                  backgroundColor: "rgba(255, 255, 255, 0.18)",
-                  backdropFilter: "blur(6px)",
-                  border: "1px solid rgba(255, 255, 255, 0.35)",
-                  color: "#FFFFFF",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
-                <span>Activity & Alerts</span>
-              </button>
-
+              {/* Secondary Action: Departures & Arrivals */}
               <button
                 type="button"
                 className="glass-btn"
@@ -698,10 +653,10 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                   alignItems: "center",
                   gap: 6,
                   padding: "8px 14px",
-                  borderRadius: 8,
-                  backgroundColor: "rgba(255, 255, 255, 0.18)",
+                  borderRadius: 10,
+                  backgroundColor: "rgba(255, 255, 255, 0.20)",
                   backdropFilter: "blur(6px)",
-                  border: "1px solid rgba(255, 255, 255, 0.35)",
+                  border: "1px solid rgba(255, 255, 255, 0.38)",
                   color: "#FFFFFF",
                   fontSize: 12,
                   fontWeight: 700,
@@ -715,18 +670,66 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
               <button
                 type="button"
                 className="glass-btn"
+                onClick={handleExportCsv}
+                title="Download shift roster as CSV"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 12px",
+                  borderRadius: 10,
+                  backgroundColor: "rgba(255, 255, 255, 0.16)",
+                  backdropFilter: "blur(6px)",
+                  border: "1px solid rgba(255, 255, 255, 0.3)",
+                  color: "#FFFFFF",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                <span>Export CSV</span>
+              </button>
+
+              <button
+                type="button"
+                className="glass-btn"
+                onClick={() => setShowNotifications(true)}
+                title="View activity and alert drawer"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 12px",
+                  borderRadius: 10,
+                  backgroundColor: "rgba(255, 255, 255, 0.16)",
+                  backdropFilter: "blur(6px)",
+                  border: "1px solid rgba(255, 255, 255, 0.3)",
+                  color: "#FFFFFF",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
+                <span>Alerts</span>
+              </button>
+
+              <button
+                type="button"
+                className="glass-btn"
                 onClick={handleResetBaseline}
                 disabled={isResetting}
                 title="Reset all 96 suites to morning baseline shift state"
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 6,
-                  padding: "8px 14px",
-                  borderRadius: 8,
-                  backgroundColor: "rgba(239, 68, 68, 0.30)",
+                  gap: 5,
+                  padding: "8px 12px",
+                  borderRadius: 10,
+                  backgroundColor: "rgba(239, 68, 68, 0.25)",
                   backdropFilter: "blur(6px)",
-                  border: "1px solid rgba(254, 202, 202, 0.45)",
+                  border: "1px solid rgba(254, 202, 202, 0.4)",
                   color: "#FFFFFF",
                   fontSize: 12,
                   fontWeight: 700,
@@ -734,8 +737,8 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                   opacity: isResetting ? 0.7 : 1,
                 }}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" /></svg>
-                <span>{isResetting ? "Resetting..." : "Reset Demo Shift"}</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" /></svg>
+                <span>{isResetting ? "Resetting..." : "Reset Shift"}</span>
               </button>
 
               <div
@@ -743,16 +746,17 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  padding: "6px 12px",
+                  padding: "5px 10px",
                   borderRadius: 20,
-                  backgroundColor: "rgba(0, 0, 0, 0.28)",
+                  backgroundColor: "rgba(0, 0, 0, 0.24)",
                   border: "1px solid rgba(255, 255, 255, 0.2)",
-                  fontSize: 12,
+                  fontSize: 11,
+                  fontWeight: 700,
                   color: "#FFFFFF",
                 }}
               >
                 <span>Live Sync v{version}</span>
-                <span className="pulse-live" style={{ width: 8, height: 8, borderRadius: "50%", background: "#4ADE80", display: "inline-block" }}></span>
+                <span className="pulse-live" style={{ width: 7, height: 7, borderRadius: "50%", background: "#4ADE80", display: "inline-block" }}></span>
                 <button
                   type="button"
                   onClick={handleManualSync}
@@ -768,7 +772,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                     alignItems: "center",
                   }}
                 >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
                 </button>
               </div>
             </div>
@@ -914,79 +918,138 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
           })}
         </section>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
-          <PushToggle compact />
+        {/* Operational Alerts & Handover Notes (Unified 2-Column Responsive Grid) */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: 12,
+            marginBottom: 14,
+            alignItems: "stretch",
+          }}
+        >
+          <div style={{ minWidth: 0 }}>
+            <HandoverStrip />
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <OverdueAlerts
+              rooms={allRooms}
+              onSelectSuite={(id) => setViewingHistoryRoom(allRooms.find((r) => r.id === id) ?? null)}
+            />
+          </div>
         </div>
 
-        {/* Notes the previous shift left (app/handover) */}
-        <HandoverStrip />
-
-        {/* Overdue: guest requests, checkouts not ready by check-in, waiting inspections */}
-        <OverdueAlerts
-          rooms={allRooms}
-          onSelectSuite={(id) => setViewingHistoryRoom(allRooms.find((r) => r.id === id) ?? null)}
-        />
-
-        {/* Staff Workload & Assignment Distribution (Phase 10) */}
+        {/* Staff Workload & Assignment Distribution (Collapsible) */}
         <WorkloadDistribution
           rooms={allRooms}
           activeAttendantFilter={activeAttendantFilter}
           onSelectAttendant={setActiveAttendantFilter}
         />
 
-        {/* Filter & Search Bar */}
+        {/* Floor Readiness & Filter Ribbon (Unified, Zero Duplication) */}
         <div
           style={{
             backgroundColor: "#FFFFFF",
             borderRadius: 12,
             border: "1px solid var(--border-default)",
-            padding: "14px 16px",
-            marginBottom: 16,
+            padding: "10px 14px",
+            marginBottom: 14,
             display: "flex",
-            flexDirection: "column",
-            gap: 12,
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 10,
             boxShadow: "var(--shadow-xs)",
           }}
         >
-          {/* Quick Filters */}
-          <div className="dash-filters-scroll">
-            {/* The tiles above are the main filters; these are the extra ones they don't cover. */}
-            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginRight: 4, whiteSpace: "nowrap" }}>
-              More filters
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.8, color: "var(--text-muted)", marginRight: 2 }}>
+              Floors:
             </span>
-            {[
-              { key: "UNASSIGNED", label: "Unassigned", count: allRooms.filter((r) => !r.attendant && (r.status === "dirty" || r.status === "assigned")).length },
-              { key: "INSPECTION FAILED", label: "Failed inspection", count: metrics.inspectionFailed },
-              { key: "OUT OF SERVICE", label: "Out of service", count: metrics.ooo },
-              { key: "DEADBOLT", label: "🔒 Deadbolt (DND)", count: allRooms.filter((r) => r.deadboltEngaged).length },
-              { key: "LOW BATTERY", label: "🪫 Low Lock Battery", count: allRooms.filter((r) => (r.lockBattery ?? 92) <= 25).length },
-              { key: "NOT LOGGED", label: "Not logged", count: allRooms.filter((r) => r.status === "not_logged").length },
-            ].map((f) => (
-              <button
-                key={f.key}
-                type="button"
-                onClick={() => setActiveFilter(f.key)}
-                style={{
-                  padding: "5px 11px",
-                  borderRadius: "var(--radius-pill)",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  border: "1px solid",
-                  borderColor: activeFilter === f.key ? "var(--esa-green)" : "var(--border-default)",
-                  backgroundColor: activeFilter === f.key ? "var(--esa-green-soft)" : "transparent",
-                  color: activeFilter === f.key ? "var(--esa-green-dark)" : "var(--text-secondary)",
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {f.label} ({f.count})
-              </button>
-            ))}
+            <button
+              type="button"
+              onClick={() => setActiveFloor("all")}
+              style={{
+                padding: "6px 12px",
+                borderRadius: 20,
+                fontSize: 12,
+                fontWeight: 700,
+                border: "1px solid",
+                borderColor: activeFloor === "all" ? "var(--esa-green)" : "var(--border-default)",
+                backgroundColor: activeFloor === "all" ? "var(--esa-green)" : "var(--bg-muted)",
+                color: activeFloor === "all" ? "#FFFFFF" : "var(--text-main)",
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
+            >
+              All Suites ({allRooms.length})
+            </button>
+
+            {floorMetrics.map((fl) => {
+              const isActive = activeFloor === String(fl.floor);
+              return (
+                <button
+                  key={fl.floor}
+                  type="button"
+                  onClick={() => setActiveFloor(isActive ? "all" : String(fl.floor))}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "6px 12px",
+                    borderRadius: 20,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    border: "1px solid",
+                    borderColor: isActive ? "var(--esa-green)" : "var(--border-default)",
+                    backgroundColor: isActive ? "var(--esa-green-soft)" : "#FFFFFF",
+                    color: isActive ? "var(--esa-green-dark)" : "var(--text-main)",
+                    cursor: "pointer",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <span>Floor {fl.floor}</span>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 800,
+                      padding: "2px 7px",
+                      borderRadius: 10,
+                      backgroundColor:
+                        fl.percentage >= 80 ? "rgba(16, 185, 129, 0.15)" : fl.percentage >= 50 ? "rgba(245, 158, 11, 0.15)" : "rgba(239, 68, 68, 0.15)",
+                      color:
+                        fl.percentage >= 80 ? "var(--esa-green-dark)" : fl.percentage >= 50 ? "#B45309" : "var(--st-dirty)",
+                    }}
+                  >
+                    {fl.percentage}% ({fl.clean}/{fl.total})
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
-          {/* Search, Floor, and View Controls */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <PushToggle compact />
+          </div>
+        </div>
+
+        {/* Search, Filter Pills & Table Controls */}
+        <div
+          style={{
+            backgroundColor: "#FFFFFF",
+            borderRadius: 12,
+            border: "1px solid var(--border-default)",
+            padding: "12px 16px",
+            marginBottom: 14,
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+            boxShadow: "var(--shadow-xs)",
+          }}
+        >
+          {/* Top row: Search input + View switcher + Print */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
-            <div style={{ position: "relative", display: "flex", alignItems: "center", flex: 1, maxWidth: 500 }}>
+            <div style={{ position: "relative", display: "flex", alignItems: "center", flex: 1, minWidth: 260, maxWidth: 520 }}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ position: "absolute", left: 12, color: "var(--text-muted)", pointerEvents: "none" }} aria-hidden="true">
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
@@ -997,59 +1060,42 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
                   width: "100%",
-                  padding: "9px 12px 9px 36px",
+                  padding: "8px 12px 8px 36px",
                   borderRadius: 8,
                   border: "1px solid var(--border-default)",
                   fontSize: 13,
                   outline: "none",
                   backgroundColor: "#FFFFFF",
                   color: "var(--text-main)",
-                  transition: "border-color 0.15s ease, box-shadow 0.15s ease",
+                  transition: "border-color 0.15s ease",
                 }}
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  style={{ position: "absolute", right: 10, background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", fontSize: 13, fontWeight: 700 }}
+                  title="Clear search"
+                >
+                  ✕
+                </button>
+              )}
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              {/* Floor Switcher */}
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)" }}>Floor:</span>
-                {(["all", "1", "2", "3"] as const).map((fl) => (
-                  <button
-                    key={fl}
-                    type="button"
-                    onClick={() => setActiveFloor(fl)}
-                    style={{
-                      padding: "8px 12px",
-                      minHeight: 36,
-                      borderRadius: 6,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      border: "1px solid",
-                      borderColor: activeFloor === fl ? "var(--color-primary)" : "var(--border-default)",
-                      backgroundColor: activeFloor === fl ? "var(--color-primary)" : "#FFFFFF",
-                      color: activeFloor === fl ? "#FFFFFF" : "var(--text-secondary)",
-                      cursor: "pointer",
-                      transition: "all 0.15s ease",
-                    }}
-                  >
-                    {fl === "all" ? "All Floors" : `Floor ${fl}`}
-                  </button>
-                ))}
-              </div>
-
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               {/* View Switcher: Table vs Cards */}
               <div style={{ display: "flex", border: "1px solid var(--border-default)", borderRadius: 8, overflow: "hidden" }}>
                 <button
                   type="button"
                   onClick={() => setViewMode("table")}
                   style={{
-                    padding: "8px 14px",
-                    minHeight: 36,
+                    padding: "7px 14px",
+                    minHeight: 34,
                     border: "none",
                     fontSize: 12,
-                    fontWeight: 600,
-                    backgroundColor: viewMode === "table" ? "var(--color-muted)" : "#FFFFFF",
-                    color: viewMode === "table" ? "var(--color-primary)" : "var(--text-muted)",
+                    fontWeight: 700,
+                    backgroundColor: viewMode === "table" ? "var(--esa-green)" : "#FFFFFF",
+                    color: viewMode === "table" ? "#FFFFFF" : "var(--text-muted)",
                     cursor: "pointer",
                     transition: "all 0.15s ease",
                   }}
@@ -1060,13 +1106,13 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                   type="button"
                   onClick={() => setViewMode("grid")}
                   style={{
-                    padding: "8px 14px",
-                    minHeight: 36,
+                    padding: "7px 14px",
+                    minHeight: 34,
                     border: "none",
                     fontSize: 12,
-                    fontWeight: 600,
-                    backgroundColor: viewMode === "grid" ? "var(--color-muted)" : "#FFFFFF",
-                    color: viewMode === "grid" ? "var(--color-primary)" : "var(--text-muted)",
+                    fontWeight: 700,
+                    backgroundColor: viewMode === "grid" ? "var(--esa-green)" : "#FFFFFF",
+                    color: viewMode === "grid" ? "#FFFFFF" : "var(--text-muted)",
                     cursor: "pointer",
                     transition: "all 0.15s ease",
                   }}
@@ -1092,6 +1138,7 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
                   fontSize: 12,
                   fontWeight: 700,
                   cursor: "pointer",
+                  minHeight: 34,
                   transition: "all 0.15s ease",
                 }}
                 title="Print morning assignment roster and room table"
@@ -1103,104 +1150,41 @@ export function SupervisorDashboard({ initialDocs, initialVersion, currentRole }
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Floor Progress & Clean Readiness Meters */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "var(--text-main)" }}>
-              Floors ready
-            </h3>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-              gap: 10,
-            }}
-          >
-            {floorMetrics.map((fl) => {
-              const isActive = activeFloor === String(fl.floor);
-              return (
-                <div
-                  key={fl.floor}
-                  onClick={() => setActiveFloor(isActive ? "all" : String(fl.floor))}
-                  style={{
-                    backgroundColor: "#FFFFFF",
-                    borderRadius: 12,
-                    border: isActive ? "2px solid var(--esa-green)" : "1px solid var(--border-default)",
-                    padding: "12px 14px",
-                    cursor: "pointer",
-                    boxShadow: isActive ? "var(--shadow-md)" : "var(--shadow-xs)",
-                    transition: "all 0.15s ease",
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <span style={{ fontSize: 13, fontWeight: 800, color: "var(--esa-brown)" }}>
-                        Floor {fl.floor}
-                      </span>
-                      <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                        {fl.total} suites
-                      </span>
-                      {isActive && (
-                        <span
-                          style={{
-                            fontSize: 10,
-                            fontWeight: 700,
-                            backgroundColor: "var(--esa-green-soft)",
-                            color: "var(--esa-green-dark)",
-                            padding: "2px 6px",
-                            borderRadius: 6,
-                          }}
-                        >
-                          ACTIVE FILTER
-                        </span>
-                      )}
-                    </div>
-                    <span
-                      style={{
-                        fontSize: 12,
-                        fontWeight: 800,
-                        color: fl.percentage >= 80 ? "var(--esa-green-dark)" : fl.percentage >= 50 ? "#D97706" : "var(--st-dirty)",
-                      }}
-                    >
-                      {fl.percentage}%
-                    </span>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div
-                    style={{
-                      width: "100%",
-                      height: 7,
-                      backgroundColor: "var(--bg-muted)",
-                      borderRadius: 4,
-                      overflow: "hidden",
-                      marginBottom: 8,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: `${fl.percentage}%`,
-                        height: "100%",
-                        backgroundColor: fl.percentage >= 80 ? "var(--esa-green)" : fl.percentage >= 50 ? "#F59E0B" : "var(--st-dirty)",
-                        borderRadius: 4,
-                        transition: "width 0.3s ease",
-                      }}
-                    />
-                  </div>
-
-                  {/* Status counts breakdown */}
-                  <div style={{ display: "flex", gap: 10, fontSize: 11, color: "var(--text-secondary)", flexWrap: "wrap" }}>
-                    <span>{fl.dirty} dirty</span>
-                    <span>{fl.inProgress} cleaning</span>
-                    <span>{fl.awaitingInspection} to inspect</span>
-                  </div>
-                </div>
-              );
-            })}
+          {/* Secondary Quick Filters Pill Bar */}
+          <div className="dash-filters-scroll" style={{ paddingTop: 2 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 0.6, marginRight: 2 }}>
+              Filters:
+            </span>
+            {[
+              { key: "UNASSIGNED", label: "Unassigned", count: allRooms.filter((r) => !r.attendant && (r.status === "dirty" || r.status === "assigned")).length },
+              { key: "INSPECTION FAILED", label: "Failed inspection", count: metrics.inspectionFailed },
+              { key: "OUT OF SERVICE", label: "Out of service", count: metrics.ooo },
+              { key: "DEADBOLT", label: "🔒 Deadbolt (DND)", count: allRooms.filter((r) => r.deadboltEngaged).length },
+              { key: "LOW BATTERY", label: "🪫 Low Battery", count: allRooms.filter((r) => (r.lockBattery ?? 92) <= 25).length },
+              { key: "NOT LOGGED", label: "Not logged", count: allRooms.filter((r) => r.status === "not_logged").length },
+            ].map((f) => (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => setActiveFilter(activeFilter === f.key ? "ALL" : f.key)}
+                style={{
+                  padding: "4px 10px",
+                  borderRadius: "var(--radius-pill)",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  border: "1px solid",
+                  borderColor: activeFilter === f.key ? "var(--esa-green)" : "var(--border-default)",
+                  backgroundColor: activeFilter === f.key ? "var(--esa-green-soft)" : "transparent",
+                  color: activeFilter === f.key ? "var(--esa-green-dark)" : "var(--text-secondary)",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                {f.label} ({f.count})
+              </button>
+            ))}
           </div>
         </div>
 

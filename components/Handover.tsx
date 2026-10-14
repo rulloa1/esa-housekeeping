@@ -161,7 +161,7 @@ export function HandoverStrip() {
   const open = openNotes(notes);
   const top = open.slice(0, 3);
   return (
-    <section aria-label="Handover notes" style={{ background: "#FFFFFF", border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)", marginBottom: 16, padding: "12px 16px", display: "grid", gap: 8, boxShadow: "var(--shadow-xs)" }}>
+    <section aria-label="Handover notes" style={{ background: "#FFFFFF", border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)", marginBottom: 0, height: "100%", boxSizing: "border-box", padding: "12px 16px", display: "grid", gap: 8, boxShadow: "var(--shadow-xs)" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <strong style={{ fontSize: 15, color: "var(--text-main)", display: "inline-flex", alignItems: "center", gap: 6 }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: "var(--color-primary)" }}>

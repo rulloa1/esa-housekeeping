@@ -118,5 +118,8 @@ const panel: React.CSSProperties = {
   background: "var(--bg-card, #FFFFFF)",
   borderRadius: 12,
   border: "1px solid var(--border-default)",
-  marginBottom: 16,
+  marginBottom: 0,
+  height: "100%",
+  boxSizing: "border-box",
+  boxShadow: "var(--shadow-xs)",
 };

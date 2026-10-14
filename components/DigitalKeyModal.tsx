@@ -46,7 +46,7 @@ export function DigitalKeyModal({
           }
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [isOpen, suite, k]);
 
   // Play realistic commercial solenoid release and dual-tone optical confirmation chime
@@ -111,7 +111,7 @@ export function DigitalKeyModal({
     if (typeof window !== "undefined" && "navigator" in window && navigator.vibrate) {
       try {
         navigator.vibrate(pattern);
-      } catch {}
+      } catch { }
     }
   };
 
@@ -175,7 +175,7 @@ export function DigitalKeyModal({
         setDeadboltEngaged(Boolean(data.deadboltEngaged));
         triggerHaptic([60, 40]);
       }
-    } catch {}
+    } catch { }
   };
 
   useEffect(() => {
@@ -291,7 +291,7 @@ export function DigitalKeyModal({
 
         {/* Main Body - Physical Lock Representation matching hardware photo */}
         <div style={{ padding: "16px 20px", overflowY: "auto", flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          
+
           {/* Target Alignment Instructions Banner */}
           <div
             style={{
@@ -386,25 +386,25 @@ export function DigitalKeyModal({
                     unlockState === "unlocked"
                       ? "#10B981"
                       : unlockState === "transmitting"
-                      ? "#38BDF8"
-                      : unlockState === "error"
-                      ? "#EF4444"
-                      : "#334155",
+                        ? "#38BDF8"
+                        : unlockState === "error"
+                          ? "#EF4444"
+                          : "#334155",
                   border: "2px solid #09090B",
                   boxShadow:
                     unlockState === "unlocked"
                       ? "0 0 18px #10B981, 0 0 35px #10B981"
                       : unlockState === "transmitting"
-                      ? "0 0 18px #38BDF8"
-                      : unlockState === "error"
-                      ? "0 0 18px #EF4444"
-                      : "inset 0 1px 2px rgba(0,0,0,0.8)",
+                        ? "0 0 18px #38BDF8"
+                        : unlockState === "error"
+                          ? "0 0 18px #EF4444"
+                          : "inset 0 1px 2px rgba(0,0,0,0.8)",
                   animation:
                     unlockState === "unlocked"
                       ? "ledPulseGreen 1.5s infinite"
                       : unlockState === "transmitting"
-                      ? "ledPulseBlue 0.8s infinite"
-                      : "beaconBeacon 2.5s infinite",
+                        ? "ledPulseBlue 0.8s infinite"
+                        : "beaconBeacon 2.5s infinite",
                   marginBottom: 10,
                 }}
               />
@@ -549,8 +549,8 @@ export function DigitalKeyModal({
                   unlockState === "unlocked"
                     ? "linear-gradient(135deg, #10B981 0%, #059669 100%)"
                     : unlockState === "transmitting"
-                    ? "linear-gradient(135deg, #0284C7 0%, #0369A1 100%)"
-                    : `linear-gradient(135deg, ${BRAND.green} 0%, #15803D 100%)`,
+                      ? "linear-gradient(135deg, #0284C7 0%, #0369A1 100%)"
+                      : `linear-gradient(135deg, ${BRAND.green} 0%, #15803D 100%)`,
                 border: "none",
                 color: "#FFFFFF",
                 fontWeight: 800,
