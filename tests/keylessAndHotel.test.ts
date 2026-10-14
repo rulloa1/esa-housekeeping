@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { guestKey, validGuest, generateDigitalPassToken } from "@/lib/guest";
 import { HOTEL_PRESETS, getHotelConfig } from "@/hotel.config";
+import { get, put, withSuiteLock } from "@/lib/store";
+import type { RoomDoc } from "@/lib/models";
 
 describe("Digital Key & Keyless Entry Verification", () => {
   it("generates and verifies guest keys for suites", async () => {
@@ -26,6 +28,63 @@ describe("Digital Key & Keyless Entry Verification", () => {
     const suite = "105";
     const token = await generateDigitalPassToken(suite);
     expect(token).toMatch(/^BLE-105-[A-Z0-9_-]{8}$/);
+  });
+
+  it("handles deadbolt and lock hardware telemetry on room docs", async () => {
+    const suite = "202";
+    let room = await get(suite);
+    if (!room) {
+      // Create baseline room
+      const dummy: RoomDoc = {
+        id: suite,
+        floor: 2,
+        type: "King Suite",
+        status: "assigned",
+        priority: "standard",
+        serviceType: "stayover",
+        attendant: "Maria S.",
+        supervisor: "Supervisor Sarah J.",
+        guestNote: null,
+        instructions: null,
+        startedAt: null,
+        completedAt: null,
+        inspectedAt: null,
+        inspectedBy: null,
+        inspectionResult: null,
+        inspectionNotes: null,
+        inspectionFailReasons: [],
+        inspectionCategories: {},
+        checklist: {},
+        checklistNotes: {},
+        maintenanceIssues: [],
+        supplyRequests: [],
+        history: [],
+        lockBattery: 94,
+        lockModel: "Onity Trillium DirectKey RFID/BLE",
+        lockFirmware: "v4.2.1-SECURE",
+        lockSignalRssi: "-45 dBm (Strong)",
+        deadboltEngaged: true,
+        updatedAt: new Date().toISOString(),
+        updatedBy: "test",
+      };
+      await put(suite, dummy);
+      room = dummy;
+    }
+
+    expect(room.lockModel).toBeDefined();
+    expect(room.lockBattery).toBeGreaterThan(0);
+
+    // Unlocking retracts deadbolt
+    await withSuiteLock(suite, async () => {
+      const current = (await get(suite))!;
+      current.deadboltEngaged = false;
+      current.lastUnlockedAt = new Date().toISOString();
+      await put(suite, current);
+    });
+
+    const updated = await get(suite);
+    expect(updated?.deadboltEngaged).toBe(false);
+    expect(updated?.lastUnlockedAt).toBeDefined();
   });
 });
 

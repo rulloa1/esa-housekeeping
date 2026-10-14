@@ -695,6 +695,7 @@ export function MaintenanceModal({ room, reportedByName, onClose, onComplete }: 
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );
